@@ -65,10 +65,10 @@
 #firstlbls=(SRIO)
 #secondlbls=(JEDI)
 
- firstlist=(jedi_C96_lgetkf_sondesonly)
+ firstlist=(gsi_C96_lgetkf_psonly)
  secondlist=(gdas-cycling)
- firstlbls=(JEDI)
- secondlbls=(GDAS)
+ firstlbls=(GSI_PS)
+ secondlbls=(GDAS_PS)
  for j in ${!firstlist[@]}
  do
    first=${firstlist[$j]}

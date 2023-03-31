@@ -49,7 +49,7 @@ flst=`ls *_ps_obs_${yyyymmddhh}.nc4`
 #python ${iodablddir}/bin/combine_obsspace.py \
 #    -i ${flst} -o ps_obs_${yyyymmddhh}.nc4
 
-cp sfc_ps_obs_${yyyymmddhh}.nc4 ps_obs_${yyyymmddhh}.nc4
+#cp sfc_ps_obs_${yyyymmddhh}.nc4 ps_obs_${yyyymmddhh}.nc4
 	
 cd ..
 
@@ -109,7 +109,7 @@ cd ${run_dir}
 
 #--------------------------------------------------------------------------------------------
  cp ${enkfscripts}/genyaml/config.template .
- cp ${enkfscripts}/genyaml/ps.yaml .
+ cp ${enkfscripts}/genyaml/*ps.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
  cp ${enkfscripts}/genyaml/rr.distribution .
 
@@ -185,11 +185,14 @@ env
  obstype=ps
 
  number_members=81
- time python ${enkfscripts}/python_scripts/concanate-observer.py \
-      --run_dir=${run_dir} \
-      --datestr=${yyyymmddhh} \
-      --nmem=${number_members} \
-      --obstype=${obstype}
+ for obstype in sfc_ps sfcship_ps sondes_ps
+ do
+   time python ${enkfscripts}/python_scripts/concanate-observer.py \
+        --run_dir=${run_dir} \
+        --datestr=${yyyymmddhh} \
+        --nmem=${number_members} \
+        --obstype=${obstype}
+ done
 
  echo "run solver"
  cd ${run_dir}

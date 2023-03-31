@@ -42,6 +42,9 @@ def plot_lines(frtrms, sndrms, output=0, lbl1='UNKOWN1', lbl2='UNKOWN2'):
  #print('frtrms = ', frtrms)
  #print('sndrms = ', sndrms)
 
+  frtrms = 0.01*frtrms
+  sndrms = 0.01*sndrms
+
   pmin = np.min(sndrms)
   gmin = np.min(frtrms)
   if(pmin > gmin):
@@ -59,11 +62,14 @@ def plot_lines(frtrms, sndrms, output=0, lbl1='UNKOWN1', lbl2='UNKOWN2'):
     xlabels.append(lbl)
     x.append(k)
 
-  y = np.linspace(0,0.5,11)
+  yl = np.linspace(0,0.5,11)
+  y = []
   ylabels = []
-  for v in y:
-    lbl = '%5.3f' %(v)
-    ylabels.append(lbl)
+  for v in yl:
+    if(v >= pmin and v <= pmax):
+      lbl = '%5.3f' %(v)
+      ylabels.append(lbl)
+      y.append(v)
 
   fig = plt.figure()
   ax = plt.subplot()
@@ -83,8 +89,8 @@ def plot_lines(frtrms, sndrms, output=0, lbl1='UNKOWN1', lbl2='UNKOWN2'):
   plt.grid()
 
  #Same limits for everybody!
- #plt.xlim(0, len(frtrms))
- #plt.ylim(pmin, pmax)
+  plt.xlim(0, len(frtrms))
+  plt.ylim(pmin, pmax)
  
  #general title
   title = '%s and %s PS rms' %(lbl1, lbl2)
@@ -97,8 +103,8 @@ def plot_lines(frtrms, sndrms, output=0, lbl1='UNKOWN1', lbl2='UNKOWN2'):
  #hide tick and tick label of the big axes
   plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
 
-  bs.set_xlabel('(m/s)', labelpad=10)
-  bs.set_ylabel('Pressure (hPa)', labelpad=20)
+ #bs.set_xlabel('(m/s)', labelpad=10)
+  bs.set_ylabel('PS RMS (hPa)', labelpad=20)
 
   labels = [lbl1, lbl2]
 

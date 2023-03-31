@@ -2,7 +2,7 @@
 
  set -x
 
- edate=2020011118
+ edate=2020010200
 
  plot_stats () {
    argnum=$#
@@ -35,7 +35,7 @@
      --datadir=/work2/noaa/da/weihuang/cycling > obs_count_${flag}.csv
 
    python plot-jedi-gsi-diag.py --lbl1=${lbl1} --lbl2=${lbl2} \
-	--output=1 >> obs_count_${flag}.csv
+	--output=0 >> obs_count_${flag}.csv
 
    dirname=${lbl2}-${lbl1}
    rm -rf ${dirname}
@@ -57,19 +57,24 @@
 
  tar cvf ~/jg.tar plot-jedi-gsi-diag.py get_diag.sh
 #------------------------------------------------------------------------------
- firstlist=(gsi_C96_lgetkf_sondesonly feb8.jedi_C96_lgetkf_sondesonly)
- secondlist=(gdas-cycling gdas-cycling)
- firstlbls=(GSI JEDI)
- secondlbls=(GDAS GDAS)
+#firstlist=(gsi_C96_lgetkf_psonly)
+#secondlist=(gdas-cycling)
+#firstlbls=(GSI_PS)
+#secondlbls=(GDAS_PS)
+
+ firstlist=(new.gsi_C96_lgetkf_sondesonly)
+ secondlist=(gsi_C96_lgetkf_sondesonly)
+ firstlbls=(GSI_ORIG)
+ secondlbls=(GSI_HALF)
  for j in ${!firstlist[@]}
  do
    first=${firstlist[$j]}
    second=${secondlist[$j]}
    echo "first: ${first}, second: ${second}"
 
-   plot_stats 2020010118 ${edate} 12 at_6h  ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
+   plot_stats 2020010106 ${edate} 6  all    ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
    plot_stats 2020010112 ${edate} 12 at_12h ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
-   plot_stats 2020010112 ${edate} 6  all    ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
+   plot_stats 2020010106 ${edate} 12 at_6h  ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
 
    tar uvf ~/jg.tar ${secondlbls[$j]}-${firstlbls[$j]}
  done

@@ -86,4 +86,6 @@ output increment:
 # ----------------
 observations:
   observers:
-  - !INC ps.yaml
+  - !INC sfc_ps.yaml
+  - !INC sfcship_ps.yaml
+  - !INC sondes_ps.yaml

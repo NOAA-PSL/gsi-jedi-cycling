@@ -55,12 +55,12 @@ class GenerateYAML():
       if(self.debug):
         print('YAML %d: %s' %(n, yaml_out))
 
-      self.config['OBSINFILE'] = 'ioda_v2_data/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-      self.config['OBSOUTFILE'] = '%s/mem%3.3d/ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-     #self.config['GEOVALSFILE'] = '%s/mem%3.3d/ps_geovals_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-     #self.config['OBSINFILE'] = 'ioda_v2_data/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-     #self.config['OBSOUTFILE'] = '%s/mem%3.3d/sfc_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-     #self.config['GEOVALSFILE'] = '%s/mem%3.3d/sfc_ps_geovals_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['SFC_OBSINFILE'] = 'ioda_v2_data/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['SFC_OBSOUTFILE'] = '%s/mem%3.3d/sfc_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['SFCSHIP_OBSINFILE'] = 'ioda_v2_data/sfcship_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['SFCSHIP_OBSOUTFILE'] = '%s/mem%3.3d/sfcship_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['SONDES_OBSINFILE'] = 'ioda_v2_data/sondes_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['SONDES_OBSOUTFILE'] = '%s/mem%3.3d/sondes_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
       self.config['MEMBERDATAPATH'] = 'mem%3.3d/INPUT' %(n)
       self.config['MEMSTR'] = 'mem%3.3d' %(n)
 
@@ -74,9 +74,13 @@ class GenerateYAML():
     if(self.debug):
       print('YAML: %s' %(yaml_out))
 
-    self.config['OBSINFILE'] = '%s/ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
-    self.config['OBSOUTFILE'] = 'solver/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-   #self.config['GEOVALSFILE'] = 'solver/ps_geovals_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['SFC_OBSINFILE'] = '%s/sfc_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['SFC_OBSOUTFILE'] = 'solver/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['SFCSHIP_OBSINFILE'] = '%s/sfcship_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['SFCSHIP_OBSOUTFILE'] = 'solver/sfcship_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['SONDES_OBSINFILE'] = '%s/sondes_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['SONDES_OBSOUTFILE'] = 'solver/sondes_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+
 
     self.genYAML(self.config, self.solver, yaml_out)
 
