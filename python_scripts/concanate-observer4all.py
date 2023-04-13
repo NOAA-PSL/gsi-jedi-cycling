@@ -7,27 +7,6 @@ import time
 import numpy as np
 import inspect, logging
 
-identstr = ''
-
-#-----------------------------------------------------------------------------------------
-def logger(message):
-  global identstr
- #Automatically log the current function details.
- #Get the previous frame in the stack, otherwise it would
- #be this function!!!
-  func = inspect.currentframe().f_back.f_code
- #Dump the message + the name of this function to the log.
-  if(message == 'Enter'):
-    identstr += '\t'
-  if(message == 'Leave'):
-    newidentstr = identstr[:-3]
-    identstr = newidentstr
- 
- #logging.debug("%s %s: in %s:%i in %s" % (
-  print("%s %s %s at line %i in %s" % (
-    identstr, message, 
-    func.co_name, func.co_firstlineno, func.co_filename))
-
 #-----------------------------------------------------------------------------------------
 def average(vlist):
   buf = np.zeros_like(vlist[0])
@@ -46,9 +25,28 @@ class ConcanateObservations():
     self.grplist = ['hofx_y_mean_xb0', 'hofx0_1', 'ombg']
     self.filelist = []
     for n in range(nmem):
-      flnm = '%s/mem%3.3d/%s_obs_%s.nc4' %(run_dir, n, obstype, datestr)
+     #flnm = '%s/mem%3.3d/%s_obs_%s.nc4' %(run_dir, n, obstype, datestr)
+      flnm = '%s/mem%3.3d/%s_hofx_%s.nc4' %(run_dir, n, obstype, datestr)
       self.filelist.append(flnm)
     self.outfile = '%s/%s_obs_%s.nc4' %(run_dir, obstype, datestr)
+
+    self.identstr = ''
+
+ #-----------------------------------------------------------------------------------------
+  def logger(self, message):
+   #Automatically log the current function details.
+   #Get the previous frame in the stack, otherwise it would
+   #be this function!!!
+    func = inspect.currentframe().f_back.f_code
+   #Dump the message + the name of this function to the log.
+    if(message == 'Enter'):
+      self.identstr += '    '
+    if(self.debug):
+      print("%s %s %s at line %i in %s" % (self.identstr, message, 
+        func.co_name, func.co_firstlineno, func.co_filename))
+    if(message == 'Leave'):
+      newidentstr = self.identstr[:-4]
+      self.identstr = newidentstr
 
  #-----------------------------------------------------------------------------------------
   def copy_dimension(self, ncin, ncout):
@@ -91,7 +89,9 @@ class ConcanateObservations():
       outvar[:,:,:,:] = invar[:,:,:,:]
     else:
       msg = 'Do not know how to handle nd = %i' %(nd)
-      logger(msg)
+      self.logger(msg)
+      print(msg)
+      sys.exit(-1)
 
  #-----------------------------------------------------------------------------------------
   def read_val(self, invar):
@@ -106,7 +106,9 @@ class ConcanateObservations():
       val = invar[:,:,:,:]
     else:
       msg = 'Do not know how to handle nd = %i' %(nd)
-      logger(msg)
+      self.logger(msg)
+      print(msg)
+      sys.exit(-1)
 
     return val
 
@@ -123,15 +125,17 @@ class ConcanateObservations():
       outvar[:,:,:,:] = val[:,:,:,:]
     else:
       msg = 'Do not know how to handle nd = %i' %(nd)
-      logger(msg)
+      self.logger(msg)
+      print(msg)
+      sys.exit(-1)
 
  #-----------------------------------------------------------------------------------------
   def copy_group2group(self, ncingroup, ncoutgroup):
-    logger('Enter')
+    self.logger('Enter')
     fvname = '_FillValue'
    #copy all var in group.
     for varname, variable in ncingroup.variables.items():
-     #logger('  working on var: ' + varname)
+     #self.logger('  working on var: ' + varname)
      #print('  working on var: ' + varname)
       if(fvname in variable.__dict__):
         fill_value = variable.getncattr(fvname)
@@ -152,22 +156,22 @@ class ConcanateObservations():
       newoutgroup = ncoutgroup.createGroup(grpname)
       self.copy_group2group(group, newoutgroup)
 
-    logger('Leave')
+    self.logger('Leave')
 
  #-----------------------------------------------------------------------------------------
   def copy_grp2newname(self, name, n, group, ncout):
-    logger('Enter')
+    self.logger('Enter')
     item = name.split('_')
     item[-1] = '%d' %(n)
     newname = '_'.join(item)
-    print('No %d name: %s, newname: %s' %(n, name, newname))
+   #print('No %d name: %s, newname: %s' %(n, name, newname))
     ncoutgroup = ncout.createGroup(newname)
     self.copy_group2group(group, ncoutgroup)
-    logger('Leave')
+    self.logger('Leave')
 
 #-----------------------------------------------------------------------------------------
   def process_basegroup(self, ncin, ncout, grplist):
-    logger('Enter')
+    self.logger('Enter')
 
     self.grpnamelist = []
     self.hofxgrps = []
@@ -178,7 +182,7 @@ class ConcanateObservations():
     ng = 0
     for grpname, group in ncin.groups.items():
       ng += 1
-      print('grpname No %d: %s' %(ng, grpname))
+     #print('grpname No %d: %s' %(ng, grpname))
       self.grpnamelist.append(grpname)
       if(grpname in grplist):
         self.ensvarinfo[grpname] = {}
@@ -196,7 +200,7 @@ class ConcanateObservations():
             val = self.read_val(variable)
             self.ensvarinfo[grpname][varname] = val
       else:
-        print('grpname: ', grpname)
+       #print('grpname: ', grpname)
         if(grpname.find('hofx') < 0):
           self.commongrps.append(grpname)
           ncoutgroup = ncout.createGroup(grpname)
@@ -208,7 +212,7 @@ class ConcanateObservations():
     print('len(self.commongrps) = %d' %(len(self.commongrps))) 
     print('len(self.hofxgrps) = %d' %(len(self.hofxgrps)))
 
-    logger('Leave')
+    self.logger('Leave')
 
 #-----------------------------------------------------------------------------------------
   def process(self, ncinlist, ncout, grplist):
@@ -227,7 +231,7 @@ class ConcanateObservations():
         self.ensvarinfo[grpname][varname].append(val)
 
     varlist = self.ensvarinfo['hofx0_1'].keys()
-    print('varlist = ', varlist)
+   #print('varlist = ', varlist)
     meanvars = {}
     ncoutgroup = ncout.createGroup(grpname)
     for varname in varlist:
@@ -305,7 +309,7 @@ class ConcanateObservations():
 
 #--------------------------------------------------------------------------------
 if __name__== '__main__':
-  debug = 1
+  debug = 0
   nmem = 81
 
   run_dir = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/obsout'
