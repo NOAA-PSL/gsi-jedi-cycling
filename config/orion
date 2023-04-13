@@ -91,24 +91,7 @@ export save_hpss_subset="false" # save a subset of data each analysis time to HP
 export save_hpss="false"
 
 source $MODULESHOME/init/sh
-if [ "$machine" == 'hera' ]; then
-   export basedir=/scratch2/BMC/gsienkf/${USER}
-   export datadir=$basedir
-   export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
-   export obs_datapath=/scratch1/NCEPDEV/global/glopara/dump
-   module purge
-   module use /scratch2/NCEPDEV/nwprod/hpc-stack/libs/hpc-stack/modulefiles/stack
-   module load hpc/1.1.0
-   module load hpc-intel/18.0.5.274
-   module load hpc-impi/2018.0.4
-   module load hdf5/1.10.6
-   module load netcdf/4.7.4
-   module load pio/2.5.2
-   module load esmf/8_2_0_beta_snapshot_14
-   module load fms/2021.03
-   module load wgrib
-   export WGRIB=`which wgrib`
-elif [ "$machine" == 'orion' ]; then
+if [ "$machine" == 'orion' ]; then
    export basedir=/work2/noaa/da/weihuang/cycling
    export datadir=$basedir
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
@@ -128,20 +111,15 @@ elif [ "$machine" == 'orion' ]; then
    export PYTHONPATH=/work2/noaa/gsienkf/weihuang/anaconda3/lib
    export HDF5_DISABLE_VERSION_CHECK=1
    export WGRIB=`which wgrib`
-elif [ "$machine" == 'gaea' ]; then
-   export basedir=/lustre/f2/dev/${USER}
-   export datadir=/lustre/f2/scratch/${USER}
-   export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
-   #export hsidir="/3year/NCEPDEV/GEFSRR/${exptname}"
-   export obs_datapath=/lustre/f2/dev/Jeffrey.S.Whitaker/dumps
 else
-   echo "machine must be 'hera', 'orion' or 'gaea' got $machine"
+   echo "machine must be 'orion'"
    exit 1
 fi
 export datapath="${datadir}/${exptname}"
 export logdir="${datadir}/logs/${exptname}"
 
-export NOSAT="YES" # if yes, no radiances assimilated
+#export NOSAT="YES" # if yes, no radiances assimilated
+export NOSAT="NO" # if yes, no radiances assimilated
 export NOCONV="NO"
 export NOTLNMC="NO" # no TLNMC in GSI in GSI EnVar
 export NOOUTERLOOP="NO" # no outer loop in GSI EnVar
@@ -477,7 +455,7 @@ export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readi
 # in stratosphere/mesosphere
 #export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
 export OZINFO=${fixgsi}/global_ozinfo.txt
-export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.psonly
+export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.ps+sondes+amsua
 export SATINFO=${fixgsi}/global_satinfo.txt
 export NLAT=$((${LATA}+2))
 # default is to use berror file in gsi fix dir.
