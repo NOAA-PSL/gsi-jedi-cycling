@@ -35,6 +35,14 @@ class GenerateYAML():
    #  print('key: ', key)
    #  print('\tconfig[key]:', self.config[key])
 
+  def add_obs2observer(self, n=1, obstype='sondes'):
+    ctype = obstype.upper()
+    ctype = ctype.replace('-', '_')
+    infile = '%s_OBSINFILE' %(ctype)
+    outfile = '%s_OBSOUTFILE' %(ctype)
+    self.config[infile] = 'ioda_v2_data/%s_obs_%s.nc4' %(obstype, self.config['YYYYMMDDHH'])
+    self.config[outfile] = '%s/mem%3.3d/%s_obs_%s.nc4' %(self.obsdir, n, obstype, self.config['YYYYMMDDHH'])
+
   def genYAML(self, config, yaml_in, yaml_out):
     yaml_file = YAMLFile(path=yaml_in)
     yaml_file = Template.substitute_structure(yaml_file, TemplateConstants.DOUBLE_CURLY_BRACES,
@@ -59,14 +67,36 @@ class GenerateYAML():
       self.config['SFC_OBSOUTFILE'] = '%s/mem%3.3d/sfc_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
       self.config['SFCSHIP_OBSINFILE'] = 'ioda_v2_data/sfcship_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
       self.config['SFCSHIP_OBSOUTFILE'] = '%s/mem%3.3d/sfcship_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-      self.config['SONDES_OBSINFILE'] = 'ioda_v2_data/sondes_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-      self.config['SONDES_OBSOUTFILE'] = '%s/mem%3.3d/sondes_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['SONDES_PS_OBSINFILE'] = 'ioda_v2_data/sondes_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['SONDES_PS_OBSOUTFILE'] = '%s/mem%3.3d/sondes_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+
+      self.config['SONDES_OBSINFILE'] = 'ioda_v2_data/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['SONDES_OBSOUTFILE'] = '%s/mem%3.3d/sondes_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+
+      self.config['IASI_METOP_B_OBSINFILE'] = 'ioda_v2_data/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['IASI_METOP_B_OBSOUTFILE'] = '%s/mem%3.3d/iasi_metop-b_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+
+      self.config['AMSUA_N15_OBSINFILE'] = 'ioda_v2_data/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N18_OBSINFILE'] = 'ioda_v2_data/amsua_n18_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N19_OBSINFILE'] = 'ioda_v2_data/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N15_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n15_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N18_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n18_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N19_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n19_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+
       self.config['MEMBERDATAPATH'] = 'mem%3.3d/INPUT' %(n)
       self.config['MEMSTR'] = 'mem%3.3d' %(n)
 
       self.genYAML(self.config, self.observer, yaml_out)
 
       n += 1
+
+  def add_obs2solver(self, obstype='sondes'):
+    ctype = obstype.upper()
+    ctype = ctype.replace('-', '_')
+    infile = '%s_OBSINFILE' %(ctype)
+    outfile = '%s_OBSOUTFILE' %(ctype)
+    self.config[infile] = '%s/%s_obs_%s.nc4' %(self.obsdir, obstype, self.config['YYYYMMDDHH'])
+    self.config[outfile] = 'solver/%s_obs_%s.nc4' %(obstype, self.config['YYYYMMDDHH'])
 
   def genSolverYAML(self):
     os.system('cp halo.distribution distribution.yaml')

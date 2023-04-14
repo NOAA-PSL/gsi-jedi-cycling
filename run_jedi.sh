@@ -31,28 +31,24 @@ echo "run Jedi starting at `date`"
 cd ${run_dir}
 rm -rf ioda_v2_data diag
 mkdir ioda_v2_data diag
-cp diag_conv_* diag/.
+cp diag_* diag/.
 which python
 echo "in run_dir: $${run_dir}"
-#echo "ls diag"
-#ls diag
-
-#echo "module list"
-#module list
 
 python ${iodablddir}/bin/proc_gsi_ncdiag.py \
        -o ioda_v2_data diag
 
 cd ioda_v2_data
-flst=`ls sondes_*_obs_${yyyymmddhh}.nc4`
+flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
 
 python ${iodablddir}/bin/combine_obsspace.py \
-  -i ${flst} -o sondes_${yyyymmddhh}.nc4
+  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
+     sondes_tv_obs_${yyyymmddhh}.nc4 \
+     sondes_uv_obs_${yyyymmddhh}.nc4 \
+     sondes_q_obs_${yyyymmddhh}.nc4 \
+  -o sondes_obs_${yyyymmddhh}.nc4
 
 cd ..
-
-echo "ls ioda_v2_data"
-ls ioda_v2_data
 
 minute=0
 second=0
@@ -94,12 +90,6 @@ cd ${run_dir}
 
 echo "Run gen_ensmean.sh"
 
-echo "module list"
-module list
-
-#echo "env"
-#env
-
 ${enkfscripts}/scripts/gen_ensmean.sh ${run_dir}
 
 echo "cd ${run_dir}" >> ${run_dir}/logs/run_jedi.out
@@ -108,6 +98,11 @@ cd ${run_dir}
 #--------------------------------------------------------------------------------------------
  cp ${enkfscripts}/genyaml/config.template .
  cp ${enkfscripts}/genyaml/*ps.yaml .
+ cp ${enkfscripts}/genyaml/sondes.yaml .
+ cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n15.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n18.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n19.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
  cp ${enkfscripts}/genyaml/rr.distribution .
 
