@@ -84,6 +84,16 @@ class GenerateYAML():
     self.config['SONDES_OBSINFILE'] = '%s/sondes_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
     self.config['SONDES_OBSOUTFILE'] = 'solver/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
 
+    self.config['IASI_METOP_B_OBSINFILE'] = '%s/iasi_metop-b_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['IASI_METOP_B_OBSOUTFILE'] = 'solver/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+
+    self.config['AMSUA_N15_OBSINFILE'] = '%s/amsua_n15_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N18_OBSINFILE'] = '%s/amsua_n18_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N19_OBSINFILE'] = '%s/amsua_n19_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N15_OBSOUTFILE'] = 'solver/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N18_OBSOUTFILE'] = 'solver/amsua_n18_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N19_OBSOUTFILE'] = 'solver/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+
     self.genYAML(self.config, self.solver, yaml_out)
 
 #--------------------------------------------------------------------------------

@@ -44,13 +44,11 @@ python ${iodablddir}/bin/proc_gsi_ncdiag.py \
        -o ioda_v2_data diag
 
 cd ioda_v2_data
-flst=`ls *_ps_obs_${yyyymmddhh}.nc4`
+flst=`ls sondes_*_obs_${yyyymmddhh}.nc4`
 
-#python ${iodablddir}/bin/combine_obsspace.py \
-#    -i ${flst} -o ps_obs_${yyyymmddhh}.nc4
+python ${iodablddir}/bin/combine_obsspace.py \
+  -i ${flst} -o sondes_${yyyymmddhh}.nc4
 
-#cp sfc_ps_obs_${yyyymmddhh}.nc4 ps_obs_${yyyymmddhh}.nc4
-	
 cd ..
 
 echo "ls ioda_v2_data"

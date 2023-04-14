@@ -89,3 +89,8 @@ observations:
   - !INC sfc_ps.yaml
   - !INC sfcship_ps.yaml
   - !INC sondes_ps.yaml
+  - !INC sondes.yaml
+  - !INC amsua_n15.yaml
+  - !INC amsua_n18.yaml
+  - !INC amsua_n19.yaml
+  - !INC iasi_metop-b.yaml

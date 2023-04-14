@@ -1,3 +1,17 @@
+obs space:
+  name: amsua_n15
+  distribution:
+    !INC distribution.yaml
+  obsdatain:
+      engine:
+        type: H5File
+        obsfile: $(AMSUA_N15_OBSINFILE)
+  obsdataout:
+      engine:
+        type: H5File
+        obsfile: $(AMSUA_N15_OBSINFILE)
+  simulated variables: [brightnessTemperature]
+  channels: &all_channels 1-15
 obs operator:
   name: CRTM
   Absorbers: [H2O,O3]
@@ -7,20 +21,6 @@ obs operator:
     Sensor_ID: &Sensor_ID amsua_n15
     EndianType: little_endian
     CoefficientPath: crtm/
-obs space:
-  name: amsua_n15
-  distribution:
-    !INC /work2/noaa/da/telless/git/GDASApp_Mar_14_2023/GDASApp/run_letkf/distribution.yaml
-  obsdatain:
-      engine:
-        type: H5File
-        obsfile: ioda_v2_data/amsua_n15_obs_2022030312.nc4 
-  obsdataout:
-      engine:
-        type: H5File
-        obsfile: obsout/amsua_n15_obs_2022030312.nc4
-  simulated variables: [brightnessTemperature]
-  channels: &all_channels 1-15
 obs bias:
   input file: satbias/amsua_n15_satbias.nc4 
   variational bc:

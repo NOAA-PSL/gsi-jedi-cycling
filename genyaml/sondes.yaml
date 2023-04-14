@@ -5,7 +5,7 @@ obs space:
   obsdatain:
     engine: 
       type: H5File
-      obsfile: $(OBSINFILE)
+      obsfile: $(SONDES_OBSINFILE)
     obsgrouping:
       group variables: ["stationIdentification"]
       sort variable: "pressure"
@@ -13,7 +13,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      obsfile: $(OBSOUTFILE)
+      obsfile: $(SONDES_OBSOUTFILE)
   io pool:
     max pool size: 1
   simulated variables: [airTemperature, virtualTemperature, windEastward, windNorthward, specificHumidity]
