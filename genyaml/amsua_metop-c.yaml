@@ -6,7 +6,7 @@ obs operator:
   obs options:
     Sensor_ID: &Sensor_ID amsua_metop-c
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs space:
   name: amsua_metop-c
   distribution:

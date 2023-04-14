@@ -4,7 +4,7 @@ obs operator:
   obs options:
     Sensor_ID: &Sensor_ID avhrr3_n18
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs space:
   name: avhrr_n18
   distribution:

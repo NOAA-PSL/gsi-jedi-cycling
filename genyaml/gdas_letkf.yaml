@@ -89,7 +89,7 @@ observations:
       obs options:
         Sensor_ID: iasi_metop-b
         EndianType: little_endian
-        CoefficientPath: crtm/
+        CoefficientPath: Data/crtm/
     obs bias:
       input file: Data/satbias/iasi_metop-b_satbias.nc4
       variational bc:
@@ -3993,7 +3993,7 @@ observations:
       obs options:
         Sensor_ID: amsua_n15
         EndianType: little_endian
-        CoefficientPath: crtm/
+        CoefficientPath: Data/crtm/
     obs space:
       name: amsua_n15
       distribution:
@@ -4554,7 +4554,7 @@ observations:
       obs options:
         Sensor_ID: amsua_n18
         EndianType: little_endian
-        CoefficientPath: crtm/
+        CoefficientPath: Data/crtm/
     obs space:
       name: amsua_n18
       distribution:
@@ -5115,7 +5115,7 @@ observations:
       obs options:
         Sensor_ID: amsua_n19
         EndianType: little_endian
-        CoefficientPath: crtm/
+        CoefficientPath: Data/crtm/
     obs space:
       name: amsua_n19
       distribution:

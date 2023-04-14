@@ -6,7 +6,7 @@ obs operator:
   obs options:
     Sensor_ID: &Sensor_ID atms_npp 
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs space:
   name: atms_npp
   distribution:

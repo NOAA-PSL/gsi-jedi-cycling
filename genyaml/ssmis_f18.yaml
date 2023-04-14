@@ -4,7 +4,7 @@ obs operator:
   obs options:
     Sensor_ID: &Sensor_ID ssmis_f18
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs space:
   name: ssmis_f18
   distribution:

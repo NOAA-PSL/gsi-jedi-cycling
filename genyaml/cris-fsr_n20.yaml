@@ -50,7 +50,7 @@ obs operator:
   obs options:
     Sensor_ID: cris-fsr_n20
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs bias:
   input file: Data/satbias/cris-fsr_n20_satbias.nc4
   variational bc:

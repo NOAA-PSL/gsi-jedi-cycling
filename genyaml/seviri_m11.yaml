@@ -4,7 +4,7 @@ obs operator:
   obs options:
     Sensor_ID: &Sensor_ID seviri_m11
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs space:
   name: seviri_m11
   distribution:

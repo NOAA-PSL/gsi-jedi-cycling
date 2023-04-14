@@ -20,7 +20,7 @@ obs operator:
   obs options:
     Sensor_ID: &Sensor_ID amsua_n18
     EndianType: little_endian
-    CoefficientPath: crtm/
+    CoefficientPath: Data/crtm/
 obs bias:
   input file: Data/satbias/amsua_n18_satbias.nc4 
   variational bc:
@@ -164,8 +164,8 @@ obs post filters:
           name: DerivedMetaData/CLWRetFromObs
         clwbkg_function:
           name: DerivedMetaData/CLWRetFromBkg
-        clwret_clearsky: [0.050, 0.030, 0.030, 0.020, 0.000,
-                          0.100, 0.000, 0.000, 0.000, 0.000,
+        clwret_clearsky: [0.050, 0.030, 0.030, 0.020,
+                          0.100, 0.000, 0.000,
                           0.000, 0.000, 0.000, 0.000, 0.030]
 
 # Calculate symmetric observation error 
@@ -181,17 +181,17 @@ obs post filters:
         channels: *all_channels
         xvar:
           name: DerivedMetaData/CLWRetSymmetric
-        x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
-                 0.100,  0.000,  0.000,  0.000,  0.000,
+        x0:    [ 0.050,  0.030,  0.030,  0.020,
+                 0.100,  0.000,  0.000,
                  0.000,  0.000,  0.000,  0.000,  0.030]
-        x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
-                 1.500,  0.000,  0.000,  0.000,  0.000,
+        x1:    [ 0.600,  0.450,  0.400,  0.450,
+                 1.500,  0.000,  0.000,
                  0.000,  0.000,  0.000,  0.000,  0.200]
-        err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
-                 0.230,  0.230,  0.250,  0.250,  0.350,
+        err0:  [ 2.500,  2.200,  2.000,  0.550,
+                 0.230,  0.230,  0.350,
                  0.400,  0.550,  0.800,  4.000,  3.500]
-        err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
-                 0.300,  0.230,  0.250,  0.250,  0.350,
+        err1:  [20.000, 18.000, 12.000,  3.000,
+                 0.300,  0.230,  0.350,
                  0.400,  0.550,  0.800,  4.000, 18.000]
 
 # Calculate Innovation
@@ -270,8 +270,8 @@ obs post filters:
     channels: *all_channels
     options:
       channels: *all_channels
-      obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
-                         0.230, 0.230, 0.250, 0.250, 0.350,
+      obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550,
+                         0.230, 0.230, 0.350,
                          0.400, 0.550, 0.800, 4.000, 3.500]
       clwret_function:
         name: DerivedMetaData/CLWRetFromObs
@@ -379,8 +379,8 @@ obs post filters:
         obserr_function:
           name: DerivedMetaData/InitialObsError
           channels: *all_channels
-        obserr_clearsky: [2.500, 2.200, 2.000, 0.550, 0.300,
-                          0.230, 0.230, 0.250, 0.250, 0.350,
+        obserr_clearsky: [2.500, 2.200, 2.000, 0.550,
+                          0.230, 0.230, 0.350,
                           0.400, 0.550, 0.800, 4.000, 3.500]
 
 - filter: Perform Action
@@ -429,8 +429,8 @@ obs post filters:
           name: DerivedMetaData/InitialObsError
           channels: *all_channels
           threhold: 3
-        obserr_bound_max: [4.5, 4.5, 4.5, 2.5, 2.0,
-                           2.0, 2.0, 2.0, 2.0, 2.0,
+        obserr_bound_max: [4.5, 4.5, 4.5, 2.5,
+                           2.0, 2.0, 2.0,
                            2.5, 3.5, 4.5, 4.5, 4.5]
 
 - filter: Background Check
@@ -458,8 +458,8 @@ obs post filters:
       channels: *all_channels
       use passive_bc: true
       sensor: *Sensor_ID
-      use_flag: [ 1,  1,  1,  1, -1,
-                  1,  1, -1, -1,  1,
+      use_flag: [ 1,  1,  1,  1,
+                  1,  1,  1,
                   1,  1,  1,  1,  1 ]
   maxvalue: 1.0e-12
   actions:
