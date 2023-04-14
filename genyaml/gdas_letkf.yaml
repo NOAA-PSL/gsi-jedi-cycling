@@ -91,15 +91,15 @@ observations:
         EndianType: little_endian
         CoefficientPath: crtm/
     obs bias:
-      input file: satbias/iasi_metop-b_satbias.nc4
+      input file: Data/satbias/iasi_metop-b_satbias.nc4
       variational bc:
         predictors:
         - name: constant
         - name: lapse_rate
           order: 2
-          tlapse: satbias/iasi_metop-b_tlapmean.txt
+          tlapse: Data/satbias/iasi_metop-b_tlapmean.txt
         - name: lapse_rate
-          tlapse: satbias/iasi_metop-b_tlapmean.txt
+          tlapse: Data/satbias/iasi_metop-b_tlapmean.txt
         - name: emissivity
         - name: scan_angle
           order: 4
@@ -4011,15 +4011,15 @@ observations:
       - brightnessTemperature
       channels: 1-15
     obs bias:
-      input file: satbias/amsua_n15_satbias.nc4
+      input file: Data/satbias/amsua_n15_satbias.nc4
       variational bc:
         predictors:
         - name: constant
         - name: lapse_rate
           order: 2
-          tlapse: satbias/amsua_n15_tlapmean.txt
+          tlapse: Data/satbias/amsua_n15_tlapmean.txt
         - name: lapse_rate
-          tlapse: satbias/amsua_n15_tlapmean.txt
+          tlapse: Data/satbias/amsua_n15_tlapmean.txt
         - name: emissivity
         - name: scan_angle
           order: 4
@@ -4572,15 +4572,15 @@ observations:
       - brightnessTemperature
       channels: 1-15
     obs bias:
-      input file: satbias/amsua_n18_satbias.nc4
+      input file: Data/satbias/amsua_n18_satbias.nc4
       variational bc:
         predictors:
         - name: constant
         - name: lapse_rate
           order: 2
-          tlapse: satbias/amsua_n18_tlapmean.txt
+          tlapse: Data/satbias/amsua_n18_tlapmean.txt
         - name: lapse_rate
-          tlapse: satbias/amsua_n18_tlapmean.txt
+          tlapse: Data/satbias/amsua_n18_tlapmean.txt
         - name: emissivity
         - name: scan_angle
           order: 4
@@ -5133,15 +5133,15 @@ observations:
       - brightnessTemperature
       channels: 1-15
     obs bias:
-      input file: satbias/amsua_n19_satbias.nc4
+      input file: Data/satbias/amsua_n19_satbias.nc4
       variational bc:
         predictors:
         - name: constant
         - name: lapse_rate
           order: 2
-          tlapse: satbias/amsua_n19_tlapmean.txt
+          tlapse: Data/satbias/amsua_n19_tlapmean.txt
         - name: lapse_rate
-          tlapse: satbias/amsua_n19_tlapmean.txt
+          tlapse: Data/satbias/amsua_n19_tlapmean.txt
         - name: emissivity
         - name: scan_angle
           order: 4

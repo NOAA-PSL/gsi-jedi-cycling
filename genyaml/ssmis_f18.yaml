@@ -20,7 +20,7 @@ obs space:
   simulated variables: [brightnessTemperature]
   channels: &all_channels 1-24
 obs bias:
-  input file: satbias/ssmis_f18_satbias.nc4
+  input file: Data/satbias/ssmis_f18_satbias.nc4
   variational bc:
     predictors:
     - name: constant
@@ -37,7 +37,7 @@ obs bias:
     - name: sine_of_latitude
     - name: lapse_rate
       order: 2
-      tlapse: &ssmis_f18_tlap satbias/ssmis_f18_tlapmean.txt
+      tlapse: &ssmis_f18_tlap Data/satbias/ssmis_f18_tlapmean.txt
     - name: lapse_rate
       tlapse: *ssmis_f18_tlap
     - name: emissivity

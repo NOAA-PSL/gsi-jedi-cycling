@@ -52,13 +52,13 @@ obs operator:
     EndianType: little_endian
     CoefficientPath: crtm/
 obs bias:
-  input file: satbias/cris-fsr_npp_satbias.nc4
+  input file: Data/satbias/cris-fsr_npp_satbias.nc4
   variational bc:
     predictors:
     - name: constant
     - name: lapse_rate
       order: 2
-      tlapse: &cris-fsr_npp_tlap satbias/cris-fsr_npp_tlapmean.txt
+      tlapse: &cris-fsr_npp_tlap Data/satbias/cris-fsr_npp_tlapmean.txt
     - name: lapse_rate
       tlapse: *cris-fsr_npp_tlap
     - name: emissivity

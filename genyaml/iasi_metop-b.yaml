@@ -69,13 +69,13 @@ obs operator:
     EndianType: little_endian
     CoefficientPath: crtm/
 obs bias:
-  input file: satbias/iasi_metop-b_satbias.nc4
+  input file: Data/satbias/iasi_metop-b_satbias.nc4
   variational bc:
     predictors:
     - name: constant
     - name: lapse_rate
       order: 2
-      tlapse: &iasi_metop-b_tlap satbias/iasi_metop-b_tlapmean.txt
+      tlapse: &iasi_metop-b_tlap Data/satbias/iasi_metop-b_tlapmean.txt
     - name: lapse_rate
       tlapse: *iasi_metop-b_tlap
     - name: emissivity

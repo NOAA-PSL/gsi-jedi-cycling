@@ -22,13 +22,13 @@ obs operator:
     EndianType: little_endian
     CoefficientPath: crtm/
 obs bias:
-  input file: satbias/amsua_n18_satbias.nc4 
+  input file: Data/satbias/amsua_n18_satbias.nc4 
   variational bc:
     predictors:
     - name: constant
     - name: lapse_rate
       order: 2
-      tlapse: &amsua_n18_tlap satbias/amsua_n18_tlapmean.txt
+      tlapse: &amsua_n18_tlap Data/satbias/amsua_n18_tlapmean.txt
     - name: lapse_rate
       tlapse: *amsua_n18_tlap
     - name: emissivity

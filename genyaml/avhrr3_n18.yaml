@@ -20,13 +20,13 @@ obs space:
   simulated variables: [brightnessTemperature]
   channels: &all_channels 3-5 
 obs bias:
-  input file: satbias/avhrr3_n18_satbias.nc4
+  input file: Data/satbias/avhrr3_n18_satbias.nc4
   variational bc:
     predictors:
     - name: constant
     - name: lapse_rate
       order: 2
-      tlapse: &avhrr3_n18_tlap satbias/avhrr3_n18_tlapmean.txt
+      tlapse: &avhrr3_n18_tlap Data/satbias/avhrr3_n18_tlapmean.txt
     - name: lapse_rate
       tlapse: *avhrr3_n18_tlap
     - name: emissivity
