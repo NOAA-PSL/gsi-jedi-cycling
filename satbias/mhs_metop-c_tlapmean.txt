@@ -1,0 +1,5 @@
+mhs_metop-c 1 0.310555E+00
+mhs_metop-c 2 0.740982E+00
+mhs_metop-c 3 0.346894E+01
+mhs_metop-c 4 0.253978E+01
+mhs_metop-c 5 0.165098E+01

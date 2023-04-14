@@ -1,0 +1,13 @@
+gmi_gpm 1 0.000000E+00
+gmi_gpm 2 0.000000E+00
+gmi_gpm 3 0.000000E+00
+gmi_gpm 4 0.000000E+00
+gmi_gpm 5 0.000000E+00
+gmi_gpm 6 0.000000E+00
+gmi_gpm 7 0.000000E+00
+gmi_gpm 8 0.000000E+00
+gmi_gpm 9 0.000000E+00
+gmi_gpm 10 0.000000E+00
+gmi_gpm 11 0.000000E+00
+gmi_gpm 12 0.000000E+00
+gmi_gpm 13 0.000000E+00

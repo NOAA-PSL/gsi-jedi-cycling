@@ -1,0 +1,10 @@
+ahi_himawari8 7 0.399571E+00
+ahi_himawari8 8 0.387964E+01
+ahi_himawari8 9 0.380101E+01
+ahi_himawari8 10 0.304962E+01
+ahi_himawari8 11 0.652302E+00
+ahi_himawari8 12 -0.125861E+01
+ahi_himawari8 13 0.471739E+00
+ahi_himawari8 14 0.534685E+00
+ahi_himawari8 15 0.837601E+00
+ahi_himawari8 16 0.167573E+01

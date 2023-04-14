@@ -1,0 +1,8 @@
+seviri_m09 4 0.408478E+00
+seviri_m09 5 0.395537E+01
+seviri_m09 6 0.297516E+01
+seviri_m09 7 0.479831E+00
+seviri_m09 8 -0.123099E+01
+seviri_m09 9 0.425127E+00
+seviri_m09 10 0.598046E+00
+seviri_m09 11 0.157525E+01

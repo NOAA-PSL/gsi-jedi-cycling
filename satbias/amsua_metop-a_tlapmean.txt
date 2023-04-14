@@ -1,0 +1,15 @@
+amsua_metop-a 1 0.201974E+00
+amsua_metop-a 2 0.114096E+00
+amsua_metop-a 3 0.714036E+00
+amsua_metop-a 4 0.162302E+01
+amsua_metop-a 5 0.211425E+01
+amsua_metop-a 6 0.233288E+01
+amsua_metop-a 7 0.000000E+00
+amsua_metop-a 8 0.000000E+00
+amsua_metop-a 9 -0.755844E+00
+amsua_metop-a 10 -0.184264E+01
+amsua_metop-a 11 -0.300010E+01
+amsua_metop-a 12 -0.455245E+01
+amsua_metop-a 13 -0.596864E+01
+amsua_metop-a 14 -0.513909E+01
+amsua_metop-a 15 0.331177E+00

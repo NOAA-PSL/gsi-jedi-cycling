@@ -35,14 +35,6 @@ class GenerateYAML():
    #  print('key: ', key)
    #  print('\tconfig[key]:', self.config[key])
 
-  def add_obs2observer(self, n=1, obstype='sondes'):
-    ctype = obstype.upper()
-    ctype = ctype.replace('-', '_')
-    infile = '%s_OBSINFILE' %(ctype)
-    outfile = '%s_OBSOUTFILE' %(ctype)
-    self.config[infile] = 'ioda_v2_data/%s_obs_%s.nc4' %(obstype, self.config['YYYYMMDDHH'])
-    self.config[outfile] = '%s/mem%3.3d/%s_obs_%s.nc4' %(self.obsdir, n, obstype, self.config['YYYYMMDDHH'])
-
   def genYAML(self, config, yaml_in, yaml_out):
     yaml_file = YAMLFile(path=yaml_in)
     yaml_file = Template.substitute_structure(yaml_file, TemplateConstants.DOUBLE_CURLY_BRACES,
@@ -51,7 +43,15 @@ class GenerateYAML():
                                               self.config.get)
     yaml_file.save(yaml_out)
 
-  def genObserverYAML(self):
+  def add_obs2observer(self, n=1, obstype='sondes'):
+    ctype = obstype.upper()
+    ctype = ctype.replace('-', '_')
+    infile = '%s_OBSINFILE' %(ctype)
+    outfile = '%s_OBSOUTFILE' %(ctype)
+    self.config[infile] = 'ioda_v2_data/%s_obs_%s.nc4' %(obstype, self.config['YYYYMMDDHH'])
+    self.config[outfile] = '%s/mem%3.3d/%s_obs_%s.nc4' %(self.obsdir, n, obstype, self.config['YYYYMMDDHH'])
+
+  def genObserverYAML(self, obstypelist):
     os.system('cp rr.distribution distribution.yaml')
 
     if not os.path.exists(self.obsdir):
@@ -63,6 +63,9 @@ class GenerateYAML():
       if(self.debug):
         print('YAML %d: %s' %(n, yaml_out))
 
+     #for obstype in obstypelist:
+     #  self.add_obs2observer(n=n, obstype=obstype)
+
       self.config['SFC_OBSINFILE'] = 'ioda_v2_data/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
       self.config['SFC_OBSOUTFILE'] = '%s/mem%3.3d/sfc_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
       self.config['SFCSHIP_OBSINFILE'] = 'ioda_v2_data/sfcship_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
@@ -73,15 +76,15 @@ class GenerateYAML():
       self.config['SONDES_OBSINFILE'] = 'ioda_v2_data/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
       self.config['SONDES_OBSOUTFILE'] = '%s/mem%3.3d/sondes_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
 
-      self.config['IASI_METOP_B_OBSINFILE'] = 'ioda_v2_data/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-      self.config['IASI_METOP_B_OBSOUTFILE'] = '%s/mem%3.3d/iasi_metop-b_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-
       self.config['AMSUA_N15_OBSINFILE'] = 'ioda_v2_data/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
       self.config['AMSUA_N18_OBSINFILE'] = 'ioda_v2_data/amsua_n18_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
       self.config['AMSUA_N19_OBSINFILE'] = 'ioda_v2_data/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
       self.config['AMSUA_N15_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n15_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
       self.config['AMSUA_N18_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n18_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
       self.config['AMSUA_N19_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n19_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+
+     #self.config['IASI_METOP_B_OBSINFILE'] = 'ioda_v2_data/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+     #self.config['IASI_METOP_B_OBSOUTFILE'] = '%s/mem%3.3d/iasi_metop-b_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
 
       self.config['MEMBERDATAPATH'] = 'mem%3.3d/INPUT' %(n)
       self.config['MEMSTR'] = 'mem%3.3d' %(n)
@@ -98,11 +101,14 @@ class GenerateYAML():
     self.config[infile] = '%s/%s_obs_%s.nc4' %(self.obsdir, obstype, self.config['YYYYMMDDHH'])
     self.config[outfile] = 'solver/%s_obs_%s.nc4' %(obstype, self.config['YYYYMMDDHH'])
 
-  def genSolverYAML(self):
+  def genSolverYAML(self, obstypelist):
     os.system('cp halo.distribution distribution.yaml')
     yaml_out = 'getkf.solver.yaml'
     if(self.debug):
       print('YAML: %s' %(yaml_out))
+
+   #for obstype in obstypelist:
+   #  self.add_obs2solver(obstype=obstype)
 
     self.config['SFC_PS_OBSINFILE'] = '%s/sfc_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
     self.config['SFC_PS_OBSOUTFILE'] = 'solver/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
@@ -114,15 +120,15 @@ class GenerateYAML():
     self.config['SONDES_OBSINFILE'] = '%s/sondes_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
     self.config['SONDES_OBSOUTFILE'] = 'solver/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
 
-    self.config['IASI_METOP_B_OBSINFILE'] = '%s/iasi_metop-b_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
-    self.config['IASI_METOP_B_OBSOUTFILE'] = 'solver/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-
     self.config['AMSUA_N15_OBSINFILE'] = '%s/amsua_n15_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
     self.config['AMSUA_N18_OBSINFILE'] = '%s/amsua_n18_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
     self.config['AMSUA_N19_OBSINFILE'] = '%s/amsua_n19_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
     self.config['AMSUA_N15_OBSOUTFILE'] = 'solver/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
     self.config['AMSUA_N18_OBSOUTFILE'] = 'solver/amsua_n18_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
     self.config['AMSUA_N19_OBSOUTFILE'] = 'solver/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+
+   #self.config['IASI_METOP_B_OBSINFILE'] = '%s/iasi_metop-b_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+   #self.config['IASI_METOP_B_OBSOUTFILE'] = 'solver/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
 
     self.genYAML(self.config, self.solver, yaml_out)
 
@@ -134,6 +140,8 @@ if __name__== '__main__':
   solver = 'getkf.yaml.template.solver'
   numensmem = 80
   obsdir = 'observer'
+  obstypelist = ['sfc_ps', 'sfcship_ps', 'sondes_ps',
+                 'sondes', 'amsua_n15', 'amsua_n18', 'amsua_n19']
 
  #--------------------------------------------------------------------------------
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'config=', 'observer=',
@@ -165,6 +173,6 @@ if __name__== '__main__':
   gy = GenerateYAML(debug=debug, config_file=config_file, solver=solver,
                     observer=observer, numensmem=numensmem, obsdir=obsdir)
 
-  gy.genSolverYAML()
-  gy.genObserverYAML()
+  gy.genSolverYAML(obstypelist)
+  gy.genObserverYAML(obstypelist)
 

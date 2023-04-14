@@ -1,0 +1,5 @@
+viirs-m_npp 12 0.344368E+00
+viirs-m_npp 13 0.000000E+00
+viirs-m_npp 14 0.000000E+00
+viirs-m_npp 15 0.429237E+00
+viirs-m_npp 16 0.565185E+00

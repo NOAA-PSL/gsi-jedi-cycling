@@ -11,7 +11,7 @@ obs space:
         type: H5File
         obsfile: $(AMSUA_N18_OBSINFILE)
   simulated variables: [brightnessTemperature]
-  channels: &all_channels 1-15
+  channels: &all_channels 1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14, 15
 obs operator:
   name: CRTM
   Absorbers: [H2O,O3]
