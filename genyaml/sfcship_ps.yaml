@@ -7,11 +7,11 @@ obs space:
   obsdatain:
     engine:
       type: H5File
-      obsfile: $(SFCSHIP_OBSINFILE)
+      obsfile: $(SFCSHIP_PS_OBSINFILE)
   obsdataout:
     engine:
       type: H5File
-      obsfile: $(SFCSHIP_OBSOUTFILE)
+      obsfile: $(SFCSHIP_PS_OBSOUTFILE)
   simulated variables: [stationPressure]
 obs operator:
   name: SfcPCorrected

@@ -16,7 +16,7 @@ geometry:
 window begin: '$(ATM_WINDOW_BEGIN)'
 window length: $(ATM_WINDOW_LENGTH)
 
-increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
+#increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
 
 background:
   date: '$(BKG_ISOTIME)'
@@ -89,9 +89,5 @@ output increment:
 observations:
   observers:
   - !INC sfc_ps.yaml
-  - !INC sfcship_ps.yaml
-  - !INC sondes_ps.yaml
   - !INC sondes.yaml
-  - !INC amsua_n15.yaml
-  - !INC amsua_n18.yaml
   - !INC amsua_n19.yaml

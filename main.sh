@@ -100,46 +100,6 @@ else
     exit 1
 fi
 
-#   Set SATINFO
-if [[ "$analdate" -ge "2021052118" ]]; then
-    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2021052118
-elif [[ "$analdate" -ge "2020022012" ]]; then
-    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2020022012
-elif [[ "$analdate" -ge "2019110706" ]]; then
-    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2019110706
-elif [[ "$analdate" -ge "2019021900" ]]; then
-    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2019021900
-elif [[ "$analdate" -ge "2018053012" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2018053012
-elif [[ "$analdate" -ge "2018021212" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2018021212
-elif [[ "$analdate" -ge "2017103118" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017103118
-elif [[ "$analdate" -ge "2017031612" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017031612
-elif [[ "$analdate" -ge "2017030812" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017030812
-elif [[ "$analdate" -ge "2016110812" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016110812
-elif [[ "$analdate" -ge "2016090912" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016090912
-elif [[ "$analdate" -ge "2016020312" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016020312
-elif [[ "$analdate" -ge "2016011912" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016011912
-elif [[ "$analdate" -ge "2015111012" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015111012
-elif [[ "$analdate" -ge "2015100118" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015100118
-elif [[ "$analdate" -ge "2015070218" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015070218
-elif [[ "$analdate" -ge "2015011412" ]]; then
-    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015011412
-else
-    echo "no satinfo found"
-    exit 1
-fi
-
 fi
 
 if [ ! -z $HYBENSINFO ]; then

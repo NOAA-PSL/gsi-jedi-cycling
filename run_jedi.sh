@@ -113,10 +113,13 @@ cd ${run_dir}
 
  NODES=$SLURM_NNODES
 
+ export nodes_per_observer=2
  export observer_layout_x=3
- export observer_layout_y=2
- export solver_layout_x=8
- export solver_layout_y=5
+ export observer_layout_y=4
+ export tasks_per_observer=$(( 6 * $observer_layout_x * $observer_layout_y ))
+
+ export solver_layout_x=6
+ export solver_layout_y=10
  export NMEM_ENKF=80
 
  python ${enkfscripts}/genyaml/genconfig.py \
@@ -151,7 +154,7 @@ do
    used_nodes=0
    while [ $used_nodes -lt $NODES ] && [ $n -le $number_members ]
    do
-     used_nodes=$(( $used_nodes + 1 ))
+     used_nodes=$(( $used_nodes + $nodes_per_observer ))
 
      zeropadmem=`printf %03d $n`
      member_str=mem${zeropadmem}
@@ -159,7 +162,7 @@ do
      mkdir -p analysis/increment/${member_str}
      mkdir -p observer/${member_str}
 
-     srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
+     srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
 	observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
      n=$(( $n + 1 ))
@@ -178,7 +181,8 @@ env
  obstype=ps
 
  number_members=81
- for obstype in sfc_ps sfcship_ps sondes_ps
+#for obstype in sfc_ps sondes amsua_n19
+ for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \
@@ -203,7 +207,7 @@ nprocs=240
 echo "srun: `which srun`" >> ${run_dir}/logs/run_jedi.out
 
 #srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode $executable getkf.solver.yaml
- srun -N 8 -n 240 --ntasks-per-node=30 \
+ srun -N 10 -n 360 --ntasks-per-node=36 \
         ${executable} getkf.solver.yaml log.solver.out
 
 cd ${run_dir}
@@ -272,6 +276,8 @@ do
 
    n=$(( $n + 1 ))
 done
+
+export corespernode=40
 
 if [ $incrnumb -eq $number_members ]
 then

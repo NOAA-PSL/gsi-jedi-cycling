@@ -4,3 +4,4 @@
 *.stdout
 job.sh
 exec_orion
+logs
