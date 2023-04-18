@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # model was compiled with these 
 echo "starting at `date`"
 source $MODULESHOME/init/sh
@@ -11,6 +12,8 @@ launch_level=$(echo "$LEVS/2.35" |bc)
 if [ $VERBOSE = "YES" ]; then
  set -x
 fi
+
+set -x
 
 ulimit -s unlimited
 

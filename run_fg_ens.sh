@@ -1,4 +1,6 @@
 #!/bin/sh
+set -x
+
 # run ensemble first guess.
 # first, clean up old first guesses.
 if [ $cleanup_fg == 'true' ];  then

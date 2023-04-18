@@ -25,6 +25,7 @@ for nfhr in $iaufhrs2; do
   done
 done
 
+set -x
 
 if [ $filemissing == 'yes' ]; then
 
@@ -172,6 +173,9 @@ export PGM=$enkfbin
 echo "OMP_NUM_THREADS = $OMP_NUM_THREADS"
 
 # use same number of tasks on every node.
+#export cores=20
+#export OMP_NUM_THREADS=1
+#export corespernode=2
 export nprocs=`expr $cores \/ $OMP_NUM_THREADS`
 export mpitaskspernode=`expr $corespernode \/ $OMP_NUM_THREADS`
 echo "running with $OMP_NUM_THREADS threads ..."

@@ -1,6 +1,8 @@
 #!/bin/sh
 export VERBOSE=YES
 
+set -x
+
 date
 # run model
 export DATOUT=${datapath}/${analdatep1}

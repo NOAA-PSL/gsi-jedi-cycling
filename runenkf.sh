@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 # need symlinks for satbias_angle, satbias_in, satinfo
 if [ -z $biascorrdir ]; then # cycled bias correction files
     export GBIAS=${datapathm1}/${PREINPm1}abias

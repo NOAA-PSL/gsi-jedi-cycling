@@ -155,6 +155,10 @@ export PREINPm1="${RUN}.t${hrm1}z."
 echo "nanals2 = $nanals2"
 echo "cold_start = $cold_start"
 
+if [ $cold_start == "true" ]; then
+  export jedirun='false'
+fi
+
 # if nanals2>0, extend nanals2 members out to FHMAX_LONGER
 if [ $nanals2 -gt 0 ] && [ $cold_start != "true" ]; then
   echo "will run $nanals2 members out to hour $FHMAX_LONGER"
@@ -310,50 +314,6 @@ fi
   #module load hdf5/1.10.6-parallel
   #module load wgrib/1.8.0b
   #module load slurm
-
-# loop over members run observer sequentially (for testing)
-#export skipcat="false"
-#nanal=0
-#ncount=0
-#while [ $nanal -le $nanals ]; do
-#   if [ $nanal -eq 0 ]; then
-#     export charnanal="ensmean"
-#     export charnanal2="ensmean"
-#   else
-#     export charnanal="mem"`printf %03i $nanal`
-#     export charnanal2=$charnanal 
-#   fi
-#   export lobsdiag_forenkf='.false.'
-#   echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
-#   sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer_${charnanal}.out 2>&1 &
-#   ncount=$((ncount+1))
-#   if [ $ncount -eq $NODES ]; then
-#      echo "waiting at nanal = $nanal ..."
-#      wait
-#      ncount=0
-#   fi
-#   nanal=$((nanal+1))
-#done
-#wait
-#nanal=0
-#while [ $nanal -le $nanals ]; do
-#   if [ $nanal -eq 0 ]; then
-#     export charnanal="ensmean"
-#     export charnanal2="ensmean"
-#   else
-#     export charnanal="mem"`printf %03i $nanal`
-#     export charnanal2=$charnanal 
-#   fi
-#   # once observer has completed, check log files.
-#   gsi_done=`cat ${current_logdir}/run_gsi_observer_${charnanal}.log`
-#   if [ $gsi_done == 'yes' ]; then
-#     echo "$analdate gsi observer $charnanal completed successfully `date`"
-#   else
-#     echo "$analdate gsi observer $charnanal did not complete successfully, exiting `date`"
-#     exit 1
-#   fi
-#   nanal=$((nanal+1))
-#done
 
 # run enkf analysis.
 echo "$analdate run enkf `date`"
