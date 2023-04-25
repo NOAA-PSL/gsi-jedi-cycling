@@ -13,126 +13,54 @@ from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
 from genplot import GeneratePlot as genplot
-from scipy_regridder import RegridFV3 as regridder
 from modelVerticalpressure import ModelVerticalPressure
 
 #=========================================================================
 class PlotGaussian():
-  def __init__(self, debug=0, output=0, bkg=None, anl=None):
+  def __init__(self, debug=0, output=0, fst=None, snd=None):
     self.debug = debug
     self.output = output
-    self.bkg = bkg
-    self.anl = anl
+    self.fst = fst
+    self.snd = snd
 
     if(self.debug):
       print('debug = ', debug)
 
     if(self.debug > 10):
-      print('self.bkg = ', self.bkg)
-      print('self.anl = ', self.anl)
+      print('self.fst = ', self.fst)
+      print('self.snd = ', self.snd)
 
-    self.has_snd_file = 0
-    self.snd_file = None
+    self.ncfst = netCDF4.Dataset(fst, 'r')
+    self.ncsnd = netCDF4.Dataset(snd, 'r')
 
-  def set_snd_file(self, filename):
-    self.has_snd_file = 1
-    self.snd_file = filename
+    self.lon = self.ncfst['lon'][:]
+    self.lat = self.ncfst['lat'][:]
+    self.hyai = self.ncfst['hyai'][:]
+    self.hybi = self.ncfst['hybi'][:]
+    self.nlon = len(self.lon)
+    self.nlat = len(self.lat)
+    self.nlev = len(self.hyai) - 1
 
-  def get_vardims(self, filename, varname):
-    if(self.debug > 1):
-      print('varname = ', varname)
-      print('filename = ', filename)
-    ncfile = netCDF4.Dataset(filename, 'r')
-    dimids = ncfile.variables[varname].dimensions
+  def get_latlon(self):
+    return self.lat, self.lon
 
-    if(self.debug > 1):
-      print('dimids = ', dimids)
+  def get_akbk(self):
+    return self.hyai, self.hybi
 
-    self.nx = 0
-    self.ny = 0
-    self.nz = 0
-    self.ntime = 0
-
-    print('dimids = ', dimids)
-
-    for dimname in dimids:
-      if(self.debug > 1):
-        print('dimname:', dimname)
-      if(dimname == 'time'):
-        self.ntime = len(ncfile.dimensions[dimname])
-      elif(dimname == 'pfull'):
-        self.nz = len(ncfile.dimensions[dimname])
-      elif(dimname == 'grid_yt'):
-        self.ny = len(ncfile.dimensions[dimname])
-      elif(dimname == 'grid_xt'):
-        self.nx = len(ncfile.dimensions[dimname])
+  def get_var(self, ncfile, varname):
+    var = ncfile.variables[varname][:, :, :]
 
     if(self.debug):
-      print('self.nx = ', self.nx)
-      print('self.ny = ', self.ny)
-      print('self.nz = ', self.nz)
-      print('self.ntime = ', self.ntime)
-
-  def get_var(self, varname):
-    print('varname =', varname)
-
-    self.get_vardims(self.bkg, varname)
-
-    lat = np.zeros((self.ny, self.nx))
-    lon = np.zeros((self.ny, self.nx))
-
-    anl = np.zeros((self.nz, self.ny, self.nx))
-    bkg = np.zeros((self.nz, self.ny, self.nx))
-
-    anl_file = netCDF4.Dataset(self.anl, 'r')
-    lat = anl_file.variables['lat'][:, :]
-    lon = anl_file.variables['lon'][:, :]
-    anl = anl_file.variables[varname][0, :, :, :]
-    anl_file.close()
-
-    self.lats = lat.flatten()
-    self.lons = lon.flatten()
-
-    bkg_file = netCDF4.Dataset(self.bkg, 'r')
-    bkg = bkg_file.variables[varname][0, :, :, :]
-    bkg_file.close()
-
-    if(self.debug):
-      msg = ('analy range for variable %s: (%s, %s).' % (varname, anl.min(), anl.max()))
-      print(msg)
-      msg = ('bkgrd range for variable %s: (%s, %s).' % (varname, bkg.min(), bkg.max()))
+      msg = ('variable %s: (%s, %s).' % (varname, var.min(), var.max()))
       print(msg)
 
-    incr = anl - bkg
-
-   #print('incr = ', incr)
-
-    return self.lons, self.lats, incr
+    return var
 
   def get_diff(self, varname):
     print('varname =', varname)
 
-    self.get_vardims(self.anl, varname)
-
-    lat = np.zeros((self.ny, self.nx))
-    lon = np.zeros((self.ny, self.nx))
-
-    fst = np.zeros((self.nz, self.ny, self.nx))
-    snd = np.zeros((self.nz, self.ny, self.nx))
-
-    fst_file = netCDF4.Dataset(self.anl, 'r')
-    lat = fst_file.variables['lat'][:, :]
-    lon = fst_file.variables['lon'][:, :]
-    fst = fst_file.variables[varname][0, :, :, :]
-    fst_file.close()
-
-    self.lats = lat.flatten()
-    self.lons = lon.flatten()
-
-    snd_file = netCDF4.Dataset(self.snd_file, 'r')
-    snd = snd_file.variables[varname][0, :, :, :]
-    snd_file.close()
-
+    fst = self.ncfst.variables[varname][:,:,:]
+    snd = self.ncsnd.variables[varname][:,:,:]
     if(self.debug):
       msg = ('fst range for variable %s: (%s, %s).' % (varname, fst.min(), fst.max()))
       print(msg)
@@ -141,59 +69,37 @@ class PlotGaussian():
 
     diff = snd - fst
 
-   #print('incr = ', incr)
-
-    return self.lons, self.lats, diff
+    return fst, snd, diff
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
   output = 0
 
-  uvOnly = 0
+  topdir = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data'
+  fstfile = '%s/analysis.iasi_metop+n15+n18+n19/increment/interp2gaussian_grid.nc4' %(topdir)
+  sndfile = '%s/analysis.iasi_metop+n15+n18+n19.separate_reinit_observer/increment/interp2gaussian_grid.nc4' %(topdir)
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'uvOnly='])
+#=======================================================================================================================
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'fstfile=', 'sndfile='])
 
   for o, a in opts:
     if o in ('--debug'):
       debug = int(a)
     elif o in ('--output'):
       output = int(a)
-    elif o in ('--uvOnly'):
-      uvOnly = int(a)
-   #else:
-   #  assert False, 'unhandled option'
+    elif o in ('--fstfile'):
+      fstfile = a
+    elif o in ('--sndfile'):
+      sndfile = a
+    else:
+      assert False, 'unhandled option'
 
   print('debug = ', debug)
   print('output = ', output)
-  print('uvOnly = ', uvOnly)
 
 #=======================================================================================================================
-  fv3_griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
-
-  if(uvOnly):
-    gsi_bkg = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/jeff-gsi-run/uv-only/sfg_2021010900_fhr06_ensmean'
-    gsi_anl = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/jeff-gsi-run/uv-only/sanl_2021010900_fhr06_ensmean.uv'
-
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvOnly/increment/'
-  else:
-    gsi_bkg = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/jeff-run/sfg_2021010900_fhr06_ensmean'
-    gsi_anl = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/jeff-run/sanl_2021010900_fhr06_ensmean'
-
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.all/increment/'
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
-
-  datafiles = []
-  gridspecfiles = []
-  for ntile in range(1,7,1):
-    gridfile = '%sC48_grid.tile%s.nc' %(fv3_griddir, ntile)
-    gridspecfiles.append(gridfile)
-
-    datafile = '%s20210109.000000.fv_core.res.tile%s.nc' %(datadir, ntile)
-    datafiles.append(datafile)
-
-#=======================================================================================================================
-  filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/fv_core.res.nc'
+  filename = 'akbk127.nc4'
   mvp = ModelVerticalPressure(debug=debug, filename=filename)
  #prs = mvp.get_pressure()
  #print('len(prs) = ', len(prs))
@@ -204,48 +110,25 @@ if __name__ == '__main__':
   marklogp = mvp.get_marklogp()
 
 #=======================================================================================================================
-  nlon = 360
-  nlat = nlon/2 + 1
-  dlon = 360.0/nlon
-  dlat = 180.0/(nlat - 1)
-  lon = np.arange(0.0, 360.0, dlon)
-  lat = np.arange(-90.0, 90.0+dlat, dlat)
-
-#=======================================================================================================================
-  pg = PlotGaussian(debug=debug, output=output, bkg=gsi_bkg, anl=gsi_anl)
-  lon1d, lat1d, var1d = pg.get_var('tmp')
-
-  regrid_gsi = regridder(debug=debug, datafiles=[], gridspecfiles=[])
-  gsi_var = regrid_gsi.interp2latlon_data(lon1d, lat1d, var1d, nlon=nlon, nlat=nlat, method='linear')
-
-#=======================================================================================================================
-  regrid_getkf = regridder(debug=debug, datafiles=datafiles, gridspecfiles=gridspecfiles)
-
-  varname = 'T'
-  getkf_var = regrid_getkf.get_latlon_data(varname, nlon=nlon, nlat=nlat, method='linear')
-
- #print('var.ndim = ', var.ndim)
- #print('var.shape = ', var.shape)
-
-#=======================================================================================================================
-  var = getkf_var - gsi_var
+  pg = PlotGaussian(debug=debug, output=output, fst=fstfile, snd=sndfile)
+  fst, snd, var = pg.get_diff('T_inc')
+  lat,lon = pg.get_latlon()
 
 #=======================================================================================================================
   gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
 
   gp.set_label('Temperature (K)')
 
-  if(uvOnly):
-    imgprefix = 'uvOnly_getkf-gsi_sondes'
-    title_prefix = 'uvOnly GETKF-GSI Sondes Temperature at'
-  else:
-    imgprefix = 'uvTq_getkf-gsi_sondes'
-    title_prefix = 'uvTq GETKF-GSI Sondes Temperature at'
+ #imgprefix = 'JEDI_GSI_ps+sondes+amsua'
+ #title_prefix = 'JEDI GSI ps+sondes+amsua'
 
-  levs = [10, 23, 30, 52]
+  imgprefix = 'IASI_ps+sondes+iasi_SEPINT'
+  title_prefix = 'JEDI GSI ps+sondes+iasi_SEPINT'
+
+  levs = [30, 50, 70, 80, 90, 100, 110, 120]
 
   for lev in levs:
-    pvar = var[lev,:,:]
+    pvar = fst[lev,:,:]
     imgname = '%s_lev_%d.png' %(imgprefix, lev)
     title = '%s level %d' %(title_prefix, lev)
     gp.set_imagename(imgname)
@@ -260,17 +143,17 @@ if __name__ == '__main__':
     title = '%s longitude %d' %(title_prefix, lon)
     gp.set_imagename(imgname)
     gp.set_title(title)
-   #gp.plot_meridional_section(pvar)
-    gp.plot_meridional_section_logp(pvar, logp, marklogp, markpres)
+    gp.plot_meridional_section(pvar)
+   #gp.plot_meridional_section_logp(pvar, logp, marklogp, markpres)
 
   lats = [-30, 0, 45, 70]
 
   for lat in lats:
-    pvar = var[:,90+lat,:]
+    pvar = var[:,90+2*lat,:]
     imgname = '%s_lat_%d.png' %(imgprefix, lat)
     title = '%s latitude %d' %(title_prefix, lat)
     gp.set_imagename(imgname)
     gp.set_title(title)
-   #gp.plot_zonal_section(pvar)
-    gp.plot_zonal_section_logp(pvar, logp, marklogp, markpres)
+    gp.plot_zonal_section(pvar)
+   #gp.plot_zonal_section_logp(pvar, logp, marklogp, markpres)
 
