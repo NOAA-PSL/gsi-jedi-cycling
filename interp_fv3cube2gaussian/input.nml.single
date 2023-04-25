@@ -1,0 +1,19 @@
+&control_param
+ generate_weights = .false.
+ output_flnm = 'interp2gaussian_grid.nc4'
+ wgt_flnm = 'gaussian_weights_C192.nc4'
+ indirname = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19/increment'
+ outdirname = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19/increment'
+ has_prefix = .true.
+ prefix = '20220303.090000.mean_'
+ use_gaussian_grid = .true.
+ gaussian_grid_file = 'gaussian_grid_C192.nc4'
+ nlon = 768
+ nlat = 384
+ nlev = 127
+ nilev = 128
+ npnt = 4
+ num_types = 2
+ data_types = 'fv_core.res.tile', 'fv_tracer.res.tile',
+/
+

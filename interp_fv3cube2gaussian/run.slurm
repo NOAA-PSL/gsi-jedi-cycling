@@ -11,11 +11,11 @@
 
  set -x
 
- source ~/intelenv
+ source ~/gdasenv
 
- cd /work2/noaa/gsienkf/weihuang/production/run/transform/interp_fv3cube2gaussian
+ cd /work2/noaa/da/weihuang/cycling/scripts/gdas-cycling/interp_fv3cube2gaussian
 
- time srun -n 40 fv3interp.exe
+ time single-fv3interp.exe
 
  sacct --format=JobID,CPUTime,Elapsed,AveVMSize,MaxRSS,NodeList%30 --units=M -j $SLURM_JOBID
 

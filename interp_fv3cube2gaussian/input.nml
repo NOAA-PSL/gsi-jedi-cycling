@@ -1,15 +1,15 @@
 &control_param
  generate_weights = .false.
- output_flnm = "interp2gaussian_grid.nc4"
- wgt_flnm = "gaussian_weights.nc4"
- indirname = "/work2/noaa/gsienkf/weihuang/production/run/sondes/run_80.40t1n_36p/analysis.2/increment"
- outdirname = "/work2/noaa/gsienkf/weihuang/production/run/sondes/run_80.40t1n_36p/analysis.2/increment"
+ output_flnm = 'interp2gaussian_grid.nc4'
+ wgt_flnm = 'gaussian_weights_C192.nc4'
+ indirname = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19.separate_reinit_observer/increment'
+ outdirname = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19.separate_reinit_observer/increment'
  has_prefix = .true.
- prefix = '20200101.120000.'
+ prefix = '20220303.090000.mean_'
  use_gaussian_grid = .true.
- gaussian_grid_file = 'gaussian_grid.nc4'
- nlon = 384
- nlat = 192
+ gaussian_grid_file = 'gaussian_grid_C192.nc4'
+ nlon = 768
+ nlat = 384
  nlev = 127
  nilev = 128
  npnt = 4

@@ -1,6 +1,8 @@
 #!/bin/sh
 
-set -x
+#set -x
+
+main_start=$(date +%s)
 
 # main driver script
 # gsi gain or gsi covariance GSI EnKF (based on ensemble mean background)
@@ -100,6 +102,46 @@ else
     exit 1
 fi
 
+#   Set SATINFO
+if [[ "$analdate" -ge "2021052118" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2021052118
+elif [[ "$analdate" -ge "2020022012" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2020022012
+elif [[ "$analdate" -ge "2019110706" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2019110706
+elif [[ "$analdate" -ge "2019021900" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2019021900
+elif [[ "$analdate" -ge "2018053012" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2018053012
+elif [[ "$analdate" -ge "2018021212" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2018021212
+elif [[ "$analdate" -ge "2017103118" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017103118
+elif [[ "$analdate" -ge "2017031612" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017031612
+elif [[ "$analdate" -ge "2017030812" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017030812
+elif [[ "$analdate" -ge "2016110812" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016110812
+elif [[ "$analdate" -ge "2016090912" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016090912
+elif [[ "$analdate" -ge "2016020312" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016020312
+elif [[ "$analdate" -ge "2016011912" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016011912
+elif [[ "$analdate" -ge "2015111012" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015111012
+elif [[ "$analdate" -ge "2015100118" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015100118
+elif [[ "$analdate" -ge "2015070218" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015070218
+elif [[ "$analdate" -ge "2015011412" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015011412
+else
+    echo "no satinfo found"
+    exit 1
+fi
+
 fi
 
 if [ ! -z $HYBENSINFO ]; then
@@ -155,10 +197,6 @@ export PREINPm1="${RUN}.t${hrm1}z."
 echo "nanals2 = $nanals2"
 echo "cold_start = $cold_start"
 
-if [ $cold_start == "true" ]; then
-  export jedirun='false'
-fi
-
 # if nanals2>0, extend nanals2 members out to FHMAX_LONGER
 if [ $nanals2 -gt 0 ] && [ $cold_start != "true" ]; then
   echo "will run $nanals2 members out to hour $FHMAX_LONGER"
@@ -168,6 +206,8 @@ else
 fi
 
 if [ $fg_only ==  'false' ]; then
+
+ensmean_start=$(date +%s)
 
 niter=1
 alldone="no"
@@ -188,6 +228,9 @@ while [ $alldone == 'no' ] && [ $niter -le $nitermax ]; do
    fi
    niter=$((niter+1))
 done
+
+ensmean_end=$(date +%s)
+echo "compute_ensmean_fcst.sh elapsed Time: $(($ensmean_end-$ensmean_start)) seconds"
 
 echo "alldone=$alldone"
 echo "replay_controlfcst=$replay_controlfcst"
@@ -277,6 +320,7 @@ else # just run observer (EnKF only)
    export lobsdiag_forenkf='.true.'
    export skipcat="false"
   #Create diag files.
+   gsiobserver_start=$(date +%s)
    echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
    sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer.out 2>&1
    # once observer has completed, check log files.
@@ -287,8 +331,11 @@ else # just run observer (EnKF only)
      echo "$analdate gsi observer did not complete successfully, exiting `date`"
      exit 1
    fi
+   gsiobserver_end=$(date +%s)
+   echo "run_gsiobserver.sh elapsed Time: $(($gsiobserver_end-$gsiobserver_start)) seconds"
 fi
 
+run_jedi_start=$(date +%s)
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
    echo "Run JEDI for: $analdate start at: `date`"
    ${enkfscripts}/run_jedi.sh
@@ -304,6 +351,9 @@ else
    echo "Did not run JEDI for: $analdate "
 fi
 
+run_jedi_end=$(date +%s)
+echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
+
   #module purge
   #module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
   #module load hpc/1.1.0
@@ -315,6 +365,51 @@ fi
   #module load wgrib/1.8.0b
   #module load slurm
 
+# loop over members run observer sequentially (for testing)
+#export skipcat="false"
+#nanal=0
+#ncount=0
+#while [ $nanal -le $nanals ]; do
+#   if [ $nanal -eq 0 ]; then
+#     export charnanal="ensmean"
+#     export charnanal2="ensmean"
+#   else
+#     export charnanal="mem"`printf %03i $nanal`
+#     export charnanal2=$charnanal 
+#   fi
+#   export lobsdiag_forenkf='.false.'
+#   echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
+#   sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer_${charnanal}.out 2>&1 &
+#   ncount=$((ncount+1))
+#   if [ $ncount -eq $NODES ]; then
+#      echo "waiting at nanal = $nanal ..."
+#      wait
+#      ncount=0
+#   fi
+#   nanal=$((nanal+1))
+#done
+#wait
+#nanal=0
+#while [ $nanal -le $nanals ]; do
+#   if [ $nanal -eq 0 ]; then
+#     export charnanal="ensmean"
+#     export charnanal2="ensmean"
+#   else
+#     export charnanal="mem"`printf %03i $nanal`
+#     export charnanal2=$charnanal 
+#   fi
+#   # once observer has completed, check log files.
+#   gsi_done=`cat ${current_logdir}/run_gsi_observer_${charnanal}.log`
+#   if [ $gsi_done == 'yes' ]; then
+#     echo "$analdate gsi observer $charnanal completed successfully `date`"
+#   else
+#     echo "$analdate gsi observer $charnanal did not complete successfully, exiting `date`"
+#     exit 1
+#   fi
+#   nanal=$((nanal+1))
+#done
+
+time_start=$(date +%s)
 # run enkf analysis.
 echo "$analdate run enkf `date`"
 sh ${enkfscripts}/runenkf.sh > ${current_logdir}/run_enkf.out 2>&1
@@ -327,12 +422,19 @@ else
   exit 1
 fi
 
+time_end=$(date +%s)
+echo "runenkf.sh elapsed Time: $(($time_end-$time_start)) seconds"
+
+time_start=$(date +%s)
 # compute ensemble mean analyses.
 if [ $write_ensmean == ".false." ]; then
    echo "$analdate starting ens mean analysis computation `date`"
    sh ${enkfscripts}/compute_ensmean_enkf.sh > ${current_logdir}/compute_ensmean_anal.out 2>&1
    echo "$analdate done computing ensemble mean analyses `date`"
 fi
+
+time_end=$(date +%s)
+echo "compute_ensmean_enkf.sh elapsed Time: $(($time_end-$time_start)) seconds"
 
 # blend enkf mean and 3dvar increments, recenter ensemble
 if [ $enkfonly != "true" ]; then
@@ -429,6 +531,7 @@ if [ $replay_controlfcst == 'true' ]; then
     fi
 fi
 
+fg_ens_start=$(date +%s)
 echo "$analdate run enkf ens first guess `date`"
 sh ${enkfscripts}/run_fg_ens.sh > ${current_logdir}/run_fg_ens.out  2>&1
 ens_done=`cat ${current_logdir}/run_fg_ens.log`
@@ -438,6 +541,9 @@ else
   echo "$analdate enkf first-guess did not complete successfully, exiting `date`"
   exit 1
 fi
+
+fg_ens_end=$(date +%s)
+echo "run_fg_ens.sh elapsed Time: $(($fg_ens_end-$fg_ens_start)) seconds"
 
 if [ $cold_start == 'false' ]; then
 
@@ -494,5 +600,8 @@ if [ $analdate -le $analdate_end ]  && [ $resubmit == 'true' ]; then
       submit_job.sh $machine
    fi
 fi
+
+main_end=$(date +%s)
+echo "main.sh elapsed Time: $(($main_end-$main_start)) seconds"
 
 exit 0

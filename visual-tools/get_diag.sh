@@ -2,7 +2,7 @@
 
  set -x
 
- edate=2020010200
+ edate=2020010312
 
  plot_stats () {
    argnum=$#
@@ -35,7 +35,7 @@
      --datadir=/work2/noaa/da/weihuang/cycling > obs_count_${flag}.csv
 
    python plot-jedi-gsi-diag.py --lbl1=${lbl1} --lbl2=${lbl2} \
-	--output=0 >> obs_count_${flag}.csv
+	--output=1 >> obs_count_${flag}.csv
 
    dirname=${lbl2}-${lbl1}
    rm -rf ${dirname}
@@ -62,10 +62,14 @@
 #firstlbls=(GSI_PS)
 #secondlbls=(GDAS_PS)
 
- firstlist=(new.gsi_C96_lgetkf_sondesonly)
- secondlist=(gsi_C96_lgetkf_sondesonly)
- firstlbls=(GSI_ORIG)
- secondlbls=(GSI_HALF)
+#firstlist=(new.gsi_C96_lgetkf_sondesonly)
+#secondlist=(gsi_C96_lgetkf_sondesonly)
+#firstlbls=(GSI_ORIG)
+#secondlbls=(GSI_HALF)
+ firstlist=(gsi_C96_lgetkf_ps+sondes+amsua)
+ secondlist=(gdas-cycling)
+ firstlbls=(GSI)
+ secondlbls=(JEDI)
  for j in ${!firstlist[@]}
  do
    first=${firstlist[$j]}
