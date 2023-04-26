@@ -94,7 +94,7 @@ class GeneratePlot():
   def set_default(self):
     self.imagename = 'sample.png'
 
-    self.runname = ['Halo', 'RR', 'RR - Halo']
+    self.runname = ['REINIT', 'IASI', 'REINIT - IASI']
 
    #cmapname = coolwarm, bwr, rainbow, jet, seismic
     self.cmapname = 'bwr'
@@ -115,6 +115,9 @@ class GeneratePlot():
 
     self.label = 'Unit (C)'
     self.title = 'Temperature Increment'
+
+  def set_runname(self, runname = ['REINIT', 'IASI', 'REINIT - IASI']):
+    self.runname = runname
 
   def set_label(self, label='Unit (C)'):
     self.label = label
@@ -181,8 +184,8 @@ if __name__== '__main__':
 
 #-----------------------------------------------------------------------------------------
   for n in range(len(second_varlist)):
-    secondvar = ncsecond.variables[second_varlist[n]][0, :, :, :]
-    firstvar = ncfirst.variables[first_varlist[n]][0,:, :, :]
+    secondvar = ncsecond.variables[second_varlist[n]][:, :, :]
+    firstvar = ncfirst.variables[first_varlist[n]][:, :, :]
 
     nlev, nlat, nlon = secondvar.shape
     print('secondvar.shape = ', secondvar.shape)

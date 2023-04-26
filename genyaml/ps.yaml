@@ -1,5 +1,5 @@
 obs space:
-  name: surface pressure
+  name: station surface pressure
   distribution:
     !INC distribution.yaml
   io pool:
@@ -7,11 +7,11 @@ obs space:
   obsdatain:
     engine:
       type: H5File
-      obsfile: $(OBSINFILE)
+      obsfile: $(PS_OBSINFILE)
   obsdataout:
     engine:
       type: H5File
-      obsfile: $(OBSOUTFILE)
+      obsfile: $(PS_OBSOUTFILE)
   simulated variables: [stationPressure]
 obs operator:
   name: SfcPCorrected

@@ -86,6 +86,6 @@ output:
 # ----------------
 observations:
   observers:
-  - !INC sfc_ps.yaml
+  - !INC ps.yaml
   - !INC sondes.yaml
   - !INC amsua_n19.yaml

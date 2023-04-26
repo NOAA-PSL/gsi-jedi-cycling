@@ -66,8 +66,10 @@ class GenerateYAML():
      #for obstype in obstypelist:
      #  self.add_obs2observer(n=n, obstype=obstype)
 
-      self.config['SFC_PS_OBSINFILE'] = 'ioda_v2_data/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-      self.config['SFC_PS_OBSOUTFILE'] = '%s/mem%3.3d/sfc_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['PS_OBSINFILE'] = 'ioda_v2_data/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['PS_OBSOUTFILE'] = '%s/mem%3.3d/ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+     #self.config['SFC_PS_OBSINFILE'] = 'ioda_v2_data/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+     #self.config['SFC_PS_OBSOUTFILE'] = '%s/mem%3.3d/sfc_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
      #self.config['SFCSHIP_PS_OBSINFILE'] = 'ioda_v2_data/sfcship_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
      #self.config['SFCSHIP_PS_OBSOUTFILE'] = '%s/mem%3.3d/sfcship_ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
      #self.config['SONDES_PS_OBSINFILE'] = 'ioda_v2_data/sondes_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
@@ -110,8 +112,10 @@ class GenerateYAML():
    #for obstype in obstypelist:
    #  self.add_obs2solver(obstype=obstype)
 
-    self.config['SFC_PS_OBSINFILE'] = '%s/sfc_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
-    self.config['SFC_PS_OBSOUTFILE'] = 'solver/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['PS_OBSINFILE'] = '%s/ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['PS_OBSOUTFILE'] = 'solver/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+   #self.config['SFC_PS_OBSINFILE'] = '%s/sfc_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+   #self.config['SFC_PS_OBSOUTFILE'] = 'solver/sfc_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
    #self.config['SFCSHIP_PS_OBSINFILE'] = '%s/sfcship_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
    #self.config['SFCSHIP_PS_OBSOUTFILE'] = 'solver/sfcship_ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
    #self.config['SONDES_PS_OBSINFILE'] = '%s/sondes_ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])

@@ -67,7 +67,14 @@ python ${iodablddir}/bin/combine_obsspace.py \
      sondes_tv_obs_${yyyymmddhh}.nc4 \
      sondes_uv_obs_${yyyymmddhh}.nc4 \
      sondes_q_obs_${yyyymmddhh}.nc4 \
-  -o sondes_obs_${yyyymmddhh}.nc4
+  -o sondes_obs_${yyyymmddhh}.nc4 &
+
+flst="sfc_ps_obs_${yyyymmddhh}.nc4 sfcship_ps_obs_${yyyymmddhh}.nc4"
+python ${iodablddir}/bin/combine_obsspace.py \
+  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
+     sfcship_ps_obs_${yyyymmddhh}.nc4 \
+  -o ps_obs_${yyyymmddhh}.nc4 &
+wait
 
 time_end=$(date +%s)
 echo "combine_obsspace.py elapsed Time: $(($time_end-$time_start)) seconds"
@@ -211,14 +218,16 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in sfc_ps sondes amsua_n19
+ for obstype in ps sondes amsua_n19
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \
         --datestr=${yyyymmddhh} \
         --nmem=${number_members} \
-        --obstype=${obstype}
+        --obstype=${obstype} &
  done
+
+ wait
 
 time_end=$(date +%s)
 echo "concanate-observer.py elapsed Time: $(($time_end-$time_start)) seconds"
