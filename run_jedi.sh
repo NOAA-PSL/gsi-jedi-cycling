@@ -35,7 +35,8 @@ mkdir -p ioda_v2_data diag
 
 #cp diag_* diag/.
 #for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
-for type in amsua_n19 conv_ps conv_q conv_t conv_uv
+#for type in amsua_n19 conv_ps conv_q conv_t conv_uv
+for type in amsua_n19 conv_q conv_t conv_uv
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -69,12 +70,13 @@ python ${iodablddir}/bin/combine_obsspace.py \
      sondes_q_obs_${yyyymmddhh}.nc4 \
   -o sondes_obs_${yyyymmddhh}.nc4 &
 
-flst="sfc_ps_obs_${yyyymmddhh}.nc4 sfcship_ps_obs_${yyyymmddhh}.nc4"
-python ${iodablddir}/bin/combine_obsspace.py \
-  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
-     sfcship_ps_obs_${yyyymmddhh}.nc4 \
-  -o ps_obs_${yyyymmddhh}.nc4 &
-wait
+#flst="sfc_ps_obs_${yyyymmddhh}.nc4 sfcship_ps_obs_${yyyymmddhh}.nc4 sondes_ps_obs_${yyyymmddhh}.nc4"
+#python ${iodablddir}/bin/combine_obsspace.py \
+#  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
+#     sfcship_ps_obs_${yyyymmddhh}.nc4 \
+#     sondes_ps_obs_${yyyymmddhh}.nc4 \
+#  -o ps_obs_${yyyymmddhh}.nc4 &
+#wait
 
 time_end=$(date +%s)
 echo "combine_obsspace.py elapsed Time: $(($time_end-$time_start)) seconds"
@@ -218,7 +220,8 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in ps sondes amsua_n19
+#for obstype in ps sondes amsua_n19
+ for obstype in sondes amsua_n19
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \
