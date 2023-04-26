@@ -3,7 +3,7 @@
 #SBATCH -t 05:30:00
 #SBATCH -A gsienkf
 #SBATCH -N 10  
-#SBATCH --ntasks-per-node=36
+#SBATCH --ntasks-per-node=40
 #SBATCH -p orion
 #SBATCH -J gdasapp
 #SBATCH -e logs/gdasapp.%J.err
@@ -57,8 +57,8 @@ fi
 # for C192
 export fg_proc=$corespernode
 export fg_threads=1 
-export enkf_threads=40
-export gsi_control_threads=40
+export enkf_threads=10
+export gsi_control_threads=4
 export write_groups=4
 export write_tasks=1 
 export layout="3, 2"

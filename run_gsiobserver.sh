@@ -1,6 +1,8 @@
 #!/bin/sh
 # do hybrid observer.
 
+set -x
+
 if [ -z $charnanal2 ]; then
   export charnanal2=$charnanal
 fi

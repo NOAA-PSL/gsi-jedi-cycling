@@ -10,10 +10,10 @@ executable options:
   atm: true
   layout:
   - 3
-  - 4
-  case: C192
-  npx_ges: 193
-  npy_ges: 193
+  - 2
+  case: C96
+  npx_ges: 97
+  npy_ges: 97
   npz_ges: 127
   ATM_WINDOW_BEGIN: '2022-03-03T09:00:00Z'
   ATM_WINDOW_LENGTH: PT6H
@@ -27,5 +27,5 @@ job options:
   queue: debug
   partition: debug
   walltime: '30:00'
-  ntasks: 72
+  ntasks: 36
   modulepath: /work2/noaa/da/weihuang/GDASApp/modulefiles

@@ -228,7 +228,7 @@ time_start=$(date +%s)
  cd ${run_dir}
 
 export OOPS_DEBUG=1
-export OOPS_TRACk=-11
+export OOPS_TRACK=-11
 export OMP_NUM_THREADS=1
 export corespernode=30
 export mpitaskspernode=30
