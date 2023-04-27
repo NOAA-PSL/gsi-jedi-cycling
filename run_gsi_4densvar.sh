@@ -455,13 +455,13 @@ EOF
 
 berror=${BERROR:-$fixgsi/Big_Endian/global_berror.l${LEVS}y${NLAT}.f77}
 
-satinfo=${SATINFO:-$fixgsi/global_satinfo.txt}
+#convinfo=${CONVINFO:-$fixgsi/global_convinfo.txt}
+#satinfo=${SATINFO:-$fixgsi/global_satinfo.txt}
+#ozinfo=${OZINFO:-$fixgsi/global_ozinfo.txt}
 atmsfilter=${ATMSFILTER:-$fixgsi/atms_beamwidth.txt}
 scaninfo=$fixgsi/global_scaninfo.txt
 satangl=$fixgsi/global_satangbias.txt
 pcpinfo=$fixgsi/global_pcpinfo.txt
-ozinfo=${OZINFO:-$fixgsi/global_ozinfo.txt}
-convinfo=${CONVINFO:-$fixgsi/global_convinfo.txt}
 insituinfo=${INSITUINFO:-$fixgsi/global_insituinfo.txt}
 aeroinfo=${AEROINFO:-$fixgsi/global_aeroinfo.txt}
 errtable=$fixgsi/prepobs_errtable.global
@@ -484,12 +484,12 @@ $ncp $anavinfo ./anavinfo
 $ncp $radcloudinfo ./cloudy_radiance_info.txt
 $nln $berror   ./berror_stats
 $nln $satangl  ./satbias_angle
-$nln $satinfo  ./satinfo
+$nln $SATINFO  ./satinfo
 $nln $atmsfilter ./atms_beamwidth.txt
 $nln $scaninfo ./scaninfo
 $nln $pcpinfo  ./pcpinfo
-$nln $ozinfo   ./ozinfo
-$nln $convinfo ./convinfo
+$nln $OZINFO   ./ozinfo
+$nln $CONVINFO ./convinfo
 $nln $insituinfo ./insituinfo
 $nln $aeroinfo ./aeroinfo
 $nln $errtable ./errtable
