@@ -26,7 +26,8 @@ export beta=1000 # percentage of enkf increment (*10)
 # in this case, to recenter around EnVar analysis set recenter_control_wgt=100
 export recenter_control_wgt=100
 export recenter_ensmean_wgt=`expr 100 - $recenter_control_wgt`
-export exptname="gdas-cycling"
+#export exptname="gdas-cycling"
+export exptname="gsi-cycling"
 # for 'passive' or 'replay' cycling of control fcst 
 export replay_controlfcst='false'
 export enkfonly='true' # pure EnKF
@@ -36,8 +37,8 @@ export ensda="enkf_run.sh"
 export rungsi='run_gsi_4densvar.sh'
 export rungfs='run_fv3.sh' # ensemble forecast
 
-#export jedirun='false'
-export jedirun='true'
+export jedirun='false'
+#export jedirun='true'
 export jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
 export jediblddir=/work2/noaa/da/weihuang/GDASApp/build
 
