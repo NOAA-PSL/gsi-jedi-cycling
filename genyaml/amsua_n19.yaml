@@ -11,6 +11,7 @@ obs space:
         type: H5File
         obsfile: $(AMSUA_N19_OBSOUTFILE)
   simulated variables: [brightnessTemperature]
+ #channels: &all_channels 1-6, 9-15
   channels: &all_channels 1-15
 obs operator:
   name: CRTM
