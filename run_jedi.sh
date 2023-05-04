@@ -35,7 +35,8 @@ mkdir -p ioda_v2_data diag
 
 #cp diag_* diag/.
 #for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
-for type in amsua_n19 conv_q conv_t conv_uv iasi_metop-b
+#for type in amsua_n19 conv_q conv_t conv_uv iasi_metop-b
+for type in conv_q conv_t conv_uv
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -209,7 +210,8 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in sondes amsua_n19 iasi_metop-b
+#for obstype in sondes amsua_n19 iasi_metop-b
+ for obstype in sondes
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \

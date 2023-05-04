@@ -455,8 +455,8 @@ export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readi
 # in stratosphere/mesosphere
 #export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
 export OZINFO=${fixgsi}/global_ozinfo.txt
-export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondes+amsua_n19+iasi_metop_b
-export SATINFO=${enkfscripts}/textdata/global_satinfo.txt.sondes+amsua_n19+iasi_metop_b
+export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
+export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
 export NLAT=$((${LATA}+2))
 # default is to use berror file in gsi fix dir.
 #export BERROR=${basedir}/staticB/global_berror_enkf.l${LEVS}y${NLAT}.f77
