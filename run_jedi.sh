@@ -35,8 +35,8 @@ mkdir -p ioda_v2_data diag
 
 #cp diag_* diag/.
 #for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
-#for type in amsua_n19 conv_q conv_t conv_uv
-for type in conv_q conv_t conv_uv
+#for type in conv_q conv_t conv_uv
+for type in conv_q conv_t conv_uv amsua_n19 iasi_metop-b
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -134,6 +134,7 @@ cd ${run_dir}
  cp ${enkfscripts}/genyaml/amsua_n15.yaml .
  cp ${enkfscripts}/genyaml/amsua_n18.yaml .
  cp ${enkfscripts}/genyaml/amsua_n19.yaml .
+ cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
 
  export corespernode=40
  export mpitaskspernode=40
@@ -209,7 +210,8 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in sondes
+#for obstype in sondes
+ for obstype in sondes amsua_n19 iasi_metop-b
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \
