@@ -335,8 +335,8 @@ else # just run observer (EnKF only)
    echo "run_gsiobserver.sh elapsed Time: $(($gsiobserver_end-$gsiobserver_start)) seconds"
 fi
 
-run_jedi_start=$(date +%s)
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
+   run_jedi_start=$(date +%s)
    echo "Run JEDI for: $analdate start at: `date`"
    ${enkfscripts}/run_jedi.sh
 
@@ -347,12 +347,12 @@ if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
      echo "$analdate jedi did not complete successfully, exiting `date`"
      exit 1
    fi
+
+   run_jedi_end=$(date +%s)
+   echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
 else
    echo "Did not run JEDI for: $analdate "
 fi
-
-run_jedi_end=$(date +%s)
-echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
 
   #module purge
   #module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
