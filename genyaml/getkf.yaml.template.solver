@@ -89,4 +89,3 @@ output increment:
 observations:
   observers:
   - !INC sondes.yaml
-  - !INC amsua_n19.yaml
