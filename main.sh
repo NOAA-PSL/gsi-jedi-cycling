@@ -194,9 +194,6 @@ export PREINP="${RUN}.t${hr}z."
 export PREINP1="${RUN}.t${hrp1}z."
 export PREINPm1="${RUN}.t${hrm1}z."
 
-echo "nanals2 = $nanals2"
-echo "cold_start = $cold_start"
-
 # if nanals2>0, extend nanals2 members out to FHMAX_LONGER
 if [ $nanals2 -gt 0 ] && [ $cold_start != "true" ]; then
   echo "will run $nanals2 members out to hour $FHMAX_LONGER"
@@ -335,8 +332,8 @@ else # just run observer (EnKF only)
    echo "run_gsiobserver.sh elapsed Time: $(($gsiobserver_end-$gsiobserver_start)) seconds"
 fi
 
-run_jedi_start=$(date +%s)
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
+   run_jedi_start=$(date +%s)
    echo "Run JEDI for: $analdate start at: `date`"
    ${enkfscripts}/run_jedi.sh
 
@@ -347,23 +344,12 @@ if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
      echo "$analdate jedi did not complete successfully, exiting `date`"
      exit 1
    fi
+
+   run_jedi_end=$(date +%s)
+   echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
 else
    echo "Did not run JEDI for: $analdate "
 fi
-
-run_jedi_end=$(date +%s)
-echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
-
-  #module purge
-  #module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
-  #module load hpc/1.1.0
-  #module load hpc-intel/2018.4
-  #module unload mkl/2020.2
-  #module load mkl/2018.4
-  #module load hpc-impi/2018.4
-  #module load hdf5/1.10.6-parallel
-  #module load wgrib/1.8.0b
-  #module load slurm
 
 # loop over members run observer sequentially (for testing)
 #export skipcat="false"
