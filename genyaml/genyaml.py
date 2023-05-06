@@ -73,10 +73,10 @@ class GenerateYAML():
 
      #self.config['AMSUA_N15_OBSINFILE'] = 'ioda_v2_data/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
      #self.config['AMSUA_N18_OBSINFILE'] = 'ioda_v2_data/amsua_n18_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-     #self.config['AMSUA_N19_OBSINFILE'] = 'ioda_v2_data/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N19_OBSINFILE'] = 'ioda_v2_data/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
      #self.config['AMSUA_N15_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n15_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
      #self.config['AMSUA_N18_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n18_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-     #self.config['AMSUA_N19_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n19_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['AMSUA_N19_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n19_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
 
      #self.config['IASI_METOP_B_OBSINFILE'] = 'ioda_v2_data/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
      #self.config['IASI_METOP_B_OBSOUTFILE'] = '%s/mem%3.3d/iasi_metop-b_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
@@ -112,10 +112,10 @@ class GenerateYAML():
 
    #self.config['AMSUA_N15_OBSINFILE'] = '%s/amsua_n15_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
    #self.config['AMSUA_N18_OBSINFILE'] = '%s/amsua_n18_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
-   #self.config['AMSUA_N19_OBSINFILE'] = '%s/amsua_n19_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N19_OBSINFILE'] = '%s/amsua_n19_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
    #self.config['AMSUA_N15_OBSOUTFILE'] = 'solver/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
    #self.config['AMSUA_N18_OBSOUTFILE'] = 'solver/amsua_n18_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-   #self.config['AMSUA_N19_OBSOUTFILE'] = 'solver/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['AMSUA_N19_OBSOUTFILE'] = 'solver/amsua_n19_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
 
    #self.config['IASI_METOP_B_OBSINFILE'] = '%s/iasi_metop-b_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
    #self.config['IASI_METOP_B_OBSOUTFILE'] = 'solver/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])

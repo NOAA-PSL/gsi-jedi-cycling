@@ -144,10 +144,10 @@ cd ${run_dir}
 
  export observer_layout_x=3
  export observer_layout_y=2
- export solver_layout_x=8
- export solver_layout_y=5
-#export solver_layout_x=6
-#export solver_layout_y=10
+#export solver_layout_x=8
+#export solver_layout_y=5
+ export solver_layout_x=6
+ export solver_layout_y=10
  export NMEM_ENKF=80
 
  python ${enkfscripts}/genyaml/genconfig.py \
@@ -166,6 +166,10 @@ cd ${run_dir}
    --obsdir=observer
 
 #--------------------------------------------------------------------------------------------
+#export OOPS_DEBUG=-11
+#export OOPS_TRACK=-11
+#export OOPS_TRACE=1
+
  echo "run observer"
 
  rm -rf analysis hofx stdoutNerr solver
@@ -223,19 +227,17 @@ time_start=$(date +%s)
  echo "run solver"
  cd ${run_dir}
 
-export OOPS_DEBUG=-11
+export OOPS_DEBUG=1
 export OOPS_TRACK=-11
 export OMP_NUM_THREADS=1
+export corespernode=36
+export mpitaskspernode=36
 
-#totnodes=10
-#nprocs=360
-#export corespernode=36
-#export mpitaskspernode=36
-
+nprocs=360
 totnodes=10
-nprocs=240
-export corespernode=24
-export mpitaskspernode=24
+
+#totnodes=8
+#nprocs=240
 
 #echo "srun -N $totnodes -n $nprocs -c $count --ntasks-per-node=$mpitaskspernode \\" >> ${run_dir}/logs/run_jedi.out
 #echo "  --exclusive --cpu-bind=cores --verbose $executable getkf.yaml" >> ${run_dir}/logs/run_jedi.out

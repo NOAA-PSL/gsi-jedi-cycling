@@ -26,7 +26,7 @@ export beta=1000 # percentage of enkf increment (*10)
 # in this case, to recenter around EnVar analysis set recenter_control_wgt=100
 export recenter_control_wgt=100
 export recenter_ensmean_wgt=`expr 100 - $recenter_control_wgt`
-export exptname="gdas-cycling"
+export exptname="gsi-cycling"
 # for 'passive' or 'replay' cycling of control fcst 
 export replay_controlfcst='false'
 export enkfonly='true' # pure EnKF
@@ -36,8 +36,8 @@ export ensda="enkf_run.sh"
 export rungsi='run_gsi_4densvar.sh'
 export rungfs='run_fv3.sh' # ensemble forecast
 
-#export jedirun='false'
-export jedirun='true'
+export jedirun='false'
+#export jedirun='true'
 export jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
 export jediblddir=/work2/noaa/da/weihuang/GDASApp/build
 
@@ -92,8 +92,8 @@ export save_hpss="false"
 
 source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
-   export basedir=/work2/noaa/da/weihuang/cycling
-  #export basedir=/work2/noaa/gsienkf/weihuang/gsi
+  #export basedir=/work2/noaa/da/weihuang/cycling
+   export basedir=/work2/noaa/gsienkf/weihuang/gsi
    export datadir=/work2/noaa/da/weihuang/cycling
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work/noaa/rstprod/dump
@@ -119,8 +119,8 @@ fi
 export datapath="${datadir}/${exptname}"
 export logdir="${datadir}/logs/${exptname}"
 
-export NOSAT="YES" # if yes, no radiances assimilated
-#export NOSAT="NO" # if yes, no radiances assimilated
+#export NOSAT="YES" # if yes, no radiances assimilated
+export NOSAT="NO" # if yes, no radiances assimilated
 export NOCONV="NO"
 export NOTLNMC="NO" # no TLNMC in GSI in GSI EnVar
 export NOOUTERLOOP="NO" # no outer loop in GSI EnVar
@@ -457,7 +457,8 @@ export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readi
 #export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
 export OZINFO=${fixgsi}/global_ozinfo.txt
 #export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.ps+sondes+amsua
-export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondesonly
+#export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondesonly
+export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
 export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
 #export SATINFO=${fixgsi}/global_satinfo.txt
 export NLAT=$((${LATA}+2))
