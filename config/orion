@@ -119,8 +119,8 @@ fi
 export datapath="${datadir}/${exptname}"
 export logdir="${datadir}/logs/${exptname}"
 
-export NOSAT="YES" # if yes, no radiances assimilated
-#export NOSAT="NO" # if yes, no radiances assimilated
+#export NOSAT="YES" # if yes, no radiances assimilated
+export NOSAT="NO" # if yes, no radiances assimilated
 export NOCONV="NO"
 export NOTLNMC="NO" # no TLNMC in GSI in GSI EnVar
 export NOOUTERLOOP="NO" # no outer loop in GSI EnVar
@@ -391,19 +391,7 @@ export incdate="${enkfscripts}/incdate.sh"
 
 echo "enkfscripts=$enkfscripts"
 
-if [ "$machine" == 'hera' ]; then
-   export FIXDIR=/scratch1/NCEPDEV/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
-   #export FIXDIR_gcyc=$FIXDIR
-   export FIXDIR_gcyc=/scratch1/NCEPDEV/global/glopara/fix_NEW # for GFSv16
-   export python=/contrib/anaconda/2.3.0/bin/python
-   export gsipath=${basedir}/gsi/GSI
-   export fixgsi=${gsipath}/fix
-   export fixcrtm=/scratch2/NCEPDEV/nwprod/NCEPLIBS/fix/crtm_v2.3.0
-   export execdir=${enkfscripts}/exec_${machine}
-   export enkfbin=${execdir}/global_enkf
-   export gsiexec=${execdir}/global_gsi
-   export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
-elif [ "$machine" == 'orion' ]; then
+if [ "$machine" == 'orion' ]; then
    export FIXDIR=/work/noaa/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
    #export FIXDIR_gcyc=$FIXDIR
    export FIXDIR_gcyc=/work/noaa/global/glopara/fix_NEW # for GFSv16
@@ -413,24 +401,8 @@ elif [ "$machine" == 'orion' ]; then
    export FIXGLOBAL=$fv3gfspath/fix_nco_gfsv16/fix_am
    export gsipath=/work/noaa/gsienkf/whitaker/GSI
    export fixgsi=${gsipath}/fix
-   #export fixcrtm=${basedir}/fix/crtm/v2.2.6/fix
    export fixcrtm=$fv3gfspath/crtm/crtm_v2.3.0
-   export execdir=${enkfscripts}/exec_${machine}
-   export enkfbin=${execdir}/global_enkf
-   export gsiexec=${execdir}/global_gsi
-   export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
-elif [ "$machine" == 'gaea' ]; then
-   export python=/ncrc/sw/gaea/PythonEnv-noaa/1.4.0/.spack/opt/spack/linux-sles12-x86_64/gcc-4.8/python-2.7.14-zyx34h36bfp2c6ftp5bhdsdduqjxbvp6/bin/python
-   #export PYTHONPATH=/ncrc/home2/Jeffrey.S.Whitaker/anaconda2/lib/python2.7/site-packages
-   #export fv3gfspath=/lustre/f1/pdata/ncep_shared/fv3/fix-fv3gfs/
-   export fv3gfspath=/lustre/f2/dev/Jeffrey.S.Whitaker/fv3_reanl/fv3gfs/global_shared.v15.0.0
-   export FIXFV3=${fv3gfspath}/fix/fix_fv3_gmted2010
-   export FIXGLOBAL=${fv3gfspath}/fix/fix_am
-   export gsipath=/lustre/f2/dev/Jeffrey.S.Whitaker/GSI-github-jswhit
-   export fixgsi=${gsipath}/fix
-   export fixcrtm=/lustre/f2/pdata/ncep_shared/NCEPLIBS/lib/crtm/v2.2.6/fix
-   #export fixcrtm=${fixgsi}/crtm_v2.2.3
-   export execdir=${enkfscripts}/exec_${machine}
+   export execdir=/work2/noaa/da/weihuang/cycling/scripts/exec_${machine}
    export enkfbin=${execdir}/global_enkf
    export gsiexec=${execdir}/global_gsi
    export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
@@ -458,9 +430,8 @@ export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readi
 export OZINFO=${fixgsi}/global_ozinfo.txt
 #export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.ps+sondes+amsua
 #export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondesonly
-#export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
-export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondes+amsua_n19+iasi_metop_b
-export SATINFO=${enkfscripts}/textdata/global_satinfo.txt.sondes+amsua_n19+iasi_metop_b
+export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
+export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
 #export SATINFO=${fixgsi}/global_satinfo.txt
 export NLAT=$((${LATA}+2))
 # default is to use berror file in gsi fix dir.
