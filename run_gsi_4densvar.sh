@@ -4,6 +4,11 @@ source $MODULESHOME/init/sh
 module list
 env | grep OMP
 
+set -x
+
+echo "Enter $0"
+time_start=$(date +%s)
+
 #if [ $machine == "hera" ]; then
 #   source $MODULESHOME/init/sh
 #   module switch intel intel/19.0.4.243
@@ -147,6 +152,10 @@ else
   lupdqc=.false.
 fi
 SETUP="verbose=.true.,reduce_diag=.true.,lwrite_peakwt=.true.,lread_obs_save=$lread_obs_save,lread_obs_skip=$lread_obs_skip,l4densvar=.true.,ens_nstarthr=3,iwrtinc=-1,nhr_assimilation=6,nhr_obsbin=$FHOUT,use_prepb_satwnd=$use_prepb_satwnd,lwrite4danl=$lwrite4danl,passive_bc=.true.,newpc4pred=.true.,adp_anglebc=.true.,angord=4,use_edges=.false.,diag_precon=.true.,step_start=1.e-3,emiss_bc=.true.,lobsdiag_forenkf=$lobsdiag_forenkf,lwrite_predterms=.true.,thin4d=.true.,lupdqc=$lupdqc,nhr_anal=$iaufhrs"
+
+time_end=$(date +%s)
+echo "setup $0 elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
 
 if [[ "$HXONLY" = "YES" ]]; then
    #SETUP="$SETUP,lobserver=.true.,l4dvar=.true." # can't use reduce_diag=T
@@ -804,34 +813,50 @@ done
 # Run gsi.
 #if [ -s ./satbias_in ] && [ -s ./satbias_angle ] && [ -s ./sfcf03 ] && [ -s ./sfcf06 ] && [ -s ./sfcf09 ] && [ -s ./sigf03 ] && [ -s ./sigf06 ] && [ -s ./sigf09 ] ; then
 #if [[ $NOSAT == "YES" ||  -s ./satbias_in ]]  && [ -s ./sfcf03 ] && [ -s ./sfcf06 ] && [ -s ./sfcf09 ] && [ -s ./sigf03 ] && [ -s ./sigf06 ] && [ -s ./sigf09 ] ; then
-if [[ $NOSAT == "YES" ||  -s ./satbias_in ]]  && [ -s ./sfcf06 ] &&  [ -s ./sigf06 ] ; then
-cat gsiparm.anl
+#if [[ $NOSAT == "YES" ||  -s ./satbias_in ]]  && [ -s ./sfcf06 ] &&  [ -s ./sigf06 ] ; then
+#cat gsiparm.anl
 ulimit -s unlimited
 ulimit -a
 
 pwd
-ls -l
+
+time_end=$(date +%s)
+echo "setup 2 $0 elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
+#ls -l
 echo "Time before GSI `date` "
 export PGM=$tmpdir/gsi.x
-${enkfscripts}/runmpi
-rc=$?
+#${enkfscripts}/runmpi
+#rc=$?
+ echo "totnodes: $totnodes"
+ echo "nprocs: $nprocs"
+ echo "count: $count"
+ echo "mpitaskspernode: $mpitaskspernode"
+ echo "PGM: $PGM"
+ totnodes=10
+#srun -N $totnodes -n $nprocs -c $count --ntasks-per-node=$mpitaskspernode --exclusive --cpu-bind=cores --verbose $PGM
+ srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode --exclusive --cpu-bind=cores --verbose $PGM
 #if [[ $rc -ne 0 ]];then
 #  echo "GSI failed with exit code $rc"
 #  exit $rc
 #fi
-else
-echo "some input files missing, exiting ..."
-ls -l ./satbias_in
-ls -l ./satbias_angle
-#ls -l ./sfcf03
-ls -l ./sfcf06
-#ls -l ./sfcf09
-ls -l ./sfcanl
+#else
+#echo "some input files missing, exiting ..."
+#ls -l ./satbias_in
+#ls -l ./satbias_angle
+###ls -l ./sfcf03
+##ls -l ./sfcf06
+##ls -l ./sfcf09
+#ls -l ./sfcanl
 #ls -l ./sigf03
-ls -l ./sigf06
+#ls -l ./sigf06
 #ls -l ./sigf09
-exit 1
-fi
+#exit 1
+#fi
+
+time_end=$(date +%s)
+echo "gsi.x elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
 
 # Save output
 mkdir -p $savdir
@@ -989,12 +1014,17 @@ fi
 
 fi # skipcat
 
+time_end=$(date +%s)
+echo "last part elapsed Time: $(($time_end-$time_start)) seconds"
+
 # If requested, clean up $tmpdir
 if [[ "$CLEAN" = "YES" ]];then
   cd $tmpdir
   cd ../
   /bin/rm -rf $tmpdir
 fi
+
+echo "Leave $0"
 
 # End of script
 exit 0

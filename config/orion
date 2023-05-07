@@ -92,7 +92,6 @@ export save_hpss="false"
 
 source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
-  #export basedir=/work2/noaa/da/weihuang/cycling
    export basedir=/work2/noaa/gsienkf/weihuang/gsi
    export datadir=/work2/noaa/da/weihuang/cycling
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
@@ -391,19 +390,7 @@ export incdate="${enkfscripts}/incdate.sh"
 
 echo "enkfscripts=$enkfscripts"
 
-if [ "$machine" == 'hera' ]; then
-   export FIXDIR=/scratch1/NCEPDEV/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
-   #export FIXDIR_gcyc=$FIXDIR
-   export FIXDIR_gcyc=/scratch1/NCEPDEV/global/glopara/fix_NEW # for GFSv16
-   export python=/contrib/anaconda/2.3.0/bin/python
-   export gsipath=${basedir}/gsi/GSI
-   export fixgsi=${gsipath}/fix
-   export fixcrtm=/scratch2/NCEPDEV/nwprod/NCEPLIBS/fix/crtm_v2.3.0
-   export execdir=${enkfscripts}/exec_${machine}
-   export enkfbin=${execdir}/global_enkf
-   export gsiexec=${execdir}/global_gsi
-   export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
-elif [ "$machine" == 'orion' ]; then
+if [ "$machine" == 'orion' ]; then
    export FIXDIR=/work/noaa/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
    #export FIXDIR_gcyc=$FIXDIR
    export FIXDIR_gcyc=/work/noaa/global/glopara/fix_NEW # for GFSv16
@@ -411,25 +398,9 @@ elif [ "$machine" == 'orion' ]; then
    export fv3gfspath=/work/noaa/global/glopara
    export FIXFV3=$fv3gfspath/fix_nco_gfsv16/fix_fv3_gmted2010
    export FIXGLOBAL=$fv3gfspath/fix_nco_gfsv16/fix_am
-   export gsipath=/work/noaa/gsienkf/whitaker/GSI
+   export gsipath=/work2/noaa/da/weihuang/cycling/scripts/GSI
    export fixgsi=${gsipath}/fix
-   #export fixcrtm=${basedir}/fix/crtm/v2.2.6/fix
    export fixcrtm=$fv3gfspath/crtm/crtm_v2.3.0
-   export execdir=${enkfscripts}/exec_${machine}
-   export enkfbin=${execdir}/global_enkf
-   export gsiexec=${execdir}/global_gsi
-   export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
-elif [ "$machine" == 'gaea' ]; then
-   export python=/ncrc/sw/gaea/PythonEnv-noaa/1.4.0/.spack/opt/spack/linux-sles12-x86_64/gcc-4.8/python-2.7.14-zyx34h36bfp2c6ftp5bhdsdduqjxbvp6/bin/python
-   #export PYTHONPATH=/ncrc/home2/Jeffrey.S.Whitaker/anaconda2/lib/python2.7/site-packages
-   #export fv3gfspath=/lustre/f1/pdata/ncep_shared/fv3/fix-fv3gfs/
-   export fv3gfspath=/lustre/f2/dev/Jeffrey.S.Whitaker/fv3_reanl/fv3gfs/global_shared.v15.0.0
-   export FIXFV3=${fv3gfspath}/fix/fix_fv3_gmted2010
-   export FIXGLOBAL=${fv3gfspath}/fix/fix_am
-   export gsipath=/lustre/f2/dev/Jeffrey.S.Whitaker/GSI-github-jswhit
-   export fixgsi=${gsipath}/fix
-   export fixcrtm=/lustre/f2/pdata/ncep_shared/NCEPLIBS/lib/crtm/v2.2.6/fix
-   #export fixcrtm=${fixgsi}/crtm_v2.2.3
    export execdir=${enkfscripts}/exec_${machine}
    export enkfbin=${execdir}/global_enkf
    export gsiexec=${execdir}/global_gsi
@@ -447,20 +418,19 @@ else
 fi
 
 
-#export ANAVINFO=${fixgsi}/global_anavinfo_allhydro.l${LEVS}.txt
-export ANAVINFO=${fixgsi}/global_anavinfo.l${LEVS}.txt
+export ANAVINFO=${enkfscripts}/textdata/global_anavinfo.l${LEVS}.txt
 export ANAVINFO_ENKF=${ANAVINFO}
-export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
-#export HYBENSINFO=${enkfscripts}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
+
+#only used if readin_beta or readin_localization=T
+export HYBENSINFO=${enkfscripts}/textdata/global_hybens_info.l${LEVS}.txt
+#export HYBENSINFO=${enkfscripts}/global_hybens_info.l${LEVS}.txt
+
 # comment out next line to disable smoothing of ensemble perturbations
 # in stratosphere/mesosphere
-#export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
-export OZINFO=${fixgsi}/global_ozinfo.txt
-#export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.ps+sondes+amsua
-#export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondesonly
+#export HYBENSMOOTHINFO=${enkfscripts}/textdata/global_hybens_smoothinfo.l${LEVS}.txt
+export OZINFO=${enkfscripts}/textdata/global_ozinfo.txt
 export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
 export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
-#export SATINFO=${fixgsi}/global_satinfo.txt
 export NLAT=$((${LATA}+2))
 # default is to use berror file in gsi fix dir.
 #export BERROR=${basedir}/staticB/global_berror_enkf.l${LEVS}y${NLAT}.f77
@@ -479,9 +449,9 @@ if [ $controlanal == "true" ]; then
    export readin_beta=".true."
    export replay_controlfcst=".false."
    export hybgain=".false." # controlanal takes precedence over hybgain
-   export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
+   export HYBENSINFO=${enkfscripts}/textdata/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
    # uncomment to smooth ensemble perturbations
-   #export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
+   #export HYBENSMOOTHINFO=${enkfscripts}/textdata/global_hybens_smoothinfo.l${LEVS}.txt
    sh ./main_controlanal.sh
 else
    # GSI sees ensemble mean background (high-res control forecast is a replay to ens mean analysis)
