@@ -5,9 +5,9 @@
 #SBATCH -N 10  
 #SBATCH --ntasks-per-node=40
 #SBATCH -p orion
-#SBATCH -J gsicyl
-#SBATCH -e logs/gsicyl.%J.err
-#SBATCH -o logs/gsicyl.%J.out
+#SBATCH -J gdascyl
+#SBATCH -e logs/gdascyl.%J.err
+#SBATCH -o logs/gdascyl.%J.out
 
 export NODES=$SLURM_NNODES
 export corespernode=$SLURM_CPUS_ON_NODE

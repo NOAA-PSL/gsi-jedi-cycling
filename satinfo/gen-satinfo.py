@@ -145,6 +145,10 @@ class BuildSatelliteInfoFile:
 
    #print('channels:', channels)
 
+    newyamlfile = 'new_%s' %(yamlfile)
+    yaml.dump(docs, newyamlfile)
+   #yaml.dump(docs, sys.stdout, transform=tr)
+
     return channels
 
   def write(self, newsatfile, typelist=['']):
