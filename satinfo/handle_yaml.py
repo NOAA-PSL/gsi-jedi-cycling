@@ -25,13 +25,15 @@ yamlfile = 'iasi_metop-b.yaml'
 
 yaml.preserve_quotes = True
 
-with open(yamlfile) as f:
-  docs = yaml.load(f)
- #print(docs)
+INFILE = open(yamlfile)
+docs = yaml.load(INFILE)
+#print(docs)
 
-  obsspace = docs['obs space']
- #print('obsspace:', obsspace)
+obsspace = docs['obs space']
+#print('obsspace:', obsspace)
 
-  channels = obsspace['channels']
-  print('channels:', channels)
+channels = obsspace['channels']
+print('channels:', channels)
 
+OUTFILE = open('new_iasi_metop-b.yaml', 'wb')
+yaml.dump(docs, OUTFILE)
