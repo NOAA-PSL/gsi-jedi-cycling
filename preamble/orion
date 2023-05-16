@@ -1,8 +1,8 @@
 #!/bin/sh
 ##SBATCH -q urgent
-#SBATCH -t 05:30:00
+#SBATCH -t 06:00:00
 #SBATCH -A gsienkf
-#SBATCH -N 10  
+#SBATCH -N 20
 #SBATCH --ntasks-per-node=40
 #SBATCH -p orion
 #SBATCH -J gdascyl
@@ -61,7 +61,7 @@ export enkf_threads=10
 export gsi_control_threads=4
 export write_groups=4
 export write_tasks=1 
-export layout="3, 2"
+export layout="3, 4"
 
 # for C384
 #export fg_proc=`expr 4 \* $corespernode`

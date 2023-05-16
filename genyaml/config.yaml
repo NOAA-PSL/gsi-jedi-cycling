@@ -10,7 +10,7 @@ executable options:
   atm: true
   layout:
   - 3
-  - 2
+  - 4
   case: C96
   npx_ges: 97
   npy_ges: 97

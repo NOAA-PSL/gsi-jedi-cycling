@@ -8,6 +8,8 @@
  outdir=${indir}/mem000/INPUT
  mkdir -p ${outdir}
 
+ export OMP_NUM_THREADS=4
+
  if [ ! -f ${outdir}/coupler.res ]
  then
    for fl in coupler.res grid_spec.nc atm_stoch.res.nc
@@ -45,7 +47,6 @@
      ifiles=`ls ${indir}/mem*/INPUT/${type}.tile${tile}.nc`
      cdo ensmean $ifiles $ofile &
    done
+   wait
  done
-
- wait
 

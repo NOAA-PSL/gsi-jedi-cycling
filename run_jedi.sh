@@ -143,11 +143,13 @@ cd ${run_dir}
  NODES=$SLURM_NNODES
 
  export observer_layout_x=3
- export observer_layout_y=2
+ export observer_layout_y=4
 #export solver_layout_x=8
 #export solver_layout_y=5
- export solver_layout_x=6
- export solver_layout_y=10
+#export solver_layout_x=6
+#export solver_layout_y=10
+ export solver_layout_x=12
+ export solver_layout_y=11
  export NMEM_ENKF=80
 
  python ${enkfscripts}/genyaml/genconfig.py \
@@ -182,7 +184,7 @@ do
    used_nodes=0
    while [ $used_nodes -lt $NODES ] && [ $n -le $number_members ]
    do
-     used_nodes=$(( $used_nodes + 1 ))
+     used_nodes=$(( $used_nodes + 2 ))
 
      zeropadmem=`printf %03d $n`
      member_str=mem${zeropadmem}
@@ -190,7 +192,10 @@ do
      mkdir -p analysis/increment/${member_str}
      mkdir -p observer/${member_str}
 
-     srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
+    #srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
+    #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+
+     srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
 	observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
      n=$(( $n + 1 ))
@@ -231,10 +236,10 @@ export OOPS_DEBUG=1
 export OOPS_TRACK=-11
 export OMP_NUM_THREADS=1
 export corespernode=36
-export mpitaskspernode=36
 
-nprocs=360
-totnodes=10
+export mpitaskspernode=40
+nprocs=792
+totnodes=20
 
 #totnodes=8
 #nprocs=240
