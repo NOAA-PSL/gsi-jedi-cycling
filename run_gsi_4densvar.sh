@@ -813,9 +813,9 @@ pwd
 ls -l
 echo "Time before GSI `date` "
 export PGM=$tmpdir/gsi.x
-#${enkfscripts}/runmpi
-#srun -N 20 -n 5 -c  --ntasks-per-node=1  --exclusive --cpu-bind=cores --verbose /work2/noaa/da/weihuang/cycling/gdas-cycling/2020010106//gsitmp_ensmean/gsi.x
-srun -N 10 -n 10 /work2/noaa/da/weihuang/cycling/gdas-cycling/2020010106//gsitmp_ensmean/gsi.x
+${enkfscripts}/runmpi
+#srun -N 20 -n 5 -c  --ntasks-per-node=1  --exclusive --cpu-bind=cores --verbose /work2/noaa/da/weihuang/cycling/gdas-cycling/${analdate}/gsitmp_ensmean/gsi.x
+#srun -N 10 -n 10 /work2/noaa/da/weihuang/cycling/gdas-cycling/${analdate}/gsitmp_ensmean/gsi.x
 rc=$?
 #if [[ $rc -ne 0 ]];then
 #  echo "GSI failed with exit code $rc"

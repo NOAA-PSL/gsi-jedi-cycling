@@ -150,6 +150,11 @@ cd ${run_dir}
 #export solver_layout_y=10
  export solver_layout_x=12
  export solver_layout_y=11
+
+#export observer_layout_x=3
+#export observer_layout_y=4
+#export solver_layout_x=8
+#export solver_layout_y=5
  export NMEM_ENKF=80
 
  python ${enkfscripts}/genyaml/genconfig.py \
@@ -196,7 +201,7 @@ do
     #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
      srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
-	observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+          observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
      n=$(( $n + 1 ))
    done
@@ -249,8 +254,9 @@ totnodes=20
 echo "srun: `which srun`" >> ${run_dir}/logs/run_jedi.out
 
 #srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode $executable getkf.solver.yaml
- srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode \
-         ${executable} getkf.solver.yaml
+#srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode \
+#        ${executable} getkf.solver.yaml
+ srun -n $nprocs ${executable} getkf.solver.yaml
 
 time_end=$(date +%s)
 echo "solver elapsed Time: $(($time_end-$time_start)) seconds"
@@ -333,6 +339,8 @@ fi
 
 run_jedi_time_end=$(date +%s)
 echo "run_jedi.sh elapsed Time: $(($run_jedi_time_end-$run_jedi_time_start)) seconds"
+
+export mpitaskspernode=36
 
 echo "$jedi_done" > ${run_dir}/logs/run_jedi.log
 echo "jedi_done = $jedi_done" >> ${run_dir}/logs/run_jedi.out

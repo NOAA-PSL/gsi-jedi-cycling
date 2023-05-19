@@ -338,7 +338,18 @@ fi
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
    run_jedi_start=$(date +%s)
    echo "Run JEDI for: $analdate start at: `date`"
-   ${enkfscripts}/run_jedi.sh
+
+   if [ -f ${current_logdir}/run_jedi.log ]
+   then
+     jedi_done=`cat ${current_logdir}/run_jedi.log`
+     if [ $jedi_done == 'yes' ]; then
+       echo "$analdate jedi already completed successfully `date`"
+     else
+       ${enkfscripts}/run_jedi.sh
+     fi
+   else
+     ${enkfscripts}/run_jedi.sh
+   fi
 
    jedi_done=`cat ${current_logdir}/run_jedi.log`
    if [ $jedi_done == 'yes' ]; then
@@ -353,61 +364,6 @@ if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
 else
    echo "Did not run JEDI for: $analdate "
 fi
-
-  #module purge
-  #module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
-  #module load hpc/1.1.0
-  #module load hpc-intel/2018.4
-  #module unload mkl/2020.2
-  #module load mkl/2018.4
-  #module load hpc-impi/2018.4
-  #module load hdf5/1.10.6-parallel
-  #module load wgrib/1.8.0b
-  #module load slurm
-
-# loop over members run observer sequentially (for testing)
-#export skipcat="false"
-#nanal=0
-#ncount=0
-#while [ $nanal -le $nanals ]; do
-#   if [ $nanal -eq 0 ]; then
-#     export charnanal="ensmean"
-#     export charnanal2="ensmean"
-#   else
-#     export charnanal="mem"`printf %03i $nanal`
-#     export charnanal2=$charnanal 
-#   fi
-#   export lobsdiag_forenkf='.false.'
-#   echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
-#   sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer_${charnanal}.out 2>&1 &
-#   ncount=$((ncount+1))
-#   if [ $ncount -eq $NODES ]; then
-#      echo "waiting at nanal = $nanal ..."
-#      wait
-#      ncount=0
-#   fi
-#   nanal=$((nanal+1))
-#done
-#wait
-#nanal=0
-#while [ $nanal -le $nanals ]; do
-#   if [ $nanal -eq 0 ]; then
-#     export charnanal="ensmean"
-#     export charnanal2="ensmean"
-#   else
-#     export charnanal="mem"`printf %03i $nanal`
-#     export charnanal2=$charnanal 
-#   fi
-#   # once observer has completed, check log files.
-#   gsi_done=`cat ${current_logdir}/run_gsi_observer_${charnanal}.log`
-#   if [ $gsi_done == 'yes' ]; then
-#     echo "$analdate gsi observer $charnanal completed successfully `date`"
-#   else
-#     echo "$analdate gsi observer $charnanal did not complete successfully, exiting `date`"
-#     exit 1
-#   fi
-#   nanal=$((nanal+1))
-#done
 
 time_start=$(date +%s)
 # run enkf analysis.

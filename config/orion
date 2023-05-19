@@ -92,8 +92,7 @@ export save_hpss="false"
 
 source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
-   export basedir=/work2/noaa/da/weihuang/cycling
-  #export basedir=/work2/noaa/gsienkf/weihuang/gsi
+   export basedir=/work2/noaa/da/weihuang/cycling/scripts
    export datadir=/work2/noaa/da/weihuang/cycling
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work/noaa/rstprod/dump
@@ -188,6 +187,8 @@ else
   echo "LEVS must be 64 or 127"
   exit 1
 fi
+
+echo "Selected  SUITE=$SUITE"
 
 # radiance thinning parameters for GSI
 export dmesh1=145
@@ -385,7 +386,7 @@ export nanals2=-1 # longer extension. Set to -1 to disable
 #export nanals2=$NODES
 #export nanals2=$nanals
 export nitermax=1 # number of retries
-export enkfscripts=${basedir}/scripts/${exptname}
+export enkfscripts=${basedir}/${exptname}
 export homedir=$enkfscripts
 export incdate="${enkfscripts}/incdate.sh"
 
@@ -401,9 +402,8 @@ if [ "$machine" == 'orion' ]; then
    export FIXGLOBAL=$fv3gfspath/fix_nco_gfsv16/fix_am
    export gsipath=/work/noaa/gsienkf/whitaker/GSI
    export fixgsi=${gsipath}/fix
-   #export fixcrtm=${basedir}/fix/crtm/v2.2.6/fix
    export fixcrtm=$fv3gfspath/crtm/crtm_v2.3.0
-   export execdir=${enkfscripts}/exec_${machine}
+   export execdir=${basedir}/exec_${machine}
    export enkfbin=${execdir}/global_enkf
    export gsiexec=${execdir}/global_gsi
    export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
