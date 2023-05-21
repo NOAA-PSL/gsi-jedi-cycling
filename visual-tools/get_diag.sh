@@ -2,7 +2,7 @@
 
  set -x
 
- edate=2020010406
+ edate=2020010212
 
  plot_stats () {
    argnum=$#
@@ -66,7 +66,8 @@
 #secondlist=(gsi_C96_lgetkf_sondesonly)
 #firstlbls=(GSI_ORIG)
 #secondlbls=(GSI_HALF)
- firstlist=(gsi_C96_lgetkf_sondes+amsua_n19)
+#firstlist=(gsi_C96_lgetkf_sondes+amsua_n19)
+ firstlist=(gsi-cycling)
  secondlist=(gdas-cycling)
  firstlbls=(GSI)
  secondlbls=(JEDI)
