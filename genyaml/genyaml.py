@@ -53,6 +53,7 @@ class GenerateYAML():
 
   def genObserverYAML(self, obstypelist):
     os.system('cp rr.distribution distribution.yaml')
+    os.system('cp rr.distribution iasi-distribution.yaml')
 
     if not os.path.exists(self.obsdir):
       os.makedirs(self.obsdir)
@@ -99,6 +100,7 @@ class GenerateYAML():
 
   def genSolverYAML(self, obstypelist):
     os.system('cp halo.distribution distribution.yaml')
+    os.system('cp halo.distribution.iasi iasi-distribution.yaml')
     yaml_out = 'getkf.solver.yaml'
     if(self.debug):
       print('YAML: %s' %(yaml_out))

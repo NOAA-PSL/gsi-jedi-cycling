@@ -2,7 +2,8 @@
 
  set -x
 
- edate=2020010212
+ sdate=2020010106
+ edate=2020010312
 
  plot_stats () {
    argnum=$#
@@ -37,7 +38,7 @@
    python plot-jedi-gsi-diag.py --lbl1=${lbl1} --lbl2=${lbl2} \
 	--output=1 >> obs_count_${flag}.csv
 
-   dirname=${lbl2}-${lbl1}
+   dirname=${lbl2}-${lbl1}.$flag
    rm -rf ${dirname}
    mkdir -p ${dirname}
    mv -f obs_count_${flag}.csv ${dirname}/.
@@ -57,31 +58,38 @@
 
  tar cvf ~/jg.tar plot-jedi-gsi-diag.py get_diag.sh
 #------------------------------------------------------------------------------
-#firstlist=(gsi_C96_lgetkf_psonly)
-#secondlist=(gdas-cycling)
-#firstlbls=(GSI_PS)
-#secondlbls=(GDAS_PS)
-
-#firstlist=(new.gsi_C96_lgetkf_sondesonly)
-#secondlist=(gsi_C96_lgetkf_sondesonly)
-#firstlbls=(GSI_ORIG)
-#secondlbls=(GSI_HALF)
-#firstlist=(gsi_C96_lgetkf_sondes+amsua_n19)
  firstlist=(gsi-cycling)
  secondlist=(gdas-cycling)
- firstlbls=(GSI)
- secondlbls=(JEDI)
+ firstlbls=(GSI_sai)
+ secondlbls=(JEDI_sai)
+
+#firstlist=(sondes-rerun.gsi-cycling)
+#secondlist=(sondes-rerun.gdas-cycling)
+#firstlbls=(sondes-rerun.GSI)
+#secondlbls=(sondes-rerun.JEDI)
+
+#firstlist=(sondes.gsi_C96_lgetkf_sondesonly)
+#secondlist=(sondes.gdas-cycling)
+#firstlbls=(sondes.GSI)
+#secondlbls=(sondes.JEDI)
+
+ deltlist=(0 6 0)
+ hourlist=(6 12 12)
+ caselist=(all at_12h at_6h)
  for j in ${!firstlist[@]}
  do
    first=${firstlist[$j]}
    second=${secondlist[$j]}
    echo "first: ${first}, second: ${second}"
 
-   plot_stats 2020010106 ${edate} 6  all    ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
-   plot_stats 2020010112 ${edate} 12 at_12h ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
-   plot_stats 2020010106 ${edate} 12 at_6h  ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
-
-   tar uvf ~/jg.tar ${secondlbls[$j]}-${firstlbls[$j]}
+   for n in ${!hourlist[@]}
+   do
+     hour=${hourlist[$n]}
+     case=${caselist[$n]}
+     stime=$(( $sdate + ${deltlist[$n]} ))
+     plot_stats ${stime} ${edate} ${hour} ${case} ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
+   done
+   tar uvf ~/jg.tar ${secondlbls[$j]}-${firstlbls[$j]}.*
  done
 
  exit 0

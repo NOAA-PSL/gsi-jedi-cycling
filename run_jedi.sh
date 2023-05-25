@@ -128,6 +128,7 @@ cd ${run_dir}
  cp ${enkfscripts}/genyaml/config.template .
  cp ${enkfscripts}/genyaml/*ps.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
+ cp ${enkfscripts}/genyaml/halo.distribution.iasi .
  cp ${enkfscripts}/genyaml/rr.distribution .
  cp ${enkfscripts}/genyaml/sondes.yaml .
  cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
@@ -149,7 +150,7 @@ cd ${run_dir}
 #export solver_layout_x=6
 #export solver_layout_y=10
  export solver_layout_x=12
- export solver_layout_y=11
+ export solver_layout_y=22
 
 #export observer_layout_x=3
 #export observer_layout_y=4
@@ -237,14 +238,17 @@ time_start=$(date +%s)
  echo "run solver"
  cd ${run_dir}
 
-export OOPS_DEBUG=1
+export OOPS_DEBUG=-11
 export OOPS_TRACK=-11
 export OMP_NUM_THREADS=1
 export corespernode=36
 
 export mpitaskspernode=40
-nprocs=792
-totnodes=20
+nprocs=1584
+totnodes=40
+
+#nprocs=792
+#totnodes=20
 
 #totnodes=8
 #nprocs=240
