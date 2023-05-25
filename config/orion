@@ -92,8 +92,7 @@ export save_hpss="false"
 
 source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
-  #export basedir=/work2/noaa/da/weihuang/cycling
-   export basedir=/work2/noaa/gsienkf/weihuang/gsi
+   export basedir=/work2/noaa/gsienkf/weihuang/gsi/scripts
    export datadir=/work2/noaa/da/weihuang/cycling
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work/noaa/rstprod/dump
@@ -188,6 +187,8 @@ else
   echo "LEVS must be 64 or 127"
   exit 1
 fi
+
+echo "Selected  SUITE=$SUITE"
 
 # radiance thinning parameters for GSI
 export dmesh1=145
@@ -385,7 +386,7 @@ export nanals2=-1 # longer extension. Set to -1 to disable
 #export nanals2=$NODES
 #export nanals2=$nanals
 export nitermax=1 # number of retries
-export enkfscripts=${basedir}/scripts/${exptname}
+export enkfscripts=${basedir}/${exptname}
 export homedir=$enkfscripts
 export incdate="${enkfscripts}/incdate.sh"
 

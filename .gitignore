@@ -2,6 +2,7 @@
 *.out
 *.stderr
 *.stdout
+gsiparm.anl
 job.sh
 exec_orion
 logs

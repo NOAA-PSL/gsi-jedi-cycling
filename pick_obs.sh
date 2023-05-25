@@ -11,7 +11,6 @@
 
  exit 0
 
-#pick sondes only
  python python_scripts/gengsiparmanl.py \
         --textdir=/work2/noaa/gsienkf/weihuang/gsi/scripts/gsi-cycling/textdata \
         --type=prepbufr,t,null,t \

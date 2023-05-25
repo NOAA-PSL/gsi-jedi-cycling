@@ -36,7 +36,7 @@ mkdir -p ioda_v2_data diag
 #cp diag_* diag/.
 #for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
 #for type in amsua_n19 conv_q conv_t conv_uv
-for type in conv_q conv_t conv_uv
+for type in conv_q conv_t conv_uv amsua_n19 iasi_metop-b
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -128,6 +128,7 @@ cd ${run_dir}
  cp ${enkfscripts}/genyaml/config.template .
  cp ${enkfscripts}/genyaml/*ps.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
+ cp ${enkfscripts}/genyaml/halo.distribution.iasi .
  cp ${enkfscripts}/genyaml/rr.distribution .
  cp ${enkfscripts}/genyaml/sondes.yaml .
  cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
@@ -143,11 +144,18 @@ cd ${run_dir}
  NODES=$SLURM_NNODES
 
  export observer_layout_x=3
- export observer_layout_y=2
+ export observer_layout_y=4
 #export solver_layout_x=8
 #export solver_layout_y=5
- export solver_layout_x=6
- export solver_layout_y=10
+#export solver_layout_x=6
+#export solver_layout_y=10
+ export solver_layout_x=12
+ export solver_layout_y=22
+
+#export observer_layout_x=3
+#export observer_layout_y=4
+#export solver_layout_x=8
+#export solver_layout_y=5
  export NMEM_ENKF=80
 
  python ${enkfscripts}/genyaml/genconfig.py \
@@ -182,7 +190,7 @@ do
    used_nodes=0
    while [ $used_nodes -lt $NODES ] && [ $n -le $number_members ]
    do
-     used_nodes=$(( $used_nodes + 1 ))
+     used_nodes=$(( $used_nodes + 2 ))
 
      zeropadmem=`printf %03d $n`
      member_str=mem${zeropadmem}
@@ -190,8 +198,11 @@ do
      mkdir -p analysis/increment/${member_str}
      mkdir -p observer/${member_str}
 
-     srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
-	observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+    #srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
+    #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+
+     srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
+          observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
      n=$(( $n + 1 ))
    done
@@ -209,7 +220,7 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in sondes
+ for obstype in sondes amsua_n19 iasi_metop-b
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \
@@ -227,14 +238,17 @@ time_start=$(date +%s)
  echo "run solver"
  cd ${run_dir}
 
-export OOPS_DEBUG=1
+export OOPS_DEBUG=-11
 export OOPS_TRACK=-11
 export OMP_NUM_THREADS=1
 export corespernode=36
-export mpitaskspernode=36
 
-nprocs=360
-totnodes=10
+export mpitaskspernode=40
+nprocs=1584
+totnodes=40
+
+#nprocs=792
+#totnodes=20
 
 #totnodes=8
 #nprocs=240
@@ -244,8 +258,9 @@ totnodes=10
 echo "srun: `which srun`" >> ${run_dir}/logs/run_jedi.out
 
 #srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode $executable getkf.solver.yaml
- srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode \
-         ${executable} getkf.solver.yaml
+#srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode \
+#        ${executable} getkf.solver.yaml
+ srun -n $nprocs ${executable} getkf.solver.yaml
 
 time_end=$(date +%s)
 echo "solver elapsed Time: $(($time_end-$time_start)) seconds"
@@ -328,6 +343,8 @@ fi
 
 run_jedi_time_end=$(date +%s)
 echo "run_jedi.sh elapsed Time: $(($run_jedi_time_end-$run_jedi_time_start)) seconds"
+
+export mpitaskspernode=36
 
 echo "$jedi_done" > ${run_dir}/logs/run_jedi.log
 echo "jedi_done = $jedi_done" >> ${run_dir}/logs/run_jedi.out
