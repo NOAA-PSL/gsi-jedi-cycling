@@ -146,7 +146,8 @@ if [ $use_correlated_oberrs == ".true." ];  then
 else
   lupdqc=.false.
 fi
-SETUP="verbose=.true.,reduce_diag=.true.,lwrite_peakwt=.true.,lread_obs_save=$lread_obs_save,lread_obs_skip=$lread_obs_skip,l4densvar=.true.,ens_nstarthr=3,iwrtinc=-1,nhr_assimilation=6,nhr_obsbin=$FHOUT,use_prepb_satwnd=$use_prepb_satwnd,lwrite4danl=$lwrite4danl,passive_bc=.true.,newpc4pred=.true.,adp_anglebc=.true.,angord=4,use_edges=.false.,diag_precon=.true.,step_start=1.e-3,emiss_bc=.true.,lobsdiag_forenkf=$lobsdiag_forenkf,lwrite_predterms=.true.,thin4d=.true.,lupdqc=$lupdqc,nhr_anal=$iaufhrs"
+#SETUP="verbose=.true.,reduce_diag=.true.,lwrite_peakwt=.true.,lread_obs_save=$lread_obs_save,lread_obs_skip=$lread_obs_skip,l4densvar=.true.,ens_nstarthr=3,iwrtinc=-1,nhr_assimilation=6,nhr_obsbin=$FHOUT,use_prepb_satwnd=$use_prepb_satwnd,lwrite4danl=$lwrite4danl,passive_bc=.true.,newpc4pred=.true.,adp_anglebc=.true.,angord=4,use_edges=.false.,diag_precon=.true.,step_start=1.e-3,emiss_bc=.true.,lobsdiag_forenkf=$lobsdiag_forenkf,lwrite_predterms=.true.,thin4d=.true.,lupdqc=$lupdqc,nhr_anal=$iaufhrs"
+SETUP="verbose=.true.,reduce_diag=.false.,lwrite_peakwt=.true.,lread_obs_save=$lread_obs_save,lread_obs_skip=$lread_obs_skip,l4densvar=.true.,ens_nstarthr=3,iwrtinc=-1,nhr_assimilation=6,nhr_obsbin=$FHOUT,use_prepb_satwnd=$use_prepb_satwnd,lwrite4danl=$lwrite4danl,passive_bc=.true.,newpc4pred=.true.,adp_anglebc=.true.,angord=4,use_edges=.false.,diag_precon=.true.,step_start=1.e-3,emiss_bc=.true.,lobsdiag_forenkf=$lobsdiag_forenkf,lwrite_predterms=.true.,thin4d=.true.,lupdqc=$lupdqc,nhr_anal=$iaufhrs"
 
 if [[ "$HXONLY" = "YES" ]]; then
    #SETUP="$SETUP,lobserver=.true.,l4dvar=.true." # can't use reduce_diag=T
@@ -285,11 +286,10 @@ cat <<EOF > gsiparm.anl
    tcp_width=60.0,tcp_ermin=2.0,tcp_ermax=12.0,
    $OBSQC
  /
- /
  &OBS_INPUT
    dmesh(1)=$dmesh1,dmesh(2)=$dmesh2,dmesh(3)=$dmesh3,time_window_max=3.0,
   $OBSINPUT
-/
+ /
 OBS_INPUT::
 !  dfile          dtype       dplat       dsis                 dval    dthin  dsfcalc
    prepbufr       ps          null        ps                   0.0     0      0
