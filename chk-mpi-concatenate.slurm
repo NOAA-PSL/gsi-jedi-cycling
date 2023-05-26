@@ -34,7 +34,7 @@
 
  time srun -n ${number_members} \
       python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
-      --rundir=${rundir} \
+      --rundir=${datapath} \
       --datestr=${yyyymmddhh} \
       --nmem=${number_members} \
       --obstype=${obstype}

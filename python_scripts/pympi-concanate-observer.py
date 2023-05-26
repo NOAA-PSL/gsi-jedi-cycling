@@ -6,7 +6,7 @@ import getopt
 import logging
 
 import numpy as np
-import netCDF4 as nc4
+from netCDF4 import Dataset
 
 from mpi4py import MPI
 
@@ -28,12 +28,12 @@ class PyMPIConcatenateObserver():
 
     self.setup_logging()
 
-    logging.info('debug: %d' %(self.debug))
-    logging.info('rundir: %s' %(self.rundir))
-    logging.info('datestr: %s' %(self.datestr))
-    logging.info('nmem: %d' %(self.nmem))
-    logging.info('size: %d' %(self.size))
-    logging.info('rank: %d' %(self.rank))
+    logging.debug('debug: %d' %(self.debug))
+    logging.debug('rundir: %s' %(self.rundir))
+    logging.debug('datestr: %s' %(self.datestr))
+    logging.debug('nmem: %d' %(self.nmem))
+    logging.warning('MPI size: %d' %(self.size))
+    logging.warning('MY rank: %d' %(self.rank))
 
     if(self.nmem != self.size):
       logging.error('MPI size: %d does not equal to nmem: %d. Terminating' %(self.size, self.nmem))
@@ -46,10 +46,11 @@ class PyMPIConcatenateObserver():
    #https://docs.python.org/3/howto/logging.html
    #logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s',
    #                    level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
-    logflnm='log.%s.%4.3d' %(self.obstype, self.rank)
-    logging.basicConfig(filename=logflnm, format='%(asctime)s:%(levelname)s:%(message)s',
-                        level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
-   #logging.debug('This message should go to the log file')
+    logflnm='log.%s.%4.4d' %(self.obstype, self.rank)
+   #logging.basicConfig(filename=logflnm, format='%(asctime)s:%(levelname)s:%(message)s',
+   #                    level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(filename=logflnm, filemode='w', level=logging.DEBUG)
+    logging.debug('Start logging')
    #logging.info('So should this')
    #logging.warning('And this, too')
    #logging.error('And non-ASCII stuff, too, like Øresund and Malmö')
@@ -62,24 +63,14 @@ class PyMPIConcatenateObserver():
     self.inputfile = '%s/mem%3.3d/%s' %(obsdir, self.rank, filename)
     self.outputfile = '%s/%s' %(obsdir, filename)
 
-    logging.info('inputfile: %s' %(self.inputfile))
-    logging.info('outputfile: %s' %(self.outputfile))
+    logging.debug('inputfile: %s' %(self.inputfile))
+    logging.debug('outputfile: %s' %(self.outputfile))
 
     if(0 == self.rank):
       if(os.path.exists(self.outputfile)):
         os.remove(self.outputfile)
 
     self.comm.Barrier()
-
-    try:
-      self.IFILE = open(self.inputfile, 'r')
-      self.OFILE = open(self.outputfile, 'w', parallel=True, comm=comm,
-                        info=MPI.Info(), format=format)
-      logging.info(f'Read data from {self.inputfile}')
-      if(0 == self.rank):
-        logging.info(f'Write data to {self.outputfile}')
-    except Exception as e:
-      logging.error(f'Error occurred when attempting to read from: {self.inputfile}, error: {e}')
 
 #-----------------------------------------------------------------------------------------
   def set_obstype(self, obstype):
@@ -128,7 +119,7 @@ class PyMPIConcatenateObserver():
   def write_rootvar(self, ncin, ncout):
    #copy all var in root group.
     for name, variable in ncin.variables.items():
-      ncout[name][:] = ncin[name][:]
+      ncout.variables[name][:] = ncin.variables[name][:]
 
 #-----------------------------------------------------------------------------------------
   def create_var_in_group(self, ncingroup, ncoutgroup, grpdict):
@@ -141,36 +132,44 @@ class PyMPIConcatenateObserver():
       else:
         newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions)
       self.copy_attributes(variable, newvar)
-      grpdict[varname] = newvar
+     #print('var: %s has dimension: %d' %(varname, len(variable.dimensions)))
+      grpdict[varname] = {}
+      grpdict[varname]['var'] = newvar
+      grpdict[varname]['dim'] = len(variable.dimensions)
 
 #-----------------------------------------------------------------------------------------
-  def write_var_in_group(self, ncingroup, ncoutgroup):
-    fvname = '_FillValue'
-   #create all var in group.
+  def write_var_in_group(self, ncingroup, grpdict):
+   #write all var in group.
     for varname, variable in ncingroup.variables.items():
-      self.newvarlist[varname][:] = ncingroup[varname][:]
+      if(1 == grpdict[varname]['dim']):
+        grpdict[varname]['var'][:] = ncingroup.variables[varname][:]
+      elif(2 == grpdict[varname]['dim']):
+        grpdict[varname]['var'][:,:] = ncingroup.variables[varname][:,:]
 
 #-----------------------------------------------------------------------------------------
   def create_grp2newname(self, name, n, group, ncout, grpdict):
     item = name.split('_')
     item[-1] = '%d' %(n)
     newname = '_'.join(item)
-    print('No %d name: %s, newname: %s' %(n, name, newname))
+   #print('No %d name: %s, newname: %s' %(n, name, newname))
     ncoutgroup = ncout.createGroup(newname)
-    self.create_var_in_group(group, ncoutgroup, grpdict)
+    grpdict[newname] = {}
+    self.create_var_in_group(group, ncoutgroup, grpdict[newname])
 
 #-----------------------------------------------------------------------------------------
-  def write_grp2newname(self, name, n, ncingroup, ncoutgroup, grpdict, grpvaldict):
+  def write_grp2newname(self, name, n, ncingroup, grpdict):
     if(n != self.rank):
       return
 
     item = name.split('_')
     item[-1] = '%d' %(n)
     newname = '_'.join(item)
-    print('No %d name: %s, newname: %s' %(n, name, newname))
-
+   #print('No %d name: %s, newname: %s' %(n, name, newname))
     for varname, variable in ncingroup.variables.items():
-      grpdict[varname][:] = grpval[varname][:]
+      if(1 == grpdict[varname]['dim']):
+        grpdict[newname][varname]['var'][:] = ncingroup.variables[varname][:]
+      elif(2 == grpdict[varname]['dim']):
+        grpdict[newname][varname]['var'][:,:] = ncingroup.variables[varname][:,:]
 
 #-----------------------------------------------------------------------------------------
   def create_all_variables(self, grplist):
@@ -185,10 +184,10 @@ class PyMPIConcatenateObserver():
 
    #check groups
     for grpname, group in self.IFILE.groups.items():
-      self.newvardict[grpname] = {}
-      print('grpname: ', grpname)
+     #print('grpname: ', grpname)
       self.grpnamelist.append(grpname)
       if(grpname in grplist):
+        self.newvardict[grpname] = {}
         self.ensvarinfo[grpname] = {}
         for varname, variable in group.variables.items():
           self.ensvarinfo[grpname][varname] = group[varname][:]
@@ -199,12 +198,13 @@ class PyMPIConcatenateObserver():
         if(grpname.find('hofx') < 0):
           self.commongrps.append(grpname)
           ncoutgroup = self.OFILE.createGroup(grpname)
+          self.newvardict[grpname] = {}
           self.create_var_in_group(group, ncoutgroup, self.newvardict[grpname])
         else:
           self.hofxgrps.append(grpname)
           self.newvardict[grpname] = {}
           for n in range(1, self.size):
-            self.create_grp2newname(grpname, n, group, self.OFILE, self.newvardict[grpname])
+            self.create_grp2newname(grpname, n, group, self.OFILE, self.newvardict)
 
     print('len(self.grpnamelist) = %d' %(len(self.grpnamelist)))
     print('len(self.commongrps) = %d' %(len(self.commongrps)))
@@ -222,8 +222,8 @@ class PyMPIConcatenateObserver():
       self.write_rootvar(self.IFILE, self.OFILE)
 
     for grpname in self.grpnamelist:
-      print('grpname: ', grpname)
-      ncoutgroup = self.OFILE.groups(grpname)
+     #print('grpname: ', grpname)
+      ncoutgroup = self.OFILE.groups[grpname]
       if(grpname in grplist):
         varlist = self.ensvarinfo[grpname].keys()
        #print('varlist = ', varlist)
@@ -253,11 +253,29 @@ class PyMPIConcatenateObserver():
               self.newvardict[grpname][varname][:] = self.ensvarinfo[grpname][:]
         else:
           if(0 < self.rank):
-            for n in range(1, self.size):
-              self.write_grp2newname(grpname, n, group, self.OFILE, self.newvardict[grpname])
+            if(grpname.find('hofx') < 0):
+              self.commongrps.append(grpname)
+              self.write_var_in_group(group, self.newvardict[grpname])
+            else:
+              for n in range(1, self.size):
+                self.write_grp2newname(grpname, n, group, self.newvardict)
 
 #-----------------------------------------------------------------------------------------
   def concatenate(self, grplist):
+    try:
+      self.IFILE = Dataset(self.inputfile, 'r')
+    except Exception as e:
+      logging.error(f'Error occurred when attempting to read from: {self.inputfile}, error: {e}')
+
+   #format = 'NETCDF4_CLASSIC'
+    format = 'NETCDF4'
+
+    self.OFILE = Dataset(self.outputfile, 'w', parallel=True, comm=self.comm,
+                         info=MPI.Info(), format=format)
+    logging.debug(f'Read data from {self.inputfile}')
+    if(0 == self.rank):
+      logging.debug(f'Write data to {self.outputfile}')
+
    #copy global attributes all at once via dictionary
    #ncout.setncatts(self.IFILE.__dict__)
     self.OFILE.source='JEDI observer only ouptut, each with only one member'
