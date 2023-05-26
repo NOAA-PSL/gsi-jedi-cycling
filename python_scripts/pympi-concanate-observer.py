@@ -13,10 +13,11 @@ from mpi4py import MPI
 #=========================================================================
 class PyMPIConcatenateObserver():
   def __init__(self, debug=0, rundir=None, datestr=None,
-               obstype='Unknown', nmem=81):
+               obstype='unknown', nmem=81):
     self.debug = debug
     self.rundir = rundir
     self.datestr = datestr
+    self.obstype = obstype
     self.nmem = nmem
 
    #print("MPI.COMM_WORLD:", MPI.COMM_WORLD)
@@ -25,40 +26,46 @@ class PyMPIConcatenateObserver():
     self.rank = self.comm.Get_rank()
     self.size = self.comm.Get_size()
 
-    print('debug:', self.debug)
-    print('rundir:', self.rundir)
-    print('datestr:', self.datestr)
-    print('nmem:', self.nmem)
-    print('size:', self.size)
-    print('rank:', self.rank)
-
-    if(nmem != size):
-      print('MPI size: %d does not equal to nmem: %d. Terminating' %(self.size, nmem))
-      sys.exit(-1)
-
     self.setup_logging()
 
-    self.set_obstype(obstype)
+    logging.info('debug: %d' %(self.debug))
+    logging.info('rundir: %s' %(self.rundir))
+    logging.info('datestr: %s' %(self.datestr))
+    logging.info('nmem: %d' %(self.nmem))
+    logging.info('size: %d' %(self.size))
+    logging.info('rank: %d' %(self.rank))
+
+    if(self.nmem != self.size):
+      logging.error('MPI size: %d does not equal to nmem: %d. Terminating' %(self.size, self.nmem))
+      sys.exit(-1)
+
+    self.setup()
 
 #-----------------------------------------------------------------------------------------
   def setup_logging(self):
-    logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s',
+   #https://docs.python.org/3/howto/logging.html
+   #logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s',
+   #                    level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+    logflnm='log.%s.%4.3d' %(self.obstype, self.rank)
+    logging.basicConfig(filename=logflnm, format='%(asctime)s:%(levelname)s:%(message)s',
                         level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+   #logging.debug('This message should go to the log file')
+   #logging.info('So should this')
+   #logging.warning('And this, too')
+   #logging.error('And non-ASCII stuff, too, like Øresund and Malmö')
 
 #-----------------------------------------------------------------------------------------
   def setup(self):
-    print('obstype:', self.obstype)
-    print('rundir:', self.rundir)
-    print('datestr:', self.datestr)
-    print('nmem:', self.nmem)
-    print('size:', self.size)
     obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
     filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
 
     self.inputfile = '%s/mem%3.3d/%s' %(obsdir, self.rank, filename)
     self.outputfile = '%s/%s' %(obsdir, filename)
 
-    if(0 == rank):
+    logging.info('inputfile: %s' %(self.inputfile))
+    logging.info('outputfile: %s' %(self.outputfile))
+
+    if(0 == self.rank):
       if(os.path.exists(self.outputfile)):
         os.remove(self.outputfile)
 
@@ -69,27 +76,26 @@ class PyMPIConcatenateObserver():
       self.OFILE = open(self.outputfile, 'w', parallel=True, comm=comm,
                         info=MPI.Info(), format=format)
       logging.info(f'Read data from {self.inputfile}')
-      if(0 == rank):
+      if(0 == self.rank):
         logging.info(f'Write data to {self.outputfile}')
     except Exception as e:
       logging.error(f'Error occurred when attempting to read from: {self.inputfile}, error: {e}')
 
-   #self.IFILE.close()
-   #self.OFILE.close()
-
 #-----------------------------------------------------------------------------------------
   def set_obstype(self, obstype):
     self.obstype = obstype
-
+    self.setup_logging()
     self.setup()
 
 #-----------------------------------------------------------------------------------------
-  def average(self, vlist):
-    buf = np.zeros_like(vlist[0])
-    nmem = len(vlist)
-    for n in range(1, nmem):
-      buf += vlist[n]
-    buf /= (nmem-1)
+  def mpi_average(self, varr):
+    buf = np.zeros_like(varr)
+    if(0 == self.rank):
+      varr = 0.0
+    
+    self.comm.Allreduce(varr, buf, op=MPI.SUM)
+    buf /= (self.nmem-1)
+
     return buf
 
 #-----------------------------------------------------------------------------------------
@@ -111,121 +117,149 @@ class PyMPIConcatenateObserver():
         ncout.setncattr(attr, ncin.getncattr(attr))
 
 #-----------------------------------------------------------------------------------------
-  def copy_rootvar(self, ncin, ncout):
-   #copy all var in root group.
+  def create_rootvar(self, ncin, ncout):
+   #create all var in root group.
     for name, variable in ncin.variables.items():
       ncout.createVariable(name, variable.datatype, variable.dimensions)
      #copy variable attributes all at once via dictionary
       ncout[name].setncatts(ncin[name].__dict__)
+
+#-----------------------------------------------------------------------------------------
+  def write_rootvar(self, ncin, ncout):
+   #copy all var in root group.
+    for name, variable in ncin.variables.items():
       ncout[name][:] = ncin[name][:]
 
 #-----------------------------------------------------------------------------------------
-  def copy_var_in_group(self, ncingroup, ncoutgroup):
+  def create_var_in_group(self, ncingroup, ncoutgroup, grpdict):
     fvname = '_FillValue'
-   #copy all var in group.
+   #create all var in group.
     for varname, variable in ncingroup.variables.items():
       if(fvname in variable.__dict__):
         fill_value = variable.getncattr(fvname)
         newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions, fill_value=fill_value)
       else:
         newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions)
-      copy_attributes(variable, newvar)
-      newvar[:] = ncingroup[varname][:]
+      self.copy_attributes(variable, newvar)
+      grpdict[varname] = newvar
 
 #-----------------------------------------------------------------------------------------
-  def copy_grp2newname(self, name, n, group, ncout):
+  def write_var_in_group(self, ncingroup, ncoutgroup):
+    fvname = '_FillValue'
+   #create all var in group.
+    for varname, variable in ncingroup.variables.items():
+      self.newvarlist[varname][:] = ncingroup[varname][:]
+
+#-----------------------------------------------------------------------------------------
+  def create_grp2newname(self, name, n, group, ncout, grpdict):
     item = name.split('_')
     item[-1] = '%d' %(n)
     newname = '_'.join(item)
     print('No %d name: %s, newname: %s' %(n, name, newname))
     ncoutgroup = ncout.createGroup(newname)
-    self.copy_var_in_group(group, ncoutgroup)
+    self.create_var_in_group(group, ncoutgroup, grpdict)
 
 #-----------------------------------------------------------------------------------------
-  def process(self, grplist):
-    grpnamelist = []
-    hofxgrps = []
-    commongrps = []
-    ensvarinfo = {}
+  def write_grp2newname(self, name, n, ncingroup, ncoutgroup, grpdict, grpvaldict):
+    if(n != self.rank):
+      return
+
+    item = name.split('_')
+    item[-1] = '%d' %(n)
+    newname = '_'.join(item)
+    print('No %d name: %s, newname: %s' %(n, name, newname))
+
+    for varname, variable in ncingroup.variables.items():
+      grpdict[varname][:] = grpval[varname][:]
+
+#-----------------------------------------------------------------------------------------
+  def create_all_variables(self, grplist):
+    self.grpnamelist = []
+    self.hofxgrps = []
+    self.commongrps = []
+    self.ensvarinfo = {}
+
+    self.newvardict = {}
+
+    self.create_rootvar(self.IFILE, self.OFILE)
 
    #check groups
     for grpname, group in self.IFILE.groups.items():
+      self.newvardict[grpname] = {}
       print('grpname: ', grpname)
-      grpnamelist.append(grpname)
+      self.grpnamelist.append(grpname)
       if(grpname in grplist):
-        ensvarinfo[grpname] = {}
-        if(grpname == 'hofx0_1'):
-          for varname, variable in group.variables.items():
-           #val = group[varname][:]
-            ensvarinfo[grpname][varname] = []
-           #ensvarinfo[grpname][varname].append(val)
-        else:
-          if(grpname == 'hofx_y_mean_xb0'):
-            ncoutgroup = ncout.createGroup(grpname)
-            copy_var_in_group(group, ncoutgroup)
+        self.ensvarinfo[grpname] = {}
+        for varname, variable in group.variables.items():
+          self.ensvarinfo[grpname][varname] = group[varname][:]
 
-          for varname, variable in group.variables.items():
-            val = group[varname][:]
-            ensvarinfo[grpname][varname] = val
+        ncoutgroup = self.OFILE.createGroup(grpname)
+        self.create_var_in_group(group, ncoutgroup, self.newvardict[grpname])
       else:
         if(grpname.find('hofx') < 0):
-          commongrps.append(grpname)
-          ncoutgroup = ncout.createGroup(grpname)
-          copy_var_in_group(group, ncoutgroup)
+          self.commongrps.append(grpname)
+          ncoutgroup = self.OFILE.createGroup(grpname)
+          self.create_var_in_group(group, ncoutgroup, self.newvardict[grpname])
         else:
-          hofxgrps.append(grpname)
+          self.hofxgrps.append(grpname)
+          self.newvardict[grpname] = {}
+          for n in range(1, self.size):
+            self.create_grp2newname(grpname, n, group, self.OFILE, self.newvardict[grpname])
 
-    print('len(grpnamelist) = %d, len(commongrps) = %d, len(hofxgrps) = %d' %(len(grpnamelist), len(commongrps), len(hofxgrps)))
+    print('len(self.grpnamelist) = %d' %(len(self.grpnamelist)))
+    print('len(self.commongrps) = %d' %(len(self.commongrps)))
+    print('len(self.hofxgrps) = %d' %(len(self.hofxgrps)))
 
-    grpname = 'hofx0_1'
-    for n in range(1, len(ncinlist)):
-      ncin = ncinlist[n]
-      for name in hofxgrps:
-        group = ncin.groups[name]
-        self.copy_grp2newname(name, n, group, ncout)
+#-----------------------------------------------------------------------------------------
+  def print_minmax(self, name, val):
+    print('\t%s min: %f, max: %f' %(np.max(val), np.min(val)))
 
-      group = ncin.groups[grpname]
-      self.copy_grp2newname(grpname, n, group, ncout)
+#-----------------------------------------------------------------------------------------
+  def process(self, grplist):
+    self.create_all_variables(grplist)
 
-      for varname, variable in group.variables.items():
-        val = group[varname][:]
-        ensvarinfo[grpname][varname].append(val)
+    if(0 == self.rank):
+      self.write_rootvar(self.IFILE, self.OFILE)
 
-    varlist = ensvarinfo['hofx0_1'].keys()
-   #print('varlist = ', varlist)
-    meanvars = {}
-    ncoutgroup = ncout.createGroup(grpname)
-    for varname in varlist:
-      meanval = average(ensvarinfo[grpname][varname])
-      print('get avearge for varname = ', varname)
-     #print('meanval.shape = ', meanval.shape)
-     #print('meanval.size = ', meanval.size)
-      meanvars[varname] = meanval
+    for grpname in self.grpnamelist:
+      print('grpname: ', grpname)
+      ncoutgroup = self.OFILE.groups(grpname)
+      if(grpname in grplist):
+        varlist = self.ensvarinfo[grpname].keys()
+       #print('varlist = ', varlist)
+        if('hofx0_1' == grpname):
+          self.meanvars = {}
+          for varname in varlist:
+            print('get avearge for varname = ', varname)
+            self.meanvars[varname] = self.mpi_average(self.ensvarinfo[grpname][varname])
 
-    grpname = 'ombg'
-    ncingroup = ncinlist[0].groups[grpname]
-    ncoutgroup = ncout.createGroup(grpname)
-    fvname = '_FillValue'
-   #copy all var in group.
-    for varname, variable in ncingroup.variables.items():
-      if(fvname in variable.__dict__):
-        fill_value = variable.getncattr(fvname)
-        newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions, fill_value=fill_value)
-      else:
-        newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions)
-      copy_attributes(variable, newvar)
-      val = ensvarinfo[grpname][varname] + ensvarinfo['hofx_y_mean_xb0'][varname] - meanvars[varname]
-      print('\told-ombg.max: %f, old-ombg.min: %f' %(np.max(ensvarinfo[grpname][varname]), np.min(ensvarinfo[grpname][varname])))
-      print('\thofx_y_mean_zb0.max: %f, hofx_y_mean_zb0.min: %f' %(np.max(ensvarinfo['hofx_y_mean_xb0'][varname]), np.min(ensvarinfo['hofx_y_mean_xb0'][varname])))
-      print('\tmeanvars.max: %f, meanvars.min: %f' %(np.max(meanvars[varname]), np.min(meanvars[varname])))
-      print('\tnew-ombg.max: %f, new-ombg.min: %f' %(np.max(val), np.min(val)))
-     #val = ensvarinfo[grpname][varname]
-      newvar[:] = val[:]
+          if(0 == self.rank):
+            for varname in varlist:
+              self.newvardict[grpname][varname][:] = self.meanvars[varname]
+        elif('ombg' == grpname):
+          if(0 == self.rank):
+            for varname, variable in ncingroup.variables.items():
+              val = self.ensvarinfo['ombg'][varname]
+              val += self.ensvarinfo['hofx_y_mean_xb0'][varname]
+              val -= self.meanvars[varname]
+              self.newvardict[grpname][varname][:] = val
+
+              self.print_minmax('hofx_y_mean_xb0', self.ensvarinfo['hofx_y_mean_xb0'][varname])
+              self.print_minmax('old-ombg', self.ensvarinfo['ombg'][varname])
+              self.print_minmax('new-ombg', val)
+        elif('ombg' == grpname):
+          if(0 == self.rank):
+            for varname, variable in ncingroup.variables.items():
+              self.newvardict[grpname][varname][:] = self.ensvarinfo[grpname][:]
+        else:
+          if(0 < self.rank):
+            for n in range(1, self.size):
+              self.write_grp2newname(grpname, n, group, self.OFILE, self.newvardict[grpname])
 
 #-----------------------------------------------------------------------------------------
   def concatenate(self, grplist):
    #copy global attributes all at once via dictionary
-   #ncout.setncatts(ncin.__dict__)
+   #ncout.setncatts(self.IFILE.__dict__)
     self.OFILE.source='JEDI observer only ouptut, each with only one member'
     self.OFILE.comment = 'updated variable hofx_y_mean_xb0 and ombg from all observer files'
 
@@ -233,10 +267,7 @@ class PyMPIConcatenateObserver():
     for name in self.IFILE.ncattrs():
       self.OFILE.setncattr(name, self.IFILE.getncattr(name))
 
-    self.copy_dimension(self.IFILE, ncout)
-
-    if(0 == self.rank):
-      self.copy_rootvar(self.IFILE, ncout)
+    self.copy_dimension(self.IFILE, self.OFILE)
 
     self.process(grplist)
  
@@ -256,16 +287,16 @@ if __name__== '__main__':
  #--------------------------------------------------------------------------------
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'rundir=', 'obstype=',
                                                 'nmem=', 'datestr='])
-  print('opts = ', opts)
-  print('args = ', args)
+ #print('opts = ', opts)
+ #print('args = ', args)
 
   for o, a in opts:
-    print('o: <%s>' %(o))
-    print('a: <%s>' %(a))
+   #print('o: <%s>' %(o))
+   #print('a: <%s>' %(a))
     if o in ('--debug'):
       debug = int(a)
-    elif o in ('--obsdir'):
-      obsdir = a
+    elif o in ('--rundir'):
+      rundir = a
     elif o in ('--obstype'):
       obstype = a
     elif o in ('--datestr'):
@@ -279,7 +310,7 @@ if __name__== '__main__':
 
  #--------------------------------------------------------------------------------
   pyconcatenater = PyMPIConcatenateObserver(debug=debug, rundir=rundir, obstype=obstype,
-                                            nmem=neme, datestr=datestr)
+                                            nmem=nmem, datestr=datestr)
   grplist = ['hofx_y_mean_xb0', 'hofx0_1', 'ombg']
   pyconcatenater.concatenate(grplist)
 

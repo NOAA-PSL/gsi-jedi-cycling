@@ -1,43 +1,52 @@
 #!/bin/sh
 ##SBATCH -q urgent
-#SBATCH -t 00:30:00
+#SBATCH -t 00:10:00
 #SBATCH -A gsienkf
-#SBATCH -N 1  
+#SBATCH -N 3 
 #SBATCH --ntasks-per-node=40
-#SBATCH -p bigmem
+##SBATCH -p bigmem
+#SBATCH -p orion
 #SBATCH -J mpi4py
 #SBATCH -e mpi4py.%J.err
 #SBATCH -o mpi4py.%J.out
 
-#source ~/visenv
-#module load slurm py-netcdf4/1.5.3
+ MYHOST=`hostname -s`
+ MYRANK=$PMI_RANK           # this variable may depend on your execution environment
 
-datapath=/work2/noaa/da/weihuang/cycling/gdas-cycling
-analdate=2020010200
+ export STD_OUT=stdout.$MYHOST.$MYRANK
+ export STD_ERR=stderr.$MYHOST.$MYRANK
 
-export year=`echo $analdate |cut -c 1-4`
-export month=`echo $analdate |cut -c 5-6`
-export day=`echo $analdate |cut -c 7-8`
-export hour=`echo $analdate |cut -c 9-10`
-yyyymmddhh=${year}${month}${day}${hour}
+ source ~/visenv
+ module load slurm py-netcdf4/1.5.3
+
+ datapath=/work2/noaa/da/weihuang/cycling/gdas-cycling
+ yyyymmddhh=2020010200
 
 #input file fir.
-run_dir=${datapath}/${analdate}
+ rundir=${datapath}/${yyyymmddhh}
+ cd ${rundir}
 
-source ~/gdasenv
-
- echo "concanate observer"
+ enkfscripts=/work2/noaa/da/weihuang/cycling/scripts/gdas-cycling
+ echo "concatenate observer"
  time_start=$(date +%s)
- cd ${run_dir}
- obstype=ps
-
+ obstype=sondes
  number_members=81
+
+ time srun -n ${number_members} \
+      python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
+      --rundir=${rundir} \
+      --datestr=${yyyymmddhh} \
+      --nmem=${number_members} \
+      --obstype=${obstype}
+
+ exit 0
+
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
  for obstype in sondes amsua_n19 iasi_metop-b
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
-        --run_dir=${run_dir} \
+        --rundir=${rundir} \
         --datestr=${yyyymmddhh} \
         --nmem=${number_members} \
         --obstype=${obstype} &
