@@ -91,10 +91,12 @@ class PyMPIConcatenateObserver():
    #copy dimensions
     for name, dimension in ncin.dimensions.items():
      #ncout.createDimension(name, (len(dimension) if not dimension.isunlimited() else None))
-      if dimension.isunlimited():
-        ncout.createDimension(name, None)
-      else:
-        ncout.createDimension(name, len(dimension))
+      self.LOGFILE.write('dimension: %s has size: %d\n' %(name, dimension.size))
+     #if dimension.isunlimited():
+     #  ncout.createDimension(name, None)
+     #else:
+     #  ncout.createDimension(name, len(dimension))
+      ncout.createDimension(name, dimension.size)
 
       self.LOGFILE.write('Create dimension: %s, no. dim: %d\n' %(name, len(dimension)))
 
@@ -108,26 +110,23 @@ class PyMPIConcatenateObserver():
 
 #-----------------------------------------------------------------------------------------
   def create_rootvar(self, ncin, ncout):
+    rootvarlist = {}
    #create all var in root group.
     for name, variable in ncin.variables.items():
       rv = ncout.createVariable(name, variable.datatype, variable.dimensions)
      #copy variable attributes all at once via dictionary
      #ncout.variables[name].setncatts(ncin.variables[name].__dict__)
       rv.setncatts(variable.__dict__)
-      self.rootvardict[name] = rv
+      rootvarlist[name] = ncin[name][:]
+
+    self.comm.Barrier()
+    if(0 == self.rank):
+      for name in rootvarlist.keys():
+        rootvarlist[name][:] = ncin[name][:]
 
 #-----------------------------------------------------------------------------------------
-  def write_rootvar(self, ncin, ncout):
-    self.LOGFILE.write('in write_rootvar on rank: %d\n' %(self.rank))
-    self.LOGFILE.flush()
-   #copy all var in root group.
-    for name, variable in ncin.variables.items():
-      self.LOGFILE.write('write rootvar: %s on rank: %d\n' %(name, self.rank))
-     #self.rootvardict[name][:] = variable[:]
-    self.LOGFILE.flush()
-
-#-----------------------------------------------------------------------------------------
-  def create_var_in_group(self, ncingroup, ncoutgroup, grpdict):
+  def create_var_in_group(self, ncingroup, ncoutgroup):
+    grpdict = {}
     fvname = '_FillValue'
    #create all var in group.
     for varname, variable in ncingroup.variables.items():
@@ -138,18 +137,21 @@ class PyMPIConcatenateObserver():
         newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions)
       self.copy_attributes(variable, newvar)
      #self.LOGFILE.write('var: %s has dimension: %d\n' %(varname, len(variable.dimensions)))
+
       grpdict[varname] = {}
       grpdict[varname]['var'] = newvar
       grpdict[varname]['dim'] = len(variable.dimensions)
+
+    return grpdict
 
 #-----------------------------------------------------------------------------------------
   def write_var_in_group(self, ncingroup, grpdict):
    #write all var in group.
     for varname, variable in ncingroup.variables.items():
       if(1 == grpdict[varname]['dim']):
-        grpdict[varname]['var'][:] = ncingroup.variables[varname][:]
+        grpdict[varname]['var'][:] = ncingroup[varname][:]
       elif(2 == grpdict[varname]['dim']):
-        grpdict[varname]['var'][:,:] = ncingroup.variables[varname][:,:]
+        grpdict[varname]['var'][:,:] = ncingroup[varname][:,:]
 
 #-----------------------------------------------------------------------------------------
   def get_newname(self, name, n):
@@ -160,33 +162,26 @@ class PyMPIConcatenateObserver():
     return newname
 
 #-----------------------------------------------------------------------------------------
-  def create_grp2newname(self, name, n, group, ncout, grpdict):
+  def create_grp2newname(self, name, n, group, ncout):
     newname = self.get_newname(name, n)
     ncoutgroup = ncout.createGroup(newname)
-    grpdict[newname] = {}
-    self.create_var_in_group(group, ncoutgroup, grpdict[newname])
+    grpdict = self.create_var_in_group(group, ncoutgroup)
+
+    return newname, grpdict
 
 #-----------------------------------------------------------------------------------------
-  def write_grp2newname(self, name, n, ncingroup, grpdict):
-    newname = self.get_newname(name, n)
-    self.LOGFILE.write('No %d name: %s, newname: %s\n' %(n, name, newname))
-
+  def write_grp2newname(self, ncingroup, grpdict):
     for varname, variable in ncingroup.variables.items():
-      if(1 == grpdict[newname][varname]['dim']):
-        grpdict[newname][varname]['var'][:] = ncingroup.variables[varname][:]
-      elif(2 == grpdict[newname][varname]['dim']):
-        grpdict[newname][varname]['var'][:,:] = ncingroup.variables[varname][:,:]
+      if(1 == grpdict[varname]['dim']):
+        grpdict[varname]['var'][:] = ncingroup[varname][:]
+      elif(2 == grpdict[varname]['dim']):
+        grpdict[varname]['var'][:,:] = ncingroup[varname][:,:]
 
 #-----------------------------------------------------------------------------------------
   def create_all_variables(self, grplist):
-    self.grpnamelist = []
-    self.hofxgrps = []
-    self.commongrps = []
-    self.ensvarinfo = {}
+    self.ensvar = {}
 
-    self.newvardict = {}
-
-    self.rootvardict = {}
+    self.outdict = {}
 
    #copy attributes
     for name in self.IFILE.ncattrs():
@@ -198,46 +193,46 @@ class PyMPIConcatenateObserver():
 
    #check groups
     for grpname, group in self.IFILE.groups.items():
-      self.LOGFILE.write('create grpname: %s on rank: %d\n' %(grpname, self.rank))
+     #self.LOGFILE.write('processing grpname: %s on rank: %d\n' %(grpname, self.rank))
       if(grpname in grplist):
-        self.ensvarinfo[grpname] = {}
+        self.ensvar[grpname] = {}
         for varname, variable in group.variables.items():
           if(1 == len(variable.dimensions)):
-            self.ensvarinfo[grpname][varname] = group.variables[varname][:]
+            self.ensvar[grpname][varname] = group[varname][:]
           elif(2 == len(variable.dimensions)):
-            self.ensvarinfo[grpname][varname] = group.variables[varname][:,:]
+            self.ensvar[grpname][varname] = group[varname][:,:]
 
         if('hofx0_1' == grpname):
           for n in range(1, self.size):
-            newgrpname = self.get_newname(grpname, n)
-            self.newvardict[newgrpname] = {}
-            ncoutgroup = self.OFILE.createGroup(newgrpname)
-            self.create_var_in_group(group, ncoutgroup, self.newvardict[newgrpname])
+            outname = self.get_newname(grpname, n)
+            ncoutgroup = self.OFILE.createGroup(outname)
+            vardict = self.create_var_in_group(group, ncoutgroup)
             if(n == self.rank):
-              self.grpnamelist.append(newgrpname)
+              vardict['origrpname'] = grpname
+              self.outdict[outname] = vardict
+              self.LOGFILE.write('create grpname: %s on rank: %d\n' %(outname, self.rank))
         else:
-          self.newvardict[grpname] = {}
           ncoutgroup = self.OFILE.createGroup(grpname)
-          self.create_var_in_group(group, ncoutgroup, self.newvardict[grpname])
-          self.grpnamelist.append(grpname)
+          vardict = self.create_var_in_group(group, ncoutgroup)
+          if(0 == self.rank):
+            vardict['origrpname'] = grpname
+            self.outdict[grpname] = vardict
+            self.LOGFILE.write('create grpname: %s on rank: %d\n' %(grpname, self.rank))
       else:
         if(grpname.find('hofx') < 0):
-          self.commongrps.append(grpname)
           ncoutgroup = self.OFILE.createGroup(grpname)
-          self.newvardict[grpname] = {}
-          self.create_var_in_group(group, ncoutgroup, self.newvardict[grpname])
-          self.grpnamelist.append(grpname)
+          vardict = self.create_var_in_group(group, ncoutgroup)
+          if(0 == self.rank):
+            vardict['origrpname'] = grpname
+            self.outdict[grpname] = vardict
+            self.LOGFILE.write('create grpname: %s on rank: %d\n' %(grpname, self.rank))
         else:
-          self.hofxgrps.append(grpname)
           for n in range(1, self.size):
-            self.create_grp2newname(grpname, n, group, self.OFILE, self.newvardict)
-            newgrpname = self.get_newname(grpname, n)
+            outname, vardict = self.create_grp2newname(grpname, n, group, self.OFILE)
             if(n == self.rank):
-              self.grpnamelist.append(newgrpname)
-
-    self.LOGFILE.write('len(self.grpnamelist) = %d\n' %(len(self.grpnamelist)))
-    self.LOGFILE.write('len(self.commongrps) = %d\n' %(len(self.commongrps)))
-    self.LOGFILE.write('len(self.hofxgrps) = %d\n' %(len(self.hofxgrps)))
+              vardict['origrpname'] = grpname
+              self.outdict[outname] = vardict
+              self.LOGFILE.write('create grpname: %s on rank: %d\n' %(outname, self.rank))
 
     self.LOGFILE.write('finished create group on rank: %4.4d.\n' %(self.rank))
 
@@ -250,65 +245,70 @@ class PyMPIConcatenateObserver():
     self.LOGFILE.write('\t%s min: %f, max: %f\n' %(np.max(val), np.min(val)))
 
 #-----------------------------------------------------------------------------------------
+  def process_ombg(self):
+    self.LOGFILE.write('processing for ombg on rank: %d\n' %(self.rank))
+
+    grpname = 'hofx0_1'
+    outname = self.get_newname(grpname, self.rank)
+    varlist = self.ensvarinfo[grpname].keys()
+    meanvars = {}
+
+    for varname in varlist:
+      self.LOGFILE.write('get avearge for varname: %s\n' %(varname))
+      meanvars[varname] = self.mpi_average(self.ensvarinfo[grpname][varname])
+
+      if(0 < self.rank):
+        if(1 == self.outdict[outname][varname]['dim']):
+         #self.outdict[outname][varname][:] = self.meanvars[varname]
+          self.outdict[outname][varname][:] = self.ensvarinfo[grpname][varname]
+        elif(2 == self.outdict[outname][varname]['dim']):
+         #self.outdict[outname][varname][:,:] = self.meanvars[varname]
+          self.outdict[outname][varname][:,:] = self.ensvarinfo[grpname][varname]
+
+    grpname = 'ombg'
+    if(0 == self.rank):
+      ncingroup = self.IFILE.groups[grpname]
+      for varname, variable in ncingroup.variables.items():
+        val = self.ensvarinfo['ombg'][varname]
+        val += self.ensvarinfo['hofx_y_mean_xb0'][varname]
+        val -= self.meanvars[varname]
+        if(1 == self.outdict[grpname][varname]['dim']):
+           self.outdict[grpname][varname]['var'][:] = val
+        elif(2 == self.outdict[grpname][varname]['dim']):
+           self.outdict[grpname][varname]['var'][:,:] = val
+
+        self.print_minmax('hofx_y_mean_xb0', self.ensvarinfo['hofx_y_mean_xb0'][varname])
+        self.print_minmax('old-ombg', self.ensvarinfo['ombg'][varname])
+        self.print_minmax('new-ombg', val)
+
+    grpname = 'hofx_y_mean_xb0'
+    if(0 == self.rank):
+      ncingroup = self.IFILE.groups[grpname]
+      for varname, variable in ncingroup.variables.items():
+        if(1 == self.outdict[grpname][varname]['dim']):
+           self.outdict[grpname][varname]['var'][:] = self.ensvarinfo[grpname][varname]
+        elif(2 == self.outdict[grpname][varname]['dim']):
+           self.outdict[grpname][varname]['var'][:,:] = self.ensvarinfo[grpname][varname]
+
+#-----------------------------------------------------------------------------------------
   def process(self, grplist):
     self.create_all_variables(grplist)
 
-    self.LOGFILE.write('Before writing root var on rank: %d\n' %(self.rank))
-    self.LOGFILE.flush()
+   #self.process_ombg()
 
-    if(0 == self.rank):
-      self.write_rootvar(self.IFILE, self.OFILE)
-
-    self.LOGFILE.write('After writing root var on rank: %d\n' %(self.rank))
-    self.LOGFILE.flush()
-
-    for grpname in self.grpnamelist:
+    for grpname in self.outdict.keys():
       self.LOGFILE.write('writing grpname: %s on rank: %d\n' %(grpname, self.rank))
       ncoutgroup = self.OFILE.groups[grpname]
       if(grpname in grplist):
-        varlist = self.ensvarinfo[grpname].keys()
-        if('hofx0_1' == grpname):
-          self.meanvars = {}
-          for varname in varlist:
-            self.LOGFILE.write('get avearge for varname: %s\n' %(varname))
-            self.meanvars[varname] = self.mpi_average(self.ensvarinfo[grpname][varname])
+        continue
 
-          if(0 < self.rank):
-            newgrpname = self.get_newname(grpname, self.rank)
-            for varname in varlist:
-              if(1 == self.newvardict[newgrpname][varname]['dim']):
-                self.newvardict[newgrpname][varname][:] = self.meanvars[varname]
-              elif(2 == self.newvardict[newgrpname][varname]['dim']):
-                self.newvardict[newgrpname][varname][:,:] = self.meanvars[varname]
-        elif('ombg' == grpname):
-          if(0 == self.rank):
-            ncingroup = self.IFILE.groups[grpname]
-            for varname, variable in ncingroup.variables.items():
-              val = self.ensvarinfo['ombg'][varname]
-              val += self.ensvarinfo['hofx_y_mean_xb0'][varname]
-              val -= self.meanvars[varname]
-              if(1 == self.newvardict[grpname][varname]['dim']):
-                 self.newvardict[grpname][varname]['var'][:] = val
-              elif(2 == self.newvardict[grpname][varname]['dim']):
-                 self.newvardict[grpname][varname]['var'][:,:] = val
-
-              self.print_minmax('hofx_y_mean_xb0', self.ensvarinfo['hofx_y_mean_xb0'][varname])
-              self.print_minmax('old-ombg', self.ensvarinfo['ombg'][varname])
-              self.print_minmax('new-ombg', val)
-        elif('hofx_y_mean_xb0' == grpname):
-          if(0 == self.rank):
-            ncingroup = self.IFILE.groups[grpname]
-            for varname, variable in ncingroup.variables.items():
-              if(1 == self.newvardict[grpname][varname]['dim']):
-                 self.newvardict[grpname][varname]['var'][:] = self.ensvarinfo[grpname][varname]
-              elif(2 == self.newvardict[grpname][varname]['dim']):
-                 self.newvardict[grpname][varname]['var'][:,:] = self.ensvarinfo[grpname][varname]
-        else:
-          if(0 < self.rank):
-            if(grpname.find('hofx') < 0):
-              self.write_var_in_group(group, self.newvardict[grpname])
-            else:
-              self.write_grp2newname(grpname, self.rank, group, self.newvardict)
+     #if(grpname.find('hofx') < 0):
+     #  ncingroup = self.IFILE.groups[grpname]
+     #  self.write_var_in_group(ncingroup, self.outdict[grpname])
+     #else:
+     #  origrpname = self.outdict[grpname]['origrpname']
+     #  ncingroup = self.IFILE.groups[origrpname]
+     #  self.write_grp2newname(ncingroup, self.outdict[grpname])
 
 #-----------------------------------------------------------------------------------------
   def concatenate(self, grplist):
