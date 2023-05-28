@@ -142,6 +142,21 @@ class PyMPIConcatenateObserver():
       grpdict[varname]['var'] = newvar
       grpdict[varname]['dim'] = len(variable.dimensions)
 
+    self.comm.Barrier()
+
+    if(0 == self.rank):
+      self.LOGFILE.write('start create group on rank: %d\n' %(self.rank))
+
+      for varname in grpdict.keys():
+        self.LOGFILE.write('varname: %s on rank: %d\n' %(varname, self.rank))
+   #    if(1 == grpdict[varname]['dim']):
+   #      grpdict[varname]['var'][:] = ncingroup[varname][:]
+   #    elif(2 == grpdict[varname]['dim']):
+   #      grpdict[varname]['var'][:,:] = ncingroup[varname][:,:]
+
+      self.LOGFILE.write('finished create group on rank: %d\n' %(self.rank))
+      self.LOGFILE.flush()
+
     return grpdict
 
 #-----------------------------------------------------------------------------------------
@@ -162,10 +177,39 @@ class PyMPIConcatenateObserver():
     return newname
 
 #-----------------------------------------------------------------------------------------
-  def create_grp2newname(self, name, n, group, ncout):
+  def create_grp2newname(self, name, n, ncingroup, ncout):
     newname = self.get_newname(name, n)
     ncoutgroup = ncout.createGroup(newname)
-    grpdict = self.create_var_in_group(group, ncoutgroup)
+
+    grpdict = {}
+    fvname = '_FillValue'
+   #create all var in group.
+    for varname, variable in ncingroup.variables.items():
+      if(fvname in variable.__dict__):
+        fill_value = variable.getncattr(fvname)
+        newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions, fill_value=fill_value)
+      else:
+        newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions)
+      self.copy_attributes(variable, newvar)
+     #self.LOGFILE.write('var: %s has dimension: %d\n' %(varname, len(variable.dimensions)))
+
+      grpdict[varname] = {}
+      grpdict[varname]['var'] = newvar
+      grpdict[varname]['dim'] = len(variable.dimensions)
+
+    self.comm.Barrier()
+
+    if(n == self.rank):
+      self.LOGFILE.write('start create group on rank: %d\n' %(self.rank))
+      self.LOGFILE.flush()
+     #for varname in grpdict.keys():
+     #  if(1 == grpdict[varname]['dim']):
+     #    grpdict[varname]['var'][:] = ncingroup[varname][:]
+     #  elif(2 == grpdict[varname]['dim']):
+     #    grpdict[varname]['var'][:,:] = ncingroup[varname][:,:]
+
+      self.LOGFILE.write('finished create group on rank: %d\n' %(self.rank))
+      self.LOGFILE.flush()
 
     return newname, grpdict
 
@@ -180,7 +224,6 @@ class PyMPIConcatenateObserver():
 #-----------------------------------------------------------------------------------------
   def create_all_variables(self, grplist):
     self.ensvar = {}
-
     self.outdict = {}
 
    #copy attributes
@@ -201,41 +244,23 @@ class PyMPIConcatenateObserver():
             self.ensvar[grpname][varname] = group[varname][:]
           elif(2 == len(variable.dimensions)):
             self.ensvar[grpname][varname] = group[varname][:,:]
-
-        if('hofx0_1' == grpname):
-          for n in range(1, self.size):
-            outname = self.get_newname(grpname, n)
-            ncoutgroup = self.OFILE.createGroup(outname)
-            vardict = self.create_var_in_group(group, ncoutgroup)
-            if(n == self.rank):
-              vardict['origrpname'] = grpname
-              self.outdict[outname] = vardict
-              self.LOGFILE.write('create grpname: %s on rank: %d\n' %(outname, self.rank))
-        else:
-          ncoutgroup = self.OFILE.createGroup(grpname)
-          vardict = self.create_var_in_group(group, ncoutgroup)
-          if(0 == self.rank):
-            vardict['origrpname'] = grpname
-            self.outdict[grpname] = vardict
-            self.LOGFILE.write('create grpname: %s on rank: %d\n' %(grpname, self.rank))
       else:
         if(grpname.find('hofx') < 0):
           ncoutgroup = self.OFILE.createGroup(grpname)
           vardict = self.create_var_in_group(group, ncoutgroup)
-          if(0 == self.rank):
-            vardict['origrpname'] = grpname
-            self.outdict[grpname] = vardict
-            self.LOGFILE.write('create grpname: %s on rank: %d\n' %(grpname, self.rank))
         else:
+          if('hofx0_1' == grpname):
+            self.ensvar[grpname] = {}
+            for varname, variable in group.variables.items():
+              if(1 == len(variable.dimensions)):
+                self.ensvar[grpname][varname] = group[varname][:]
+              elif(2 == len(variable.dimensions)):
+                self.ensvar[grpname][varname] = group[varname][:,:]
+
           for n in range(1, self.size):
             outname, vardict = self.create_grp2newname(grpname, n, group, self.OFILE)
-            if(n == self.rank):
-              vardict['origrpname'] = grpname
-              self.outdict[outname] = vardict
-              self.LOGFILE.write('create grpname: %s on rank: %d\n' %(outname, self.rank))
 
     self.LOGFILE.write('finished create group on rank: %4.4d.\n' %(self.rank))
-
     self.LOGFILE.flush()
 
    #self.comm.Barrier()
@@ -250,35 +275,35 @@ class PyMPIConcatenateObserver():
 
     grpname = 'hofx0_1'
     outname = self.get_newname(grpname, self.rank)
-    varlist = self.ensvarinfo[grpname].keys()
+    varlist = self.ensvar[grpname].keys()
     meanvars = {}
 
     for varname in varlist:
       self.LOGFILE.write('get avearge for varname: %s\n' %(varname))
-      meanvars[varname] = self.mpi_average(self.ensvarinfo[grpname][varname])
+      meanvars[varname] = self.mpi_average(self.ensvar[grpname][varname])
 
-      if(0 < self.rank):
-        if(1 == self.outdict[outname][varname]['dim']):
-         #self.outdict[outname][varname][:] = self.meanvars[varname]
-          self.outdict[outname][varname][:] = self.ensvarinfo[grpname][varname]
-        elif(2 == self.outdict[outname][varname]['dim']):
-         #self.outdict[outname][varname][:,:] = self.meanvars[varname]
-          self.outdict[outname][varname][:,:] = self.ensvarinfo[grpname][varname]
+     #if(0 < self.rank):
+     #  if(1 == self.outdict[outname][varname]['dim']):
+     #   #self.outdict[outname][varname][:] = self.meanvars[varname]
+     #    self.outdict[outname][varname][:] = self.ensvar[grpname][varname]
+     #  elif(2 == self.outdict[outname][varname]['dim']):
+     #   #self.outdict[outname][varname][:,:] = self.meanvars[varname]
+     #    self.outdict[outname][varname][:,:] = self.ensvar[grpname][varname]
 
     grpname = 'ombg'
     if(0 == self.rank):
       ncingroup = self.IFILE.groups[grpname]
       for varname, variable in ncingroup.variables.items():
-        val = self.ensvarinfo['ombg'][varname]
-        val += self.ensvarinfo['hofx_y_mean_xb0'][varname]
+        val = self.ensvar['ombg'][varname]
+        val += self.ensvar['hofx_y_mean_xb0'][varname]
         val -= self.meanvars[varname]
         if(1 == self.outdict[grpname][varname]['dim']):
            self.outdict[grpname][varname]['var'][:] = val
         elif(2 == self.outdict[grpname][varname]['dim']):
            self.outdict[grpname][varname]['var'][:,:] = val
 
-        self.print_minmax('hofx_y_mean_xb0', self.ensvarinfo['hofx_y_mean_xb0'][varname])
-        self.print_minmax('old-ombg', self.ensvarinfo['ombg'][varname])
+        self.print_minmax('hofx_y_mean_xb0', self.ensvar['hofx_y_mean_xb0'][varname])
+        self.print_minmax('old-ombg', self.ensvar['ombg'][varname])
         self.print_minmax('new-ombg', val)
 
     grpname = 'hofx_y_mean_xb0'
@@ -286,21 +311,22 @@ class PyMPIConcatenateObserver():
       ncingroup = self.IFILE.groups[grpname]
       for varname, variable in ncingroup.variables.items():
         if(1 == self.outdict[grpname][varname]['dim']):
-           self.outdict[grpname][varname]['var'][:] = self.ensvarinfo[grpname][varname]
+           self.outdict[grpname][varname]['var'][:] = self.ensvar[grpname][varname]
         elif(2 == self.outdict[grpname][varname]['dim']):
-           self.outdict[grpname][varname]['var'][:,:] = self.ensvarinfo[grpname][varname]
+           self.outdict[grpname][varname]['var'][:,:] = self.ensvar[grpname][varname]
 
 #-----------------------------------------------------------------------------------------
   def process(self, grplist):
     self.create_all_variables(grplist)
 
-   #self.process_ombg()
-
-    for grpname in self.outdict.keys():
-      self.LOGFILE.write('writing grpname: %s on rank: %d\n' %(grpname, self.rank))
-      ncoutgroup = self.OFILE.groups[grpname]
-      if(grpname in grplist):
-        continue
+   #for grpname in self.outdict.keys():
+     #self.LOGFILE.write('writing grpname: %s on rank: %d\n' %(grpname, self.rank))
+     #self.LOGFILE.flush()
+     #ncoutgroup = self.OFILE.groups[grpname]
+     #if(grpname in grplist):
+     #  self.LOGFILE.write('grpname: %s in grplist on rank: %d\n' %(grpname, self.rank))
+     #  self.LOGFILE.flush()
+     #  continue
 
      #if(grpname.find('hofx') < 0):
      #  ncingroup = self.IFILE.groups[grpname]
@@ -309,6 +335,11 @@ class PyMPIConcatenateObserver():
      #  origrpname = self.outdict[grpname]['origrpname']
      #  ncingroup = self.IFILE.groups[origrpname]
      #  self.write_grp2newname(ncingroup, self.outdict[grpname])
+
+   #self.LOGFILE.write('only has ombg left on rank: %4.4d.\n' %(self.rank))
+   #self.LOGFILE.flush()
+
+   #self.process_ombg()
 
 #-----------------------------------------------------------------------------------------
   def concatenate(self, grplist):
@@ -383,6 +414,7 @@ if __name__== '__main__':
  #--------------------------------------------------------------------------------
   pyconcatenater = PyMPIConcatenateObserver(debug=debug, rundir=rundir, obstype=obstype,
                                             nmem=nmem, datestr=datestr)
-  grplist = ['hofx_y_mean_xb0', 'hofx0_1', 'ombg']
+ #grplist = ['hofx_y_mean_xb0', 'hofx0_1', 'ombg']
+  grplist = ['hofx_y_mean_xb0', 'ombg']
   pyconcatenater.concatenate(grplist)
 
