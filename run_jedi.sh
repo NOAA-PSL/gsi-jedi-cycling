@@ -27,6 +27,8 @@ source ~/gdasenv
 executable=${jediblddir}/bin/fv3jedi_letkf.x
 ulimit -s unlimited
 
+module load mkl/2020.2 armforge/22.0.2
+
 echo "run Jedi starting at `date`"
 
 cd ${run_dir}
@@ -183,6 +185,8 @@ cd ${run_dir}
  rm -rf analysis hofx stdoutNerr solver
  mkdir -p analysis/mean analysis/increment hofx solver
 
+ export ALLINEA_NO_TIMEOUT=true
+
 number_members=${NMEM_ENKF}
 n=0
 while [ $n -le $number_members ]
@@ -199,6 +203,9 @@ do
      mkdir -p observer/${member_str}
 
     #srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
+    #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+
+    #time map --profile srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
     #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
      srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
@@ -260,6 +267,7 @@ echo "srun: `which srun`" >> ${run_dir}/logs/run_jedi.out
 #srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode $executable getkf.solver.yaml
 #srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode \
 #        ${executable} getkf.solver.yaml
+#time map --profile srun -n $nprocs ${executable} getkf.solver.yaml
  srun -n $nprocs ${executable} getkf.solver.yaml
 
 time_end=$(date +%s)

@@ -2,6 +2,7 @@
 ##SBATCH -q urgent
 #SBATCH -t 06:00:00
 #SBATCH -A gsienkf
+##SBATCH -N 20
 #SBATCH -N 40
 #SBATCH --ntasks-per-node=40
 #SBATCH -p orion

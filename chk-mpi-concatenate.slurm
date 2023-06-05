@@ -1,38 +1,42 @@
 #!/bin/sh
 ##SBATCH -q urgent
-#SBATCH -t 00:10:00
+#SBATCH -t 00:05:00
 #SBATCH -A gsienkf
-#SBATCH -N 3 
-#SBATCH --ntasks-per-node=40
-##SBATCH -p bigmem
-#SBATCH -p orion
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=20
+#SBATCH -p bigmem
+##SBATCH -p orion
 #SBATCH -J mpi4py
 #SBATCH -e mpi4py.%J.err
 #SBATCH -o mpi4py.%J.out
 
- MYHOST=`hostname -s`
- MYRANK=$PMI_RANK           # this variable may depend on your execution environment
-
- export STD_OUT=stdout.$MYHOST.$MYRANK
- export STD_ERR=stderr.$MYHOST.$MYRANK
+ ulimit -n 131072
 
  source ~/visenv
  module load slurm py-netcdf4/1.5.3
 
  datapath=/work2/noaa/da/weihuang/cycling/gdas-cycling
- yyyymmddhh=2020010200
+ yyyymmddhh=2020010206
 
 #input file fir.
  rundir=${datapath}/${yyyymmddhh}
  cd ${rundir}
+ rm -f logdir/*
 
  enkfscripts=/work2/noaa/da/weihuang/cycling/scripts/gdas-cycling
- echo "concatenate observer"
+
+#echo "concatenate observer"
  time_start=$(date +%s)
  obstype=sondes
+#27 members worked
+#number_members=27
+
+ number_cores=20
+#number_members=27
+#number_members=41
  number_members=81
 
- time srun -n ${number_members} \
+ time srun -N 1 -n ${number_cores} \
       python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
       --rundir=${datapath} \
       --datestr=${yyyymmddhh} \
