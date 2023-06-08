@@ -379,6 +379,8 @@ class PyMPIConcatenateObserver():
     if(self.debug):
       self.LOGFILE.flush()
 
+    return
+
     for mem in self.memlist:
       if(0 == mem):
         continue
@@ -441,7 +443,7 @@ class PyMPIConcatenateObserver():
     self.debug = 1
     self.output_file()
 
-    self.process_ombg()
+   #self.process_ombg()
 
     self.RFILE.close()
     self.OFILE.close()
@@ -459,12 +461,7 @@ if __name__== '__main__':
  #--------------------------------------------------------------------------------
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'rundir=', 'obstype=',
                                                 'nmem=', 'datestr='])
- #print('opts = ', opts)
- #print('args = ', args)
-
   for o, a in opts:
-   #print('o: <%s>' %(o))
-   #print('a: <%s>' %(a))
     if o in ('--debug'):
       debug = int(a)
     elif o in ('--rundir'):
