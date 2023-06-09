@@ -107,6 +107,7 @@ class PyMPIConcatenateObserver():
 #-----------------------------------------------------------------------------------------
   def write_var(self, var, variable):
     dim = len(variable.dimensions)
+    var.set_collective(True)
     if(1 == dim):
       var[:] = variable[:]
     elif(2 == dim):

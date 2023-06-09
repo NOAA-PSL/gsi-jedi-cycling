@@ -1,6 +1,6 @@
 #!/bin/sh
 ##SBATCH -q urgent
-#SBATCH -t 00:05:00
+#SBATCH -t 00:15:00
 #SBATCH -A gsienkf
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=20
@@ -28,13 +28,16 @@
 #echo "concatenate observer"
  time_start=$(date +%s)
  obstype=sondes
-#27 members worked
-#number_members=27
+#obstype=iasi_metop-b
 
  number_cores=20
-#number_members=27
-#number_members=41
  number_members=81
+
+#time python ${enkfscripts}/python_scripts/concanate-observer.py \
+#       --run_dir=${rundir} \
+#       --datestr=${yyyymmddhh} \
+#       --nmem=${number_members} \
+#       --obstype=${obstype}
 
  time srun -N 1 -n ${number_cores} \
       python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \

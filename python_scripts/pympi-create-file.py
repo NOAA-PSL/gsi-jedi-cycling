@@ -223,8 +223,8 @@ class PyMPIConcatenateObserver():
         self.LOGFILE.flush()
       group = igroups[grpname]
       ogroup = self.OFILE.createGroup(grpname)
-      for name in self.diminfo.keys():
-        ogroup.createDimension(name, self.diminfo[name])
+     #for name in self.diminfo.keys():
+     #  ogroup.createDimension(name, self.diminfo[name])
       vardict = self.create_var_in_group(group, ogroup)
       if(0 == self.rank):
         self.comdict[grpname] = vardict
@@ -239,8 +239,8 @@ class PyMPIConcatenateObserver():
           self.LOGFILE.write('Create group: %s from: %s\n' %(newname, grpname))
           self.LOGFILE.flush()
 
-        for name in self.diminfo.keys():
-          ogroup.createDimension(name, self.diminfo[name])
+       #for name in self.diminfo.keys():
+       #  ogroup.createDimension(name, self.diminfo[name])
         vardict = self.create_var_in_group(group, ogroup)
 
         if(mem in self.memlist):
