@@ -3,17 +3,70 @@ import getopt
 import numpy as np
 import netCDF4 as nc4
 
+from multiprocessing import Pool
+
+def basefunction(dict):
+  print('dict:', dict)
+  fv = FillVariables(dict)
+  fv.process()
+
 #=========================================================================
-class FillVariables():
-  def __init__(self, debug=0, rundir=None, datestr=None, mem=81):
+class FillVariablesWithMutiProcessing():
+  def __init__(self, debug=0, rundir=None, datestr=None, nmem=1, obstype=None):
     self.debug = debug
     self.datestr = datestr
     self.rundir = rundir
-    self.mem = mem
+    self.nmem = nmem
+    self.obstype = obstype
 
-    self.specgrps = ['hofx_y_mean_xb0', 'hofx0_1', 'ombg']
+    self.obsdir = '%s/%s/observer' %(rundir, datestr)
+    self.filename = '%s_obs_%s.nc4' %(obstype, datestr)
 
-    self.LOGFILE = None
+#-----------------------------------------------------------------------------------------
+  def process(self):
+    self.outputfile = '%s/%s' %(self.obsdir, self.filename)
+
+    self.OFILE = nc4.Dataset(self.outputfile, 'r+')
+
+    mp = Pool(self.nmem)
+
+    argslist = []
+    for n in range(self.nmem):
+      mem = n + 1
+      dict = {}
+      dict['debug'] = self.debug
+      dict['datestr'] = self.datestr
+      dict['rundir'] = self.rundir
+      dict['mem'] = mem
+      dict['obstype'] = self.obstype
+      dict['OFILE'] = self.OFILE
+
+      argslist.append(dict)
+
+    mp.map(basefunction, argslist)
+    mp.close()
+    mp.join()
+
+    self.OFILE.close()
+
+#=========================================================================
+class FillVariables():
+  def __init__(self, argsdict):
+    self.debug = argsdict['debug']
+    self.datestr = argsdict['datestr']
+    self.rundir = argsdict['rundir']
+    self.mem = argsdict['mem']
+    self.obstype = argsdict['obstype']
+    self.OFILE = argsdict['OFILE']
+
+    self.obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
+    self.filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
+
+    if(self.debug):
+      logflnm='logdir/log.%s.%4.4d' %(self.obstype, self.mem)
+      self.LOGFILE = open(logflnm, 'w')
+
+      self.LOGFILE.flush()
 
 #-----------------------------------------------------------------------------------------
   def get_newname(self, name, n):
@@ -47,33 +100,35 @@ class FillVariables():
     return val
 
 #-----------------------------------------------------------------------------------------
-  def write_var(self, var, variable):
-    dim = len(variable.dimensions)
+  def write_var(self, var, val):
+    dim = len(var.dimensions)
     if(1 == dim):
-      var[:] = variable[:]
+      var[:] = val[:]
     elif(2 == dim):
-      var[:,:] = variable[:,:]
+      var[:,:] = val[:,:]
     elif(3 == dim):
-      var[:,:,:] = variable[:,:,:]
+      var[:,:,:] = val[:,:,:]
 
 #-----------------------------------------------------------------------------------------
   def write_var_in_group(self, ingroup, outgroup):
    #write all var in group.
     for varname, variable in ingroup.variables.items():
+      val = self.read_var(varname, variable)
+
+     #FillVariables.lock.acquire() 
+
       var = outgroup.variables[varname]
-      self.write_var(var, variable)
+
+      self.write_var(var, val)
+
+     #FillVariables.lock.release() 
 
       if(self.debug):
         self.LOGFILE.write('\twrite variable: %s\n' %(varname))
 
 #-----------------------------------------------------------------------------------------
-  def fill_variables(self):
-    if(self.debug):
-      self.LOGFILE.flush()
-
-    if(self.debug):
-      self.LOGFILE.write('write for mem: %d\n' %(mem))
-    infile = '%s/mem%3.3d/%s' %(self.obsdir, mem, self.filename)
+  def process(self):
+    infile = '%s/mem%3.3d/%s' %(self.obsdir, self.mem, self.filename)
     IFILE = nc4.Dataset(infile, 'r')
     if(self.debug):
       self.LOGFILE.write('input file: %s\n' %(infile))
@@ -96,39 +151,10 @@ class FillVariables():
  
     IFILE.close()
 
-    if(self.debug):
-      self.LOGFILE.flush()
-
-#-----------------------------------------------------------------------------------------
-  def process(self, obstype):
-    self.obstype = obstype
-
-    if(self.LOGFILE is not None):
-      self.LOGFILE.close()
-
-    logflnm='logdir/log.%s.%4.4d' %(self.obstype, self.mem)
-    self.LOGFILE = open(logflnm, 'w')
-
-    self.LOGFILE.write('For member: %d\n' %(self.mem))
-
-    self.obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
-    self.filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
-
-    self.outputfile = '%s/%s' %(self.obsdir, self.filename)
-    self.OFILE = nc4.Dataset(self.outputfile, 'r+')
-
-    if(self.debug):
-      self.LOGFILE.write('outputfile: %s\n' %(self.outputfile))
-
-    self.debug = 1
-    self.fill_variables()
-
-    self.OFILE.close()
-
 #=========================================================================================
 if __name__== '__main__':
-  debug = 0
-  mem = 1
+  debug = 1
+  nmem = 80
   rundir = '/work2/noaa/da/weihuang/cycling/gdas-cycling'
   datestr = '2020010206'
   obstype = 'sondes'
@@ -137,10 +163,7 @@ if __name__== '__main__':
 
  #--------------------------------------------------------------------------------
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'rundir=', 'obstype=',
-                                                'mem=', 'datestr='])
- #print('opts = ', opts)
- #print('args = ', args)
-
+                                                'nmem=', 'datestr='])
   for o, a in opts:
    #print('o: <%s>' %(o))
    #print('a: <%s>' %(a))
@@ -152,14 +175,15 @@ if __name__== '__main__':
       obstype = a
     elif o in ('--datestr'):
       datestr = a
-    elif o in ('--mem'):
-      mem = int(a)
+    elif o in ('--nmem'):
+      nmem = int(a)
     else:
       print('o: <%s>' %(o))
       print('a: <%s>' %(a))
       assert False, 'unhandled option'
 
  #--------------------------------------------------------------------------------
-  fv = FillVariables(debug=debug, rundir=rundir, mem=mem, datestr=datestr)
-  fv.process(obstype)
+  fvwmp = FillVariablesWithMutiProcessing(debug=debug, rundir=rundir, nmem=nmem,
+                                         datestr=datestr, obstype=obstype)
+  fvwmp.process()
 
