@@ -12,7 +12,6 @@ class PyMPIConcatenateObserver():
     self.rundir = rundir
     self.nmem = nmem
 
-    self.specgrps = ['hofx_y_mean_xb0', 'hofx0_1', 'ombg']
     self.format = 'NETCDF4'
    #self.format = 'NETCDF4_CLASS'
 
@@ -36,9 +35,10 @@ class PyMPIConcatenateObserver():
   def setup(self):
     cnp = 0
     self.memlist = []
-    for n in range(nmem):
+    for n in range(self.nmem):
+      mem = n + 1
       if(cnp == self.rank):
-        self.memlist.append(n)
+        self.memlist.append(mem)
       cnp += 1
       if(cnp >= self.size):
         cnp = 0
@@ -122,10 +122,7 @@ class PyMPIConcatenateObserver():
       if(self.debug):
         self.LOGFILE.write('\tcreate var: %s with %d dimension\n' %(varname, len(variable.dimensions)))
 
-      vardict[varname] = {}
-      vardict[varname]['var'] = newvar
-      dimsize = len(variable.dimensions)
-      vardict[varname]['dim'] = dimsize
+      vardict[varname] = newvar
 
     return vardict
 
@@ -184,69 +181,74 @@ class PyMPIConcatenateObserver():
 
     igroups = self.RFILE.groups
 
-    self.specvars = {}
     self.outdict = {}
     self.comgrps = []
     self.memgrps = []
+    self.hofx0dict = {}
+    self.ombg = {}
+    self.hofx_y_mean_xb0 = {}
 
-    for mem in range(self.nmem):
-      self.specvars[mem] = {}
-      if(mem > 0):
-        self.outdict[mem] = {}
-        self.outdict[mem]['oldname'] = []
-        self.outdict[mem]['newname'] = []
-        self.outdict[mem]['vardict'] = []
+    for n in range(self.nmem):
+      mem = n + 1
+      self.outdict[mem] = {}
 
     for grpname, group in igroups.items():
       if(grpname.find('hofx') < 0):
         self.comgrps.append(grpname)
+
+        if('ombg' == grpname):
+          if(0 == self.rank):
+            for name, variable in group.variables.items():
+              val = self.read_var(name, variable)
+              self.ombg[name] = val
       else:
         if('hofx_y_mean_xb0' == grpname):
           self.comgrps.append(grpname)
+
+          if(0 == self.rank):
+            for name, variable in group.variables.items():
+              val = self.read_var(name, variable)
+              self.hofx_y_mean_xb0[name] = val
         else:
           self.memgrps.append(grpname)
 
-      if(grpname in self.specgrps):
-        self.specvars[0][grpname] = {}
-        if('hofx0_1' == grpname):
-          for varname, variable in group.variables.items():
-            self.specvars[0][grpname][varname] = self.read_var(varname, variable)
-        else:
-          if(0 == self.rank):
-            for varname, variable in group.variables.items():
-              self.specvars[0][grpname][varname] = self.read_var(varname, variable)
+    for grpname in self.comgrps:
+      self.OFILE.createGroup(grpname)
+
+    for grpname in self.memgrps:
+      for n in range(self.nmem):
+        mem = n + 1
+        newname = self.get_newname(grpname, mem)
+        ogroup = self.OFILE.createGroup(newname)
+
+    ogroups = self.OFILE.groups
 
     self.comdict = {}
     for grpname in self.comgrps:
       if(self.debug):
         self.LOGFILE.write('Create common group: %s\n' %(grpname))
         self.LOGFILE.flush()
-      group = igroups[grpname]
-      ogroup = self.OFILE.createGroup(grpname)
-      for name in self.diminfo.keys():
-        ogroup.createDimension(name, self.diminfo[name])
-      vardict = self.create_var_in_group(group, ogroup)
+      igroup = igroups[grpname]
+      ogroup = ogroups[grpname]
+      vardict = self.create_var_in_group(igroup, ogroup)
       if(0 == self.rank):
         self.comdict[grpname] = vardict
 
     for grpname in self.memgrps:
-      group = igroups[grpname]
-      for mem in range(1, self.nmem):
+      igroup = igroups[grpname]
+      for n in range(self.nmem):
+        mem = n + 1
         newname = self.get_newname(grpname, mem)
-        ogroup = self.OFILE.createGroup(newname)
+        ogroup = ogroups[newname]
 
         if(self.debug):
           self.LOGFILE.write('Create group: %s from: %s\n' %(newname, grpname))
           self.LOGFILE.flush()
 
-        for name in self.diminfo.keys():
-          ogroup.createDimension(name, self.diminfo[name])
-        vardict = self.create_var_in_group(group, ogroup)
+        vardict = self.create_var_in_group(igroup, ogroup)
 
         if(mem in self.memlist):
-          self.outdict[mem]['oldname'].append(grpname)
-          self.outdict[mem]['newname'].append(newname)
-          self.outdict[mem]['vardict'].append(vardict)
+          self.outdict[mem][newname] = vardict
 
     if(self.debug):
       self.LOGFILE.flush()
@@ -283,8 +285,8 @@ class PyMPIConcatenateObserver():
   def write_var_in_group(self, ingroup, vardict):
    #write all var in group.
     for varname in vardict.keys():
-      var = vardict[varname]['var']
-      dim = vardict[varname]['dim']
+      var = vardict[varname]
+      dim = len(var.dimensions)
      #if(self.debug):
      #  self.LOGFILE.write('\twrite variable: %s with dim: %d\n' %(varname, dim))
 
@@ -295,32 +297,20 @@ class PyMPIConcatenateObserver():
     meanvars = {}
 
     for varname in varlist:
-      nv = 0
+      buf = None
       for mem in self.memlist:
-        if(0 == mem):
-          continue
-
-        val = self.specvars[mem][grpname][varname]
-        dim = self.outdict[mem]['vardict'][nv][varname]['dim']
+        val = self.hofx0dict[mem][grpname][varname]
+        dim = len(self.outdict[mem][grpname][varname].dimensions)
         if(self.debug):
           self.LOGFILE.write('use specvars[%d][%s][%s]\n' %(mem, grpname, varname))
           self.LOGFILE.write('mem %d var dimensions: %d\n' %(mem, dim))
-        if(0 == nv):
+        if(buf is None):
            buf = val
         else:
-           if(1 == dim):
-             buf += val
-           elif(2 == dim):
-             buf += val
-           elif(3 == dim):
-             buf += val
-
-        if(0 == mem):
-          buf = 0.0
-        nv += 1
+           buf += val
     
       self.comm.Allreduce(buf, val, op=MPI.SUM)
-      val /= (self.nmem-1)
+      val /= self.nmem
       meanvars[varname] = val
 
     return meanvars
@@ -380,9 +370,6 @@ class PyMPIConcatenateObserver():
       self.LOGFILE.flush()
 
     for mem in self.memlist:
-      if(0 == mem):
-        continue
-
       if(self.debug):
         self.LOGFILE.write('write for mem: %d\n' %(mem))
       infile = '%s/mem%3.3d/%s' %(self.obsdir, mem, self.filename)
@@ -390,23 +377,29 @@ class PyMPIConcatenateObserver():
       if(self.debug):
         self.LOGFILE.write('input file: %s\n' %(infile))
       igroups = IFILE.groups
-      if(self.debug):
-        self.LOGFILE.write('length of self.outdict[mem]["oldname"]: %d\n' %(len(self.outdict[mem]['oldname'])))
-      for n in range(len(self.outdict[mem]['oldname'])):
-        grpname = self.outdict[mem]['oldname'][n]
-        group = igroups[grpname]
-        if('hofx0_1' == grpname):
-          self.specvars[mem][grpname] = {}
-          for varname, variable in group.variables.items():
-            self.specvars[mem][grpname][varname] = self.read_var(varname, variable)
-            self.LOGFILE.write('got specvars[%d][%s][%s]\n' %(mem, grpname, varname))
-        newname = self.outdict[mem]['newname'][n]
-        vardict = self.outdict[mem]['vardict'][n]
-        self.write_var_in_group(group, vardict)
+
+      grpname = 'hofx0_1'
+      group = igroups[grpname]
+
+      newname = self.get_newname(grpname, mem)
+      vardict = self.outdict[mem][newname]
+      self.write_var_in_group(group, vardict)
+
+      self.hofx0dict[mem] = {}
+      for name, variable in group.variables.items():
+        self.hofx0dict[mem][name] = self.read_var(name, variable)
       
         if(self.debug):
           self.LOGFILE.write('write group %s from %s\n' %(newname, grpname))
           self.LOGFILE.flush()
+
+      for n in range(20):
+        neng = n + 1
+        grpname = 'hofx0_%d_1' %(neng)
+        group = igroups[grpname]
+        newname = self.get_newname(grpname, mem)
+        vardict = self.outdict[mem][newname]
+        self.write_var_in_group(group, vardict)
  
       IFILE.close()
 
@@ -441,7 +434,7 @@ class PyMPIConcatenateObserver():
     self.debug = 1
     self.output_file()
 
-    self.process_ombg()
+   #self.process_ombg()
 
     self.RFILE.close()
     self.OFILE.close()

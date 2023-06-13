@@ -7,27 +7,27 @@ import time
 import numpy as np
 
 #-----------------------------------------------------------------------------------------
-  def read_var(self, name, variable):
-    if(self.debug):
-      self.LOGFILE.write('\tread var: %s with %d dimension\n' %(name, len(variable.dimensions)))
-    if(1 == len(variable.dimensions)):
-      val = variable[:]
-    elif(2 == len(variable.dimensions)):
-      val = variable[:,:]
-    elif(3 == len(variable.dimensions)):
-      val = variable[:,:,:]
+def read_var(self, name, variable):
+  if(self.debug):
+    self.LOGFILE.write('\tread var: %s with %d dimension\n' %(name, len(variable.dimensions)))
+  if(1 == len(variable.dimensions)):
+    val = variable[:]
+  elif(2 == len(variable.dimensions)):
+    val = variable[:,:]
+  elif(3 == len(variable.dimensions)):
+    val = variable[:,:,:]
 
-    return val
+  return val
 
 #-----------------------------------------------------------------------------------------
-  def write_var(self, var, val):
-    dim = len(var.dimensions)
-    if(1 == dim):
-      var[:] = val[:]
-    elif(2 == dim):
-      var[:,:] = val[:,:]
-    elif(3 == dim):
-      var[:,:,:] = val[:,:,:]
+def write_var(self, var, val):
+  dim = len(var.dimensions)
+  if(1 == dim):
+    var[:] = val[:]
+  elif(2 == dim):
+    var[:,:] = val[:,:]
+  elif(3 == dim):
+    var[:,:,:] = val[:,:,:]
 
 #-----------------------------------------------------------------------------------------
 def process(ncinlist, ncout):

@@ -3,24 +3,20 @@ import getopt
 import numpy as np
 import netCDF4 as nc4
 
-from multiprocessing import Pool
-
-def basefunction(dict):
-  print('dict:', dict)
-  fv = FillVariables(dict)
-  fv.process()
+import threading 
 
 #=========================================================================
-class FillVariablesWithMutiProcessing():
+class FillVariablesWithThreading():
   def __init__(self, debug=0, rundir=None, datestr=None, nmem=1, obstype=None):
+    threading.Thread.__init__(self)
     self.debug = debug
     self.datestr = datestr
     self.rundir = rundir
     self.nmem = nmem
     self.obstype = obstype
 
-    self.obsdir = '%s/%s/observer' %(rundir, datestr)
-    self.filename = '%s_obs_%s.nc4' %(obstype, datestr)
+    self.obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
+    self.filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
 
 #-----------------------------------------------------------------------------------------
   def process(self):
@@ -28,45 +24,47 @@ class FillVariablesWithMutiProcessing():
 
     self.OFILE = nc4.Dataset(self.outputfile, 'r+')
 
-    mp = Pool(self.nmem)
-
-    argslist = []
-    for n in range(self.nmem):
+    threads = []
+    for n in range(nmem):
       mem = n + 1
-      dict = {}
-      dict['debug'] = self.debug
-      dict['datestr'] = self.datestr
-      dict['rundir'] = self.rundir
-      dict['mem'] = mem
-      dict['obstype'] = self.obstype
-      dict['OFILE'] = self.OFILE
+      thread = FillVariables(debug=self.debug, rundir=self.rundir, mem=mem,
+                             datestr=datestr, obstype=self.obstype, OFILE=self.OFILE)
+      threads.append(thread)
+      thread.start()
 
-      argslist.append(dict)
-
-    mp.map(basefunction, argslist)
-    mp.close()
-    mp.join()
+    for thread in threads:
+      thread.join()
 
     self.OFILE.close()
 
 #=========================================================================
-class FillVariables():
-  def __init__(self, argsdict):
-    self.debug = argsdict['debug']
-    self.datestr = argsdict['datestr']
-    self.rundir = argsdict['rundir']
-    self.mem = argsdict['mem']
-    self.obstype = argsdict['obstype']
-    self.OFILE = argsdict['OFILE']
+class FillVariables(threading.Thread):
+  lock = threading.Lock()
+  def __init__(self, debug=0, rundir=None, datestr=None, mem=1,
+               obstype=None, OFILE=None):
+    threading.Thread.__init__(self)
+    self.debug = debug
+    self.datestr = datestr
+    self.rundir = rundir
+    self.mem = mem
+    self.obstype = obstype
+    self.OFILE = OFILE
 
     self.obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
     self.filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
 
+#-----------------------------------------------------------------------------------------
+  def run(self):
     if(self.debug):
       logflnm='logdir/log.%s.%4.4d' %(self.obstype, self.mem)
       self.LOGFILE = open(logflnm, 'w')
 
       self.LOGFILE.flush()
+
+    self.fill_variables()
+
+    if(self.debug):
+      self.LOGFILE.close()
 
 #-----------------------------------------------------------------------------------------
   def get_newname(self, name, n):
@@ -127,7 +125,7 @@ class FillVariables():
         self.LOGFILE.write('\twrite variable: %s\n' %(varname))
 
 #-----------------------------------------------------------------------------------------
-  def process(self):
+  def fill_variables(self):
     infile = '%s/mem%3.3d/%s' %(self.obsdir, self.mem, self.filename)
     IFILE = nc4.Dataset(infile, 'r')
     if(self.debug):
@@ -183,7 +181,7 @@ if __name__== '__main__':
       assert False, 'unhandled option'
 
  #--------------------------------------------------------------------------------
-  fvwmp = FillVariablesWithMutiProcessing(debug=debug, rundir=rundir, nmem=nmem,
-                                         datestr=datestr, obstype=obstype)
-  fvwmp.process()
+  fvwt = FillVariablesWithThreading(debug=debug, rundir=rundir, nmem=nmem,
+                                      datestr=datestr, obstype=obstype)
+  fvwt.process()
 
