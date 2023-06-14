@@ -3,7 +3,7 @@
  set -x
 
  sdate=2020010106
- edate=2020010512
+ edate=2020012900
 
  plot_stats () {
    argnum=$#
@@ -60,8 +60,8 @@
 #------------------------------------------------------------------------------
  firstlist=(gsi-cycling)
  secondlist=(gdas-cycling)
- firstlbls=(GSI_sai)
- secondlbls=(JEDI_sai)
+ firstlbls=(GSI)
+ secondlbls=(JEDI)
 
 #firstlist=(sondes-rerun.gsi-cycling)
 #secondlist=(sondes-rerun.gdas-cycling)

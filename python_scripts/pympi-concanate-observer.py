@@ -92,6 +92,7 @@ class PyMPIConcatenateObserver():
           self.LOGFILE.write('\tvariable size: %d\n' %(variable.size))
           self.LOGFILE.write('\tvariable datatype: %s\n' %(variable.datatype))
           self.LOGFILE.write('\tvariable dimensions: %s\n' %(variable.dimensions))
+          self.LOGFILE.write('\tAvoid create string variable for now.\n')
 
           strdims = ('Location', 'nchars')
 
@@ -109,8 +110,9 @@ class PyMPIConcatenateObserver():
          #                                 fill_value=fill_value)
          #newvar._Encoding = 'ascii'
 
-          newvar = outgroup.createVariable(varname, variable.datatype, variable.dimensions,
-                                           fill_value=fill_value)
+         #newvar = outgroup.createVariable(varname, variable.datatype, variable.dimensions,
+         #                                 fill_value=fill_value)
+          newvar = None
         else:
           newvar = outgroup.createVariable(varname, variable.datatype, variable.dimensions,
                                            fill_value=fill_value)
@@ -185,8 +187,9 @@ class PyMPIConcatenateObserver():
     self.comgrps = []
     self.memgrps = []
     self.hofx0dict = {}
-    self.ombg = {}
     self.hofx_y_mean_xb0 = {}
+    self.ombg = {}
+    self.ombgvarlist = []
 
     for n in range(self.nmem):
       mem = n + 1
@@ -197,8 +200,9 @@ class PyMPIConcatenateObserver():
         self.comgrps.append(grpname)
 
         if('ombg' == grpname):
-          if(0 == self.rank):
-            for name, variable in group.variables.items():
+          for name, variable in group.variables.items():
+            self.ombgvarlist.append(name)
+            if(0 == self.rank):
               val = self.read_var(name, variable)
               self.ombg[name] = val
       else:
@@ -257,53 +261,64 @@ class PyMPIConcatenateObserver():
   def write_var(self, var, dim, varname, ingroup):
     variable = ingroup.variables[varname]
 
-   #if('stationIdentification' == varname):
-   #  self.LOGFILE.write('\n\nHandle variable: %s\n' %(varname))
-   #  self.LOGFILE.write('\tvariable dtype: %s\n' %(variable.dtype))
-   #  self.LOGFILE.write('\tvariable size: %d\n' %(variable.size))
+    if(self.debug):
+      self.LOGFILE.write('\n\nPrepare to write variable: %s\n' %(varname))
+      self.LOGFILE.write('\tvariable dtype: %s\n' %(variable.dtype))
+      self.LOGFILE.write('\tvariable size: %d\n' %(variable.size))
+      self.LOGFILE.write('\tvariable dim: %d, %d\n' %(dim, len(variable.dimensions)))
 
-   #  val = variable[:]
-   #  self.LOGFILE.write('\tvariable 0: %s\n' %(val[0]))
+     #val = variable[:]
+     #self.LOGFILE.write('\tvariable 0: %s\n' %(val[0]))
+     #self.LOGFILE.flush()
 
     if(1 == dim):
-      val = variable[:]
       if('stationIdentification' == varname):
+        if(self.debug):
+          self.LOGFILE.write('\nskip write variable: %s\n' %(varname))
+         #val = variable[:]
+         #self.LOGFILE.write('\tval[0] = %s\n' %(val[0]))
        #strval = np.array(val, dtype='S5')
-        strval = np.array(val, dtype=object)
+       #strval = np.array(val, dtype=object)
        #var[:] = strval 
       else:
-        var[:] = val
+        var[:] = variable[:]
     elif(2 == dim):
       var[:,:] = variable[:,:]
     elif(3 == dim):
       var[:,:,:] = variable[:,:,:]
 
     if(self.debug):
-      self.LOGFILE.write('\twrite variable: %s with dim: %d\n' %(varname, dim))
+      self.LOGFILE.write('\nFinished write variable: %s\n' %(varname))
+      self.LOGFILE.flush()
 
 #-----------------------------------------------------------------------------------------
   def write_var_in_group(self, ingroup, vardict):
+    if(self.debug):
+      self.LOGFILE.flush()
+
    #write all var in group.
     for varname in vardict.keys():
       var = vardict[varname]
       dim = len(var.dimensions)
-     #if(self.debug):
-     #  self.LOGFILE.write('\twrite variable: %s with dim: %d\n' %(varname, dim))
+      if(self.debug):
+        self.LOGFILE.write('\twrite variable: %s with dim: %d\n' %(varname, dim))
+        self.LOGFILE.flush()
 
       self.write_var(var, dim, varname, ingroup)
 
+    if(self.debug):
+      self.LOGFILE.flush()
+
 #-----------------------------------------------------------------------------------------
-  def mpi_average(self, grpname, varlist):
+  def mpi_average(self, varlist):
     meanvars = {}
 
     for varname in varlist:
       buf = None
       for mem in self.memlist:
-        val = self.hofx0dict[mem][grpname][varname]
-        dim = len(self.outdict[mem][grpname][varname].dimensions)
+        val = self.hofx0dict[mem][varname]
         if(self.debug):
-          self.LOGFILE.write('use specvars[%d][%s][%s]\n' %(mem, grpname, varname))
-          self.LOGFILE.write('mem %d var dimensions: %d\n' %(mem, dim))
+          self.LOGFILE.write('use hofx0dict[%d][%s]\n' %(mem, varname))
         if(buf is None):
            buf = val
         else:
@@ -325,19 +340,15 @@ class PyMPIConcatenateObserver():
     self.LOGFILE.write('processing for ombg on rank: %d\n' %(self.rank))
     self.LOGFILE.flush()
 
-    grpname = 'hofx0_1'
-    varlist = self.specvars[0][grpname].keys()
-
     self.LOGFILE.write('get avearge ombg\n')
-    meanvars = self.mpi_average(grpname, varlist)
+    meanvars = self.mpi_average(self.ombgvarlist)
 
-    grpname = 'ombg'
     if(0 == self.rank):
-      for varname in varlist:
-        var = self.comdict[grpname][varname]['var']
-        dim = self.comdict[grpname][varname]['dim']
-        val = self.specvars[0]['ombg'][varname]
-        val += self.specvars[0]['hofx_y_mean_xb0'][varname]
+      for varname in self.ombgvarlist:
+        var = self.comdict['ombg'][varname]
+        dim = len(var.dimensions)
+
+        val = self.ombg[varname] + self.hofx_y_mean_xb0[varname]
         val -= meanvars[varname]
 
         if(1 == dim):
@@ -347,8 +358,8 @@ class PyMPIConcatenateObserver():
         elif(3 == dim):
            var[:,:,:] = val
 
-        self.print_minmax('hofx_y_mean_xb0', self.specvars[0]['hofx_y_mean_xb0'][varname])
-        self.print_minmax('old-ombg', self.specvars[0]['ombg'][varname])
+        self.print_minmax('hofx_y_mean_xb0', self.hofx_y_mean_xb0[varname])
+        self.print_minmax('old-ombg', self.ombg[varname])
         self.print_minmax('new-ombg', val)
 
 #-----------------------------------------------------------------------------------------
@@ -357,13 +368,14 @@ class PyMPIConcatenateObserver():
       if(self.debug):
         self.LOGFILE.write('write root variables\n')
       self.write_var_in_group(self.RFILE, self.rootvardict)
+
       igroups = self.RFILE.groups
       for grpname in self.comgrps:
         if(self.debug):
           self.LOGFILE.write('write group: %s\n' %(grpname))
         group = igroups[grpname]
-        if('ombg' == grpname):
-          continue
+       #if('ombg' == grpname):
+       #  continue
         self.write_var_in_group(group, self.comdict[grpname])
 
     if(self.debug):
@@ -376,6 +388,7 @@ class PyMPIConcatenateObserver():
       IFILE = nc4.Dataset(infile, 'r')
       if(self.debug):
         self.LOGFILE.write('input file: %s\n' %(infile))
+        self.LOGFILE.flush()
       igroups = IFILE.groups
 
       grpname = 'hofx0_1'
@@ -389,22 +402,27 @@ class PyMPIConcatenateObserver():
       for name, variable in group.variables.items():
         self.hofx0dict[mem][name] = self.read_var(name, variable)
       
+      if(self.debug):
+        self.LOGFILE.write('write group %s from %s\n' %(newname, grpname))
+        self.LOGFILE.flush()
+
+      for n in range(20):
+        neng = n + 1
+        grpname = 'hofxm0_%d_1' %(neng)
+        group = igroups[grpname]
+        newname = self.get_newname(grpname, mem)
+      
         if(self.debug):
           self.LOGFILE.write('write group %s from %s\n' %(newname, grpname))
           self.LOGFILE.flush()
 
-      for n in range(20):
-        neng = n + 1
-        grpname = 'hofx0_%d_1' %(neng)
-        group = igroups[grpname]
-        newname = self.get_newname(grpname, mem)
         vardict = self.outdict[mem][newname]
         self.write_var_in_group(group, vardict)
  
       IFILE.close()
 
-    if(self.debug):
-      self.LOGFILE.flush()
+      if(self.debug):
+        self.LOGFILE.flush()
 
 #-----------------------------------------------------------------------------------------
   def process(self, obstype):
@@ -434,7 +452,7 @@ class PyMPIConcatenateObserver():
     self.debug = 1
     self.output_file()
 
-   #self.process_ombg()
+    self.process_ombg()
 
     self.RFILE.close()
     self.OFILE.close()
@@ -474,7 +492,7 @@ if __name__== '__main__':
       assert False, 'unhandled option'
 
  #--------------------------------------------------------------------------------
-  pyconcatenater = PyMPIConcatenateObserver(debug=debug, rundir=rundir,
-                                            nmem=nmem, datestr=datestr)
-  pyconcatenater.process(obstype)
+  pmco = PyMPIConcatenateObserver(debug=debug, rundir=rundir,
+                                  nmem=nmem, datestr=datestr)
+  pmco.process(obstype)
 

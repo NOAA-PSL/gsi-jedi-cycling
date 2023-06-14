@@ -91,18 +91,18 @@ def update_ombg(filelist, outfile):
 debug = 1
 nmem = 81
 
-run_dir = '/work2/noaa/da/weihuang/cycling/gdas-cycling'
+rundir = '/work2/noaa/da/weihuang/cycling/gdas-cycling'
 datestr = '2020010106'
 obstype = 'sondes'
 
 #-----------------------------------------------------------------------------------------
-opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'run_dir=',
+opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'rundir=',
                                               'datestr=', 'obstype=', 'nmem='])
 for o, a in opts:
   if o in ('--debug'):
     debug = int(a)
-  elif o in ('--run_dir'):
-    run_dir = a
+  elif o in ('--rundir'):
+    rundir = a
   elif o in ('--datestr'):
     datestr = a
   elif o in ('--obstype'):
@@ -116,9 +116,9 @@ for o, a in opts:
 filelist = []
 for n in range(nmem):
   mem = n + 1
-  flnm = '%s/observer/mem%3.3d/%s_obs_%s.nc4' %(run_dir, mem, obstype, datestr)
+  flnm = '%s/observer/mem%3.3d/%s_obs_%s.nc4' %(rundir, mem, obstype, datestr)
   filelist.append(flnm)
-outfile = '%s/observer/%s_obs_%s.nc4' %(run_dir, obstype, datestr)
+outfile = '%s/observer/%s_obs_%s.nc4' %(rundir, datestr, obstype, datestr)
 
 update_ombg(filelist, outfile)
 
