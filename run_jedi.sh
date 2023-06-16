@@ -27,7 +27,7 @@ source ~/gdasenv
 executable=${jediblddir}/bin/fv3jedi_letkf.x
 ulimit -s unlimited
 
-module load mkl/2020.2 armforge/22.0.2
+#module load mkl/2020.2 armforge/22.0.2
 
 echo "run Jedi starting at `date`"
 
@@ -59,13 +59,20 @@ time_start=$(date +%s)
 
 cd ioda_v2_data
 
-flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
+flst="sfc_ps_obs_${yyyymmddhh}.nc4 sondes_ps_obs_${yyyymmddhh}.nc4 ship_ps_obs_${yyyymmddhh}.nc4"
 python ${iodablddir}/bin/combine_obsspace.py \
-  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
-     sondes_tv_obs_${yyyymmddhh}.nc4 \
-     sondes_uv_obs_${yyyymmddhh}.nc4 \
-     sondes_q_obs_${yyyymmddhh}.nc4 \
-  -o sondes_obs_${yyyymmddhh}.nc4
+  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
+     sfcship_obs_${yyyymmddhh}.nc4 \
+     sondes_ps_obs_${yyyymmddhh}.nc4 \
+  -o ps_obs_${yyyymmddhh}.nc4
+
+#flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
+#python ${iodablddir}/bin/combine_obsspace.py \
+#  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
+#     sondes_tv_obs_${yyyymmddhh}.nc4 \
+#     sondes_uv_obs_${yyyymmddhh}.nc4 \
+#     sondes_q_obs_${yyyymmddhh}.nc4 \
+#  -o sondes_obs_${yyyymmddhh}.nc4
 
 time_end=$(date +%s)
 echo "combine_obsspace.py elapsed Time: $(($time_end-$time_start)) seconds"
@@ -128,15 +135,15 @@ cd ${run_dir}
 
 #--------------------------------------------------------------------------------------------
  cp ${enkfscripts}/genyaml/config.template .
- cp ${enkfscripts}/genyaml/*ps.yaml .
+ cp ${enkfscripts}/genyaml/ps.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
  cp ${enkfscripts}/genyaml/halo.distribution.iasi .
  cp ${enkfscripts}/genyaml/rr.distribution .
- cp ${enkfscripts}/genyaml/sondes.yaml .
- cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
- cp ${enkfscripts}/genyaml/amsua_n15.yaml .
- cp ${enkfscripts}/genyaml/amsua_n18.yaml .
- cp ${enkfscripts}/genyaml/amsua_n19.yaml .
+#cp ${enkfscripts}/genyaml/sondes.yaml .
+#cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
+#cp ${enkfscripts}/genyaml/amsua_n15.yaml .
+#cp ${enkfscripts}/genyaml/amsua_n18.yaml .
+#cp ${enkfscripts}/genyaml/amsua_n19.yaml .
 
  export corespernode=40
  export mpitaskspernode=40
@@ -227,7 +234,8 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in sondes amsua_n19 iasi_metop-b
+#for obstype in sondes amsua_n19 iasi_metop-b
+ for obstype in ps
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \

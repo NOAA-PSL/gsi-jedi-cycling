@@ -292,15 +292,15 @@ cat <<EOF > gsiparm.anl
 /
 OBS_INPUT::
 !  dfile          dtype       dplat       dsis                 dval    dthin  dsfcalc
-!  prepbufr       ps          null        ps                   0.0     0      0
-   prepbufr       t           null        t                    0.0     0      0
-   prepbufr       q           null        q                    0.0     0      0
+   prepbufr       ps          null        ps                   0.0     0      0
+!  prepbufr       t           null        t                    0.0     0      0
+!  prepbufr       q           null        q                    0.0     0      0
 !  prepbufr       pw          null        pw                   0.0     0      0
 !  prepbufr_profl t           null        t                    0.0     0     0
 !  prepbufr_profl q           null        q                    0.0     0     0
 !  prepbufr_profl uv          null        uv                   0.0     0     0
 !  satwndbufr     uv          null        uv                   0.0     0      0
-   prepbufr       uv          null        uv                   0.0     0      0
+!  prepbufr       uv          null        uv                   0.0     0      0
 !  prepbufr       spd         null        spd                  0.0     0      0
 !  prepbufr       dw          null        dw                   0.0     0      0
 !  radarbufr      rw          null        rw                   0.0     0      0
@@ -376,7 +376,7 @@ OBS_INPUT::
 !  omibufr        omi         aura        omi_aura             0.0     2      0
 !  hirs4bufr      hirs4       n18         hirs4_n18            0.0     1      1
 !  hirs4bufr      hirs4       n19         hirs4_n19            0.0     1      1
-   amsuabufr      amsua       n19         amsua_n19            0.0     1      1
+!  amsuabufr      amsua       n19         amsua_n19            0.0     1      1
 !  mhsbufr        mhs         n19         mhs_n19              0.0     1      1
 !  tcvitl         tcp         null        tcp                  0.0     0      0
 !  seviribufr     seviri      m08         seviri_m08           0.0     1      0
@@ -385,7 +385,7 @@ OBS_INPUT::
 !  hirs4bufr      hirs4       metop-b     hirs4_metop-b        0.0     1      0
 !  amsuabufr      amsua       metop-b     amsua_metop-b        0.0     1      0
 !  mhsbufr        mhs         metop-b     mhs_metop-b          0.0     1      0
-   iasibufr       iasi        metop-b     iasi_metop-b         0.0     1      0
+!  iasibufr       iasi        metop-b     iasi_metop-b         0.0     1      0
 !  gomebufr       gome        metop-b     gome_metop-b         0.0     2      0
 !  atmsbufr       atms        npp         atms_npp            0.0     1     1
 !  atmsbufr       atms        n20         atms_n20            0.0     1     1
@@ -454,27 +454,27 @@ EOF
 #   bufrtable= text file ONLY needed for single obs test (oneobstest=.true.)
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
-berror=${BERROR:-$fixgsi/Big_Endian/global_berror.l${LEVS}y${NLAT}.f77}
+berror=${BERROR:-${enkfscripts}/texdat/global_berror.l${LEVS}y${NLAT}.f77}
 
-satinfo=${SATINFO:-$fixgsi/global_satinfo.txt}
-atmsfilter=${ATMSFILTER:-$fixgsi/atms_beamwidth.txt}
-scaninfo=$fixgsi/global_scaninfo.txt
-satangl=$fixgsi/global_satangbias.txt
-pcpinfo=$fixgsi/global_pcpinfo.txt
-ozinfo=${OZINFO:-$fixgsi/global_ozinfo.txt}
-convinfo=${CONVINFO:-$fixgsi/global_convinfo.txt}
-insituinfo=${INSITUINFO:-$fixgsi/global_insituinfo.txt}
-aeroinfo=${AEROINFO:-$fixgsi/global_aeroinfo.txt}
-errtable=$fixgsi/prepobs_errtable.global
-anavinfo=${ANAVINFO:-$fixgsi/global_anavinfo.l${LEVS}txt}
-radcloudinfo=${RADCLOUDINFO:-${fixgsi}/cloudy_radiance_info.txt}
-vqcdat=${vqcdat:-${fixgsi}/vqctp001.dat}
+satinfo=${SATINFO:-${enkfscripts}/texdat/global_satinfo.txt}
+atmsfilter=${ATMSFILTER:-${enkfscripts}/texdat/atms_beamwidth.txt}
+scaninfo=${enkfscripts}/textdata/global_scaninfo.txt
+satangl=${enkfscripts}/textdata/global_satangbias.txt
+pcpinfo=${enkfscripts}/textdata/global_pcpinfo.txt
+ozinfo=${OZINFO:-${enkfscripts}/textdata/global_ozinfo.txt}
+convinfo=${CONVINFO:-${enkfscripts}/textdata/global_convinfo.txt}
+insituinfo=${INSITUINFO:-${enkfscripts}/textdata/global_insituinfo.txt}
+aeroinfo=${AEROINFO:-${enkfscripts}/textdata/global_aeroinfo.txt}
+errtable=${enkfscripts}/textdata/prepobs_errtable.global
+anavinfo=${ANAVINFO:-${enkfscripts}/textdata/global_anavinfo.l${LEVS}txt}
+radcloudinfo=${RADCLOUDINFO:-${enkfscripts}/textdata/cloudy_radiance_info.txt}
+vqcdat=${vqcdat:-${enkfscripts}/textdata/vqctp001.dat}
 
 # Only need this file for single obs test
-bufrtable=$fixgsi/prepobs_prep.bufrtable
+bufrtable=${enkfscripts}/textdata/prepobs_prep.bufrtable
 
 # Only need this file for sst retrieval
-bftab_sst=$fixgsi/bufrtab.012
+bftab_sst=${enkfscripts}/textdata/bufrtab.012
 
 # Copy executable and fixed files to $tmpdir
 if [[ "$lread_obs_skip" = ".false." ]]; then
@@ -502,8 +502,8 @@ $nln $bftab_sst ./bftab_sstphr
 # if correlated ob errors desired, link Rcov files.
 if [ $use_correlated_oberrs == ".true." ];  then
   if grep -q "Rcov" $anavinfo ; then
-     if ls ${fixgsi}/Rcov* 1> /dev/null 2>&1; then
-       $nln ${fixgsi}/Rcov* $tmpdir
+     if ls ${enkfscripts}/textdata/Rcov* 1> /dev/null 2>&1; then
+       $nln ${enkfscripts}/textdata/Rcov* $tmpdir
        echo "using correlated obs error"
      else
        echo "Error: Satellite error covariance files are missing."

@@ -86,6 +86,4 @@ output:
 # ----------------
 observations:
   observers:
-  - !INC sondes.yaml
-  - !INC amsua_n19.yaml
-  - !INC iasi_metop-b.yaml
+  - !INC ps.yaml

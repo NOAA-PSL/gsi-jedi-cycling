@@ -118,8 +118,8 @@ fi
 export datapath="${datadir}/${exptname}"
 export logdir="${datadir}/logs/${exptname}"
 
-#export NOSAT="YES" # if yes, no radiances assimilated
-export NOSAT="NO" # if yes, no radiances assimilated
+export NOSAT="YES" # if yes, no radiances assimilated
+#export NOSAT="NO" # if yes, no radiances assimilated
 export NOCONV="NO"
 export NOTLNMC="NO" # no TLNMC in GSI in GSI EnVar
 export NOOUTERLOOP="NO" # no outer loop in GSI EnVar
@@ -420,20 +420,15 @@ else
 fi
 
 
-#export ANAVINFO=${fixgsi}/global_anavinfo_allhydro.l${LEVS}.txt
-export ANAVINFO=${fixgsi}/global_anavinfo.l${LEVS}.txt
+export ANAVINFO=${enkfscripts}/textdata/global_anavinfo.l${LEVS}.txt
 export ANAVINFO_ENKF=${ANAVINFO}
-export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
+export HYBENSINFO=${enkfscripts}/textdata/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
 #export HYBENSINFO=${enkfscripts}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
 # comment out next line to disable smoothing of ensemble perturbations
 # in stratosphere/mesosphere
-#export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
-export OZINFO=${fixgsi}/global_ozinfo.txt
-#export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.ps+sondes+amsua
-#export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt.sondesonly
+export OZINFO=${enkfscripts}/textdata/global_ozinfo.txt
 export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
 export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
-#export SATINFO=${fixgsi}/global_satinfo.txt
 export NLAT=$((${LATA}+2))
 # default is to use berror file in gsi fix dir.
 #export BERROR=${basedir}/staticB/global_berror_enkf.l${LEVS}y${NLAT}.f77
@@ -452,9 +447,9 @@ if [ $controlanal == "true" ]; then
    export readin_beta=".true."
    export replay_controlfcst=".false."
    export hybgain=".false." # controlanal takes precedence over hybgain
-   export HYBENSINFO=${fixgsi}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
+   export HYBENSINFO=${enkfscripts}/textdata/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
    # uncomment to smooth ensemble perturbations
-   #export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
+   #export HYBENSMOOTHINFO=${enkfscripts}/textdata/global_hybens_smoothinfo.l${LEVS}.txt
    sh ./main_controlanal.sh
 else
    # GSI sees ensemble mean background (high-res control forecast is a replay to ens mean analysis)

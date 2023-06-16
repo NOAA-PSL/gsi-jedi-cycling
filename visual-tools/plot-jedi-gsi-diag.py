@@ -325,12 +325,12 @@ class Plot_JEDI_GSI_Diag():
         self.cmapname = 'bwr'
        #self.clevs = np.arange(-2.0, 2.1, 0.1)
        #self.cblevs = np.arange(-2.0, 3.0, 1.0)
-        self.clevs = np.arange(-4.0, 4.01, 0.01)
+       #self.clevs = np.arange(-4.0, 4.01, 0.01)
        #self.clevs = [-4.0, -2.0, -1.5, -1.0, -0.5, -0.25, -0.1, -0.05, -0.02, -0.01, 0.0,
        #              0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 1.0, 1.5, 2.0, 4.0]
-        self.cblevs = np.arange(-4.0, 5.0, 1.0)
-       #self.clevs = np.arange(-0.5, 0.52, 0.02)
-       #self.cblevs = np.arange(-0.5, 0.6, 0.2)
+       #self.cblevs = np.arange(-4.0, 5.0, 1.0)
+        self.clevs = np.arange(-0.5, 0.52, 0.02)
+        self.cblevs = np.arange(-0.5, 0.6, 0.1)
        #self.clevs = np.arange(-0.1, 0.11, 0.01)
        #self.cblevs = np.arange(-0.1, 0.15, 0.05)
 
