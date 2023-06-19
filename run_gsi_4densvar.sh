@@ -293,14 +293,14 @@ cat <<EOF > gsiparm.anl
 OBS_INPUT::
 !  dfile          dtype       dplat       dsis                 dval    dthin  dsfcalc
    prepbufr       ps          null        ps                   0.0     0      0
-!  prepbufr       t           null        t                    0.0     0      0
-!  prepbufr       q           null        q                    0.0     0      0
+   prepbufr       t           null        t                    0.0     0      0
+   prepbufr       q           null        q                    0.0     0      0
 !  prepbufr       pw          null        pw                   0.0     0      0
 !  prepbufr_profl t           null        t                    0.0     0     0
 !  prepbufr_profl q           null        q                    0.0     0     0
 !  prepbufr_profl uv          null        uv                   0.0     0     0
 !  satwndbufr     uv          null        uv                   0.0     0      0
-!  prepbufr       uv          null        uv                   0.0     0      0
+   prepbufr       uv          null        uv                   0.0     0      0
 !  prepbufr       spd         null        spd                  0.0     0      0
 !  prepbufr       dw          null        dw                   0.0     0      0
 !  radarbufr      rw          null        rw                   0.0     0      0
