@@ -35,10 +35,10 @@ cd ${run_dir}
 rm -rf ioda_v2_data diag
 mkdir -p ioda_v2_data diag
 
-#cp diag_* diag/.
-#for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
 #for type in amsua_n19 conv_q conv_t conv_uv
-for type in conv_q conv_t conv_uv amsua_n19 iasi_metop-b
+#for type in conv_q conv_t conv_uv amsua_n19 iasi_metop-b
+#for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
+for type in conv_ps
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -59,14 +59,12 @@ time_start=$(date +%s)
 
 cd ioda_v2_data
 
-flst="sfc_ps_obs_${yyyymmddhh}.nc4 sondes_ps_obs_${yyyymmddhh}.nc4 ship_ps_obs_${yyyymmddhh}.nc4"
 python ${iodablddir}/bin/combine_obsspace.py \
   -i sfc_ps_obs_${yyyymmddhh}.nc4 \
-     sfcship_obs_${yyyymmddhh}.nc4 \
+     sfcship_ps_obs_${yyyymmddhh}.nc4 \
      sondes_ps_obs_${yyyymmddhh}.nc4 \
   -o ps_obs_${yyyymmddhh}.nc4
 
-#flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
 #python ${iodablddir}/bin/combine_obsspace.py \
 #  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
 #     sondes_tv_obs_${yyyymmddhh}.nc4 \
