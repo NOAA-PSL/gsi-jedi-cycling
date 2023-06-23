@@ -2,6 +2,7 @@
 *.out
 *.stderr
 *.stdout
-job.sh
 exec_orion
+job.sh
+obs-only-job.sh
 logs
