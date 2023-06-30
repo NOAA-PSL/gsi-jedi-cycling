@@ -2,8 +2,8 @@
 
 #obs start script
 
- run_dir=/work2/noaa/da/weihuang/cycling/gdas-cycling
- datestr=2020010112
+ run_dir=/work2/noaa/da/weihuang/cycling/gsi-cycling
+ datestr=2020010106
  obs_start_dir=${run_dir}/${datestr}
 
  if [ -d ${obs_start_dir} ]

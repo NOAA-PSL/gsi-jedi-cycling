@@ -26,6 +26,7 @@ export beta=1000 # percentage of enkf increment (*10)
 # in this case, to recenter around EnVar analysis set recenter_control_wgt=100
 export recenter_control_wgt=100
 export recenter_ensmean_wgt=`expr 100 - $recenter_control_wgt`
+#export exptname="gsi-cycling"
 export exptname="gdas-cycling"
 # for 'passive' or 'replay' cycling of control fcst 
 export replay_controlfcst='false'

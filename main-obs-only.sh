@@ -2,8 +2,6 @@
 
 #set -x
 
-main_start=$(date +%s)
-
 # main driver script
 # gsi gain or gsi covariance GSI EnKF (based on ensemble mean background)
 # optional high-res control fcst replayed to ens mean analysis
@@ -15,6 +13,12 @@ echo "nodes = $NODES"
 
 export startupenv="${datapath}/obs_date.sh"
 source $startupenv
+
+while [ $obs_date -lt $obs_date_end ]
+do
+echo "current time is $obs_date"
+
+main_start=$(date +%s)
 # substringing to get yr, mon, day, hr info
 export yr=`echo $obs_date | cut -c1-4`
 export mon=`echo $obs_date | cut -c5-6`
@@ -102,22 +106,25 @@ export PREINPm1="${RUN}.t${hrm1}z."
    gsiobserver_end=$(date +%s)
    echo "run_gsiobserver.sh elapsed Time: $(($gsiobserver_end-$gsiobserver_start)) seconds"
 
+main_end=$(date +%s)
+echo "main-obs-obly.sh elapsed Time: $(($main_end-$main_start)) seconds for $obs_date"
+
 # next obs_date: increment by $ANALINC
 export obs_date=`${incdate} $obs_date $ANALINC`
 
 echo "export obs_date=${obs_date}" > $startupenv
 echo "export obs_date_end=${obs_date_end}" >> $startupenv
 
-echo "current time is $obs_date"
-export obs_date=`${incdate} $obs_date $ANALINC`
-if [ $obs_date -le $obs_date_end ]; then
-   echo "resubmit script"
-   echo "machine = $machine"
-   submit-obs-only-job.sh $machine
+#  echo "resubmit script"
+#  echo "machine = $machine"
+#  submit-obs-only-job.sh $machine
+
+if [ ! -d ${datapath}/${obs_date} ]
+then
+  break
 fi
 
-main_end=$(date +%s)
-echo "main-obs-obly.sh elapsed Time: $(($main_end-$main_start)) seconds"
+done
 
 exit 0
 
