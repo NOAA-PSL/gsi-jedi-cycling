@@ -329,7 +329,8 @@ if [ $recenter_anal == "true" ]; then
        fi
    else
       # hybrid covariance
-      export fileprefix="sanl"
+     #export fileprefix="sanl"
+      export fileprefix="incr"
       echo "$analdate recenter enkf analysis ensemble around varanal analysis `date`"
       sh ${enkfscripts}/recenter_ens.sh > ${current_logdir}/recenter_ens_anal.out 2>&1
       recenter_done=`cat ${current_logdir}/recenter.log`

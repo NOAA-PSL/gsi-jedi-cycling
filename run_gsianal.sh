@@ -2,13 +2,13 @@
 # do hybrid analysis.
 
 export CO2DIR=$fixgsi
-export SIGANL03=${datapath2}/sanl_${analdate}_fhr03_${charnanal}
-export SIGANL04=${datapath2}/sanl_${analdate}_fhr04_${charnanal}
-export SIGANL05=${datapath2}/sanl_${analdate}_fhr05_${charnanal}
-export SIGANL06=${datapath2}/sanl_${analdate}_fhr06_${charnanal}
-export SIGANL07=${datapath2}/sanl_${analdate}_fhr07_${charnanal}
-export SIGANL08=${datapath2}/sanl_${analdate}_fhr08_${charnanal}
-export SIGANL09=${datapath2}/sanl_${analdate}_fhr09_${charnanal}
+export SIGANL03=${datapath2}/incr_${analdate}_fhr03_${charnanal}
+export SIGANL04=${datapath2}/incr_${analdate}_fhr04_${charnanal}
+export SIGANL05=${datapath2}/incr_${analdate}_fhr05_${charnanal}
+export SIGANL06=${datapath2}/incr_${analdate}_fhr06_${charnanal}
+export SIGANL07=${datapath2}/incr_${analdate}_fhr07_${charnanal}
+export SIGANL08=${datapath2}/incr_${analdate}_fhr08_${charnanal}
+export SIGANL09=${datapath2}/incr_${analdate}_fhr09_${charnanal}
 export BIASO=${datapath2}/${PREINP}abias 
 export BIASO_PC=${datapath2}/${PREINP}abias_pc 
 export SATANGO=${datapath2}/${PREINP}satang
@@ -52,17 +52,21 @@ export nprocs=`expr $cores \/ $OMP_NUM_THREADS`
 export mpitaskspernode=`expr $corespernode \/ $OMP_NUM_THREADS`
 echo "running with $OMP_NUM_THREADS threads ..."
 
-if [ -z $biascorrdir ]; then # cycled bias correction files
+#if [ -z $biascorrdir ]; then # cycled bias correction files
     export GBIAS=${datapathm1}/${PREINPm1}abias
     export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
     export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
     export ABIAS=${datapath2}/${PREINP}abias
-else # externally specified bias correction files.
-    export GBIAS=${biascorrdir}/${analdate}//${PREINP}abias
-    export GBIAS_PC=${biascorrdir}/${analdate}//${PREINP}abias_pc
-    export GBIASAIR=${biascorrdir}/${analdate}//${PREINP}abias_air
-    export ABIAS=${biascorrdir}/${analdate}//${PREINP}abias
-fi
+    export ABIASPC=${datapath2}/${PREINP}abias_pc
+    export ABIASAIR=${datapath2}/${PREINP}abias_air
+    export ABIASe=${datapath2}/${PREINP}abias_int
+
+#else # externally specified bias correction files.
+#    export GBIAS=${biascorrdir}/${analdate}//${PREINP}abias
+#    export GBIAS_PC=${biascorrdir}/${analdate}//${PREINP}abias_pc
+#    export GBIASAIR=${biascorrdir}/${analdate}//${PREINP}abias_air
+#    export ABIAS=${biascorrdir}/${analdate}//${PREINP}abias
+#fi
 export GSATANG=$fixgsi/global_satangbias.txt # not used, but needs to exist
 
 export tmpdir=$datapath2/hybridtmp$$
