@@ -449,7 +449,7 @@ class Plot_JEDI_GSI_Diag():
     plt.xlim(tmin, tmax)
    #plt.ylim(1.5, 2.25)
    #plt.ylim(1.0, 2.00)
-    plt.ylim(1.75, 2.25)
+    plt.ylim(1.50, 2.25)
     plt.grid(True)
     plt.legend(loc=0)
 
@@ -591,8 +591,9 @@ class Plot_JEDI_GSI_Diag():
    #  #plt.xlim(2.2,3.4)
    #Wind rms min: 3.0864446.2, max:   6.84
    #plt.xlim(3.25,5.5)
-   #plt.xlim(3.25,5.75)
-    plt.xlim(2.00,6.50)
+   #plt.xlim(3.50,9.50)
+    plt.xlim(3.50,11.25)
+   #plt.xlim(2.00,6.50)
    #for PS
    #plt.xlim(5.00,11.00)
     plt.ylim(self.levbot,self.levtop)
@@ -622,7 +623,8 @@ class Plot_JEDI_GSI_Diag():
    #Temp rms min: 1.2050896.2, max:   4.07
    #plt.xlim(1.0,2.75)       
    #plt.xlim(0.75,2.50)       
-    plt.xlim(0.75,3.00)       
+   #plt.xlim(1.50,3.00)       
+    plt.xlim(1.75,3.25)       
    #For PS
    #plt.xlim(2.25,3.50)
    #plt.xlim(1.75,3.25)       

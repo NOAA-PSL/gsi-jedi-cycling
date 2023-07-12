@@ -6,7 +6,10 @@ export OMP_NUM_THREADS=$enkf_threads
 export OMP_STACKSIZE=512M
 export MKL_NUM_THREADS=1
 source $MODULESHOME/init/sh
-module list
+#module list
+
+export DONT_USE_DPRES=true
+export DONT_USE_DELZ=true
 
 iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
 
