@@ -4,4 +4,5 @@
 *.stdout
 job.sh
 exec_orion
+config/runtype
 logs

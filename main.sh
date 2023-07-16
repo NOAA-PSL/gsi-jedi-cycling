@@ -472,7 +472,13 @@ if [ $analdate -le $analdate_end ]  && [ $resubmit == 'true' ]; then
    if [ $resubmit == 'true' ]; then
       echo "resubmit script"
       echo "machine = $machine"
-      submit_job.sh $machine
+      echo "runtype = $runtype"
+      if [[ -z "${runtype}" ]]; then
+        echo "runtype is not defined. Stop"
+        exit 1
+      else
+        submit_job.sh -m $machine -r $runtype
+      fi
    fi
 fi
 
