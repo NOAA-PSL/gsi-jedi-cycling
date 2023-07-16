@@ -1,21 +1,27 @@
 #!/bin/sh
 
+ current_dir=`pwd`
 # cold start script
+ datestr=2022010312
+ dateend=2022011812
 
- run_dir=/work2/noaa/da/weihuang/cycling/gdas-cycling
- datestr=2020010100
+ run_dir=/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling
+ mkdir -p ${run_dir}
+ cd ${run_dir}
+ ln -sf ../${datestr} .
+
  cold_start_dir=${run_dir}/${datestr}
 
- mkdir -p ${cold_start_dir}
-
  touch ${cold_start_dir}/cold_start_bias
+
+ cd ${current_dir}
 
  cp textdata/gdas1.t00z.abias ${cold_start_dir}/.
  cp textdata/abias_pc ${cold_start_dir}/.
 
 cat > ${run_dir}/analdate.sh << EOF1
 export analdate=${datestr}
-export analdate_end=2020020100
+export analdate_end=${dateend}
 EOF1
 
 cat > ${run_dir}/fg_only.sh << EOF2

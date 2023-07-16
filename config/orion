@@ -26,7 +26,7 @@ export beta=1000 # percentage of enkf increment (*10)
 # in this case, to recenter around EnVar analysis set recenter_control_wgt=100
 export recenter_control_wgt=100
 export recenter_ensmean_wgt=`expr 100 - $recenter_control_wgt`
-export exptname="gdas-cycling"
+export exptname="jedi-cycling"
 # for 'passive' or 'replay' cycling of control fcst 
 export replay_controlfcst='false'
 export enkfonly='true' # pure EnKF
@@ -92,8 +92,8 @@ export save_hpss="false"
 
 source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
-   export basedir=/work2/noaa/da/weihuang/cycling/scripts
-   export datadir=/work2/noaa/da/weihuang/cycling
+   export basedir=/work2/noaa/da/weihuang/EMC_cycling/scripts
+   export datadir=/work2/noaa/da/weihuang/EMC_cycling
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work/noaa/rstprod/dump
    ulimit -s unlimited
@@ -377,9 +377,6 @@ if [ $LEVS -eq 64 ]; then
 elif [ $LEVS -eq 127 ]; then
   export s_ens_v=7.7 # 20 levels
 fi
-# use pre-generated bias files.
-#export biascorrdir=${datadir}/biascor
-export biascorrdir=${datapath}/2020010100
 
 export nanals=80                                                    
 # if nanals2>0, extend nanals2 members out to FHMAX + ANALINC (one extra assim window)
@@ -390,6 +387,11 @@ export nitermax=1 # number of retries
 export enkfscripts=${basedir}/${exptname}
 export homedir=$enkfscripts
 export incdate="${enkfscripts}/incdate.sh"
+
+# use pre-generated bias files.
+#export biascorrdir=${datadir}/biascor
+#export biascorrdir=${datapath}/2020010100
+export biascorrdir=${enkfscripts}/textdata
 
 echo "enkfscripts=$enkfscripts"
 

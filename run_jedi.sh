@@ -35,10 +35,11 @@ cd ${run_dir}
 rm -rf ioda_v2_data diag
 mkdir -p ioda_v2_data diag
 
-#for type in amsua_n19 conv_q conv_t conv_uv
 #for type in conv_q conv_t conv_uv amsua_n19 iasi_metop-b
 #for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
-for type in conv_ps
+#for type in conv_ps
+#for type in amsua_n19 conv_q conv_t conv_uv
+for type in conv_q conv_t conv_uv
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -59,18 +60,18 @@ time_start=$(date +%s)
 
 cd ioda_v2_data
 
-python ${iodablddir}/bin/combine_obsspace.py \
-  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
-     sfcship_ps_obs_${yyyymmddhh}.nc4 \
-     sondes_ps_obs_${yyyymmddhh}.nc4 \
-  -o ps_obs_${yyyymmddhh}.nc4
-
 #python ${iodablddir}/bin/combine_obsspace.py \
-#  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
-#     sondes_tv_obs_${yyyymmddhh}.nc4 \
-#     sondes_uv_obs_${yyyymmddhh}.nc4 \
-#     sondes_q_obs_${yyyymmddhh}.nc4 \
-#  -o sondes_obs_${yyyymmddhh}.nc4
+#  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
+#     sfcship_ps_obs_${yyyymmddhh}.nc4 \
+#     sondes_ps_obs_${yyyymmddhh}.nc4 \
+#  -o ps_obs_${yyyymmddhh}.nc4
+
+python ${iodablddir}/bin/combine_obsspace.py \
+  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
+     sondes_tv_obs_${yyyymmddhh}.nc4 \
+     sondes_uv_obs_${yyyymmddhh}.nc4 \
+     sondes_q_obs_${yyyymmddhh}.nc4 \
+  -o sondes_obs_${yyyymmddhh}.nc4
 
 time_end=$(date +%s)
 echo "combine_obsspace.py elapsed Time: $(($time_end-$time_start)) seconds"
@@ -133,15 +134,15 @@ cd ${run_dir}
 
 #--------------------------------------------------------------------------------------------
  cp ${enkfscripts}/genyaml/config.template .
- cp ${enkfscripts}/genyaml/ps.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
  cp ${enkfscripts}/genyaml/halo.distribution.iasi .
  cp ${enkfscripts}/genyaml/rr.distribution .
-#cp ${enkfscripts}/genyaml/sondes.yaml .
-#cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
-#cp ${enkfscripts}/genyaml/amsua_n15.yaml .
-#cp ${enkfscripts}/genyaml/amsua_n18.yaml .
-#cp ${enkfscripts}/genyaml/amsua_n19.yaml .
+ cp ${enkfscripts}/genyaml/ps.yaml .
+ cp ${enkfscripts}/genyaml/sondes.yaml .
+ cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n15.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n18.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n19.yaml .
 
  export corespernode=40
  export mpitaskspernode=40
@@ -233,7 +234,8 @@ time_start=$(date +%s)
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
 #for obstype in sondes amsua_n19 iasi_metop-b
- for obstype in ps
+#for obstype in ps
+ for obstype in sondes
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
         --run_dir=${run_dir} \

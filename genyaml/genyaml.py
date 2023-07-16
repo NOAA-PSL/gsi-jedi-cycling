@@ -67,10 +67,10 @@ class GenerateYAML():
      #for obstype in obstypelist:
      #  self.add_obs2observer(n=n, obstype=obstype)
 
-      self.config['PS_OBSINFILE'] = 'ioda_v2_data/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-      self.config['PS_OBSOUTFILE'] = '%s/mem%3.3d/ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
-     #self.config['SONDES_OBSINFILE'] = 'ioda_v2_data/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-     #self.config['SONDES_OBSOUTFILE'] = '%s/mem%3.3d/sondes_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+     #self.config['PS_OBSINFILE'] = 'ioda_v2_data/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+     #self.config['PS_OBSOUTFILE'] = '%s/mem%3.3d/ps_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
+      self.config['SONDES_OBSINFILE'] = 'ioda_v2_data/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+      self.config['SONDES_OBSOUTFILE'] = '%s/mem%3.3d/sondes_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
 
      #self.config['AMSUA_N15_OBSINFILE'] = 'ioda_v2_data/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
      #self.config['AMSUA_N15_OBSOUTFILE'] = '%s/mem%3.3d/amsua_n15_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
@@ -108,10 +108,10 @@ class GenerateYAML():
    #for obstype in obstypelist:
    #  self.add_obs2solver(obstype=obstype)
 
-    self.config['PS_OBSINFILE'] = '%s/ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
-    self.config['PS_OBSOUTFILE'] = 'solver/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
-   #self.config['SONDES_OBSINFILE'] = '%s/sondes_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
-   #self.config['SONDES_OBSOUTFILE'] = 'solver/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+   #self.config['PS_OBSINFILE'] = '%s/ps_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+   #self.config['PS_OBSOUTFILE'] = 'solver/ps_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
+    self.config['SONDES_OBSINFILE'] = '%s/sondes_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
+    self.config['SONDES_OBSOUTFILE'] = 'solver/sondes_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
 
    #self.config['AMSUA_N15_OBSINFILE'] = '%s/amsua_n15_obs_%s.nc4' %(self.obsdir, self.config['YYYYMMDDHH'])
    #self.config['AMSUA_N15_OBSOUTFILE'] = 'solver/amsua_n15_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
