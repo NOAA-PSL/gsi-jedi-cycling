@@ -20,7 +20,8 @@ for nfhr in $iaufhrs2; do
   filemissing='no'
   while [ $nanal -le $nanals ]; do
      charnanal="mem"`printf %03i $nanal`
-     analfile="${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}"
+    #analfile="${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}"
+     analfile="${datapath2}/incr_${analdate}_${charfhr}_${charnanal}"
      if [ ! -s $analfile ]; then
         filemissing='yes'
      fi
@@ -198,7 +199,8 @@ nanal=1
 filemissing='no'
 while [ $nanal -le $nanals ]; do
    charnanal="mem"`printf %03i $nanal`
-   analfile=${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}
+  #analfile=${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}
+   analfile=${datapath2}/incr_${analdate}_${charfhr}_${charnanal}
    if [ ! -s $analfile ]; then
      echo "$analfile missing"
      filemissing='yes'

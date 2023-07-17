@@ -19,13 +19,13 @@ export NLAT=$((${LATA}+2))
 export CO2DIR=$fixgsi
 
 # charanal is an env var set in parent script
-export SIGANL03=${datapath2}/sanl_${analdate}_fhr03_${charnanal}
-export SIGANL04=${datapath2}/sanl_${analdate}_fhr04_${charnanal}
-export SIGANL05=${datapath2}/sanl_${analdate}_fhr05_${charnanal}
-export SIGANL06=${datapath2}/sanl_${analdate}_fhr06_${charnanal}
-export SIGANL07=${datapath2}/sanl_${analdate}_fhr07_${charnanal}
-export SIGANL08=${datapath2}/sanl_${analdate}_fhr08_${charnanal}
-export SIGANL09=${datapath2}/sanl_${analdate}_fhr09_${charnanal}
+export SIGANL03=${datapath2}/incr_${analdate}_fhr03_${charnanal}
+export SIGANL04=${datapath2}/incr_${analdate}_fhr04_${charnanal}
+export SIGANL05=${datapath2}/incr_${analdate}_fhr05_${charnanal}
+export SIGANL06=${datapath2}/incr_${analdate}_fhr06_${charnanal}
+export SIGANL07=${datapath2}/incr_${analdate}_fhr07_${charnanal}
+export SIGANL08=${datapath2}/incr_${analdate}_fhr08_${charnanal}
+export SIGANL09=${datapath2}/incr_${analdate}_fhr09_${charnanal}
 export BIASO=${datapath2}/${PREINP}abias 
 export BIASO_PC=${datapath2}/${PREINP}abias_pc 
 export SATANGO=${datapath2}/${PREINP}satang
@@ -42,7 +42,8 @@ else
    if [ $NOCONV == 'YES' ]; then
      diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.amsua_n15_01.nc4
    else
-     diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.conv_uv_01.nc4
+    #diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.conv_uv_01.nc4
+     diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.conv_ps_01.nc4
    fi
 fi
 echo "skipcat $skipcat diagfile $diagfile"
@@ -99,19 +100,18 @@ done
 #    export GBIAS=${datapathm1}/${PREINPm1}abias
 #    export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
 #    export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
-#    export ABIAS=${datapath2}/${PREINP}abias
 #else # externally specified bias correction files.
 #    if [ -s ${biascorrdir}/${analdate}/${PREINP}abias ]; then
 #    export GBIAS=${biascorrdir}/${analdate}/${PREINP}abias
 #    export GBIAS_PC=${biascorrdir}/${analdate}/${PREINP}abias_pc
 #    export GBIASAIR=${biascorrdir}/${analdate}/${PREINP}abias_air
-#    export ABIAS=${biascorrdir}/${analdate}/${PREINP}abias
 #    else
 #    export GBIAS=${biascorrdir}/abias
 #    export GBIAS_PC=${biascorrdir}/abias_pc
 #    export GBIASAIR=${biascorrdir}/abias_air
 #    fi
 #fi
+
 export GSATANG=$fixgsi/global_satangbias.txt # not used, but needs to exist
 
 export lread_obs_save=".false."

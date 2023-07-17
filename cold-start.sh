@@ -13,18 +13,15 @@
  dateend=2022011812
 
  run_dir=/work2/noaa/da/weihuang/EMC_cycling/${runtype}-cycling
+ cold_start_dir=${run_dir}/${datestr}
 
- if [ ! -L ${run_dir}/${datestr} ]
+ if [ ! -L ${cold_start_dir} ]
  then
-   mkdir -p ${run_dir}
-   cd ${run_dir}
-   ln -sf ../${datestr} .
-
-   cold_start_dir=${run_dir}/${datestr}
+   mkdir -p ${cold_start_dir}
 
    touch ${cold_start_dir}/cold_start_bias
 
-   cd ${current_dir}
+  #cd ${current_dir}
 
    cp textdata/gdas1.t00z.abias ${cold_start_dir}/.
    cp textdata/abias_pc ${cold_start_dir}/.
@@ -39,6 +36,11 @@ export fg_only=true
 export cold_start=true
 EOF2
 
+   cd ${run_dir}
+   if [ ! -L ${datestr} ]
+   then
+     ln -sf ../${datestr} .
+   fi
  fi
 
  exit 0
