@@ -26,7 +26,6 @@ export beta=1000 # percentage of enkf increment (*10)
 # in this case, to recenter around EnVar analysis set recenter_control_wgt=100
 export recenter_control_wgt=100
 export recenter_ensmean_wgt=`expr 100 - $recenter_control_wgt`
-export exptname="jedi-cycling"
 # for 'passive' or 'replay' cycling of control fcst 
 export replay_controlfcst='false'
 export enkfonly='true' # pure EnKF
@@ -35,11 +34,6 @@ export fg_gfs="run_ens_fv3.sh"
 export ensda="enkf_run.sh"
 export rungsi='run_gsi_4densvar.sh'
 export rungfs='run_fv3.sh' # ensemble forecast
-
-#export jedirun='false'
-export jedirun='true'
-export jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
-export jediblddir=/work2/noaa/da/weihuang/GDASApp/build
 
 #export do_cleanup='true' # if true, create tar files, delete *mem* files.
 #export cleanup_fg='true'
@@ -94,7 +88,7 @@ source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
    export basedir=/work2/noaa/da/weihuang/EMC_cycling/scripts
    export datadir=/work2/noaa/da/weihuang/EMC_cycling
-   export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
+  #export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work/noaa/rstprod/dump
    ulimit -s unlimited
    source $MODULESHOME/init/sh
@@ -108,15 +102,37 @@ if [ "$machine" == 'orion' ]; then
    module load hdf5/1.10.6-parallel
    module load wgrib/1.8.0b
   #export PYTHONPATH=/home/jwhitake/.local/lib/python3.7/site-packages
-   export PYTHONPATH=/work2/noaa/gsienkf/weihuang/anaconda3/lib
+  #export PYTHONPATH=/work2/noaa/gsienkf/weihuang/anaconda3/lib
    export HDF5_DISABLE_VERSION_CHECK=1
    export WGRIB=`which wgrib`
 else
-   echo "machine must be 'orion'"
+   echo "machine must be 'orion'. Exiting"
    exit 1
 fi
+
+if [[ -z "${runtype}" ]]; then
+  echo "runtype is not defined. Stop"
+  exit 1
+else
+  export exptname="${runtype}-cycling"
+fi
+
+export enkfscripts=${basedir}/${exptname}
+export homedir=$enkfscripts
+export incdate="${enkfscripts}/incdate.sh"
+
+source ${enkfscripts}/config/runtype
+
 export datapath="${datadir}/${exptname}"
 export logdir="${datadir}/logs/${exptname}"
+
+if [ "$runtype" == 'gsi' ]; then
+   export jedirun=false
+else
+   export jedirun=true
+fi
+export jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
+export jediblddir=/work2/noaa/da/weihuang/GDASApp/build
 
 export NOSAT="YES" # if yes, no radiances assimilated
 #export NOSAT="NO" # if yes, no radiances assimilated
@@ -318,7 +334,8 @@ export INCREMENTS_TO_ZERO="'liq_wat_inc','icmr_inc'"
 # Stratospheric increments to zero
 export INCVARS_ZERO_STRAT="'sphum_inc','liq_wat_inc','icmr_inc'"
 export INCVARS_EFOLD="5"
-export write_fv3_increment=".false." # don't change this
+#export write_fv3_increment=".false." # don't change this
+export write_fv3_increment=".true." # don't change this
 export WRITE_INCR_ZERO="incvars_to_zero= $INCREMENTS_TO_ZERO,"
 export WRITE_ZERO_STRAT="incvars_zero_strat= $INCVARS_ZERO_STRAT,"
 export WRITE_STRAT_EFOLD="incvars_efold= $INCVARS_EFOLD,"
@@ -378,15 +395,17 @@ elif [ $LEVS -eq 127 ]; then
   export s_ens_v=7.7 # 20 levels
 fi
 
+# use pre-generated bias files.
+#export biascorrdir=${datadir}/biascor
+#export biascorrdir=${datapath}/2020010100
+ export biascorrdir=${enkfscripts}/textdata
+
 export nanals=80                                                    
 # if nanals2>0, extend nanals2 members out to FHMAX + ANALINC (one extra assim window)
 export nanals2=-1 # longer extension. Set to -1 to disable 
 #export nanals2=$NODES
 #export nanals2=$nanals
 export nitermax=1 # number of retries
-export enkfscripts=${basedir}/${exptname}
-export homedir=$enkfscripts
-export incdate="${enkfscripts}/incdate.sh"
 
 # use pre-generated bias files.
 #export biascorrdir=${datadir}/biascor
@@ -403,7 +422,8 @@ if [ "$machine" == 'orion' ]; then
    export fv3gfspath=/work/noaa/global/glopara
    export FIXFV3=$fv3gfspath/fix_nco_gfsv16/fix_fv3_gmted2010
    export FIXGLOBAL=$fv3gfspath/fix_nco_gfsv16/fix_am
-   export gsipath=/work/noaa/gsienkf/whitaker/GSI
+  #export gsipath=/work/noaa/gsienkf/whitaker/GSI
+   export gsipath=/work2/noaa/da/weihuang/cycling/scripts/GSI
    export fixgsi=${gsipath}/fix
    export fixcrtm=$fv3gfspath/crtm/crtm_v2.3.0
    export execdir=${basedir}/exec_${machine}

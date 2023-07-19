@@ -218,46 +218,63 @@ ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_SU.v1_3.dat  
 #done
 
 # create netcdf increment files.
-#if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
-#   cd INPUT
-#   iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
+if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
+   cd INPUT
+   iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
 # IAU - multiple increments.
-#   for fh in $iaufhrs2; do
-#      export increment_file="fv3_increment${fh}.nc"
-#      if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
-#         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
-#         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
-#      else
-#         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
-#         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
-#      fi
-#      echo "create ${increment_file}"
+   for fh in $iaufhrs2; do
+      export increment_file="fv3_increment${fh}.nc"
+      if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
+        #export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
+         export analfile="${datapath2}/incr_${analdate}_fhr0${fh}_ensmean"
+         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
+      else
+        #export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
+         export analfile="${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal}"
+         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
+      fi
+      cat > calc_increment_ncio.nml << EOF
+&setup
+   no_mpinc=.true.
+   no_delzinc=.false.
+   taper_strat=.true.
+   taper_strat_ozone=.false.
+   taper_pbl=.false.
+   ak_bot=10000.,
+   ak_top=5000.
+/
+EOF
+      cat calc_increment_ncio.nml
+      echo "create ${increment_file}"
       #If it is JEDI run, the increments with be generate from JEDI, instead of here.
-#      if [ $jedirun != "true" ]; then
-#         echo "create file inside if statement"
-#         /bin/rm -f ${increment_file}
-         # last three args:  no_mpinc no_delzinc, taper_strat
-#         export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file} T $hydrostatic T"
-#         nprocs=1 mpitaskspernode=1 ${enkfscripts}/runmpi
-#         if [ $? -ne 0 -o ! -s ${increment_file} ]; then
-#            echo "problem creating ${increment_file}, stopping .."
-#            exit 1
-#         fi
-#      fi
-#   done # do next forecast
-#   cd ..
-#else
-#   if [ $cold_start == "false" ] && [ $jedirun != "true" ] ; then
+#     if [ $jedirun != "true" ]; then
+#        /bin/rm -f ${increment_file}
+#        # last three args:  no_mpinc no_delzinc, taper_strat
+#        #export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file} T $hydrostatic T"
+#        # new version read from namelist
+#        export DONT_USE_DPRES=1 # force recalculation of dpres increment from ps increment
+#        #export DONT_USE_DELZ=1 # force recalculation of delz increment
+#        export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"
+#        nprocs=1 mpitaskspernode=1 ${enkfscripts}/runmpi
+#        if [ $? -ne 0 -o ! -s ${increment_file} ]; then
+#           echo "problem creating ${increment_file}, stopping .."
+#           exit 1
+#        fi
+#     fi
+   done # do next forecast
+   cd ..
+else
+   if [ $cold_start == "false" ] && [ $jedirun != "true" ] ; then
       cd INPUT
       iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
-# link already computed increment files
+# move already computed increment files
       for fh in $iaufhrs2; do
          export increment_file="fv3_increment${fh}.nc"
          /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
       done
       cd ..
-#   fi
-#fi
+   fi
+fi
 
 # setup model namelist parameters
 if [ "$cold_start" == "true" ]; then
@@ -561,11 +578,22 @@ sed -i -e "s/CRES/C${RES}/g" input.nml
 cat input.nml
 ls -l INPUT
 
+   source $MODULESHOME/init/sh
+   module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
+   module load hpc/1.1.0
+   module load hpc-intel/2018.4
+   module unload mkl/2020.2
+   module load mkl/2018.4
+   module load hpc-impi/2018.4
+   module load python/3.7.5
+   module load hdf5/1.10.6-parallel
+
 # run model
 export PGM=$FCSTEXEC
 ldd $FCSTEXEC
 echo "start running model `date`"
-${enkfscripts}/runmpi
+#${enkfscripts}/runmpi
+ srun -N 1 -n 40 /work2/noaa/da/weihuang/cycling/scripts/exec_orion/fv3-nonhydro.exe
 if [ $? -ne 0 ]; then
    echo "model failed..."
    exit 1

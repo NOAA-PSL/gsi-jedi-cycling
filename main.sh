@@ -329,7 +329,8 @@ if [ $recenter_anal == "true" ]; then
        fi
    else
       # hybrid covariance
-      export fileprefix="sanl"
+     #export fileprefix="sanl"
+      export fileprefix="incr"
       echo "$analdate recenter enkf analysis ensemble around varanal analysis `date`"
       sh ${enkfscripts}/recenter_ens.sh > ${current_logdir}/recenter_ens_anal.out 2>&1
       recenter_done=`cat ${current_logdir}/recenter.log`
@@ -472,7 +473,13 @@ if [ $analdate -le $analdate_end ]  && [ $resubmit == 'true' ]; then
    if [ $resubmit == 'true' ]; then
       echo "resubmit script"
       echo "machine = $machine"
-      submit_job.sh $machine
+      echo "runtype = $runtype"
+      if [[ -z "${runtype}" ]]; then
+        echo "runtype is not defined. Stop"
+        exit 1
+      else
+        submit_job.sh -m $machine -r $runtype
+      fi
    fi
 fi
 
