@@ -2,9 +2,10 @@
 
  set -x
 
- sdate=2020010112
-#edate=2020010312
- edate=2020011512
+ sdate=2022010400
+ edate=2022011800
+
+ toprundir=/work2/noaa/da/weihuang/EMC_cycling
 
  plot_stats () {
    argnum=$#
@@ -34,7 +35,7 @@
    python diag.py --sdate=$sdate --edate=$edate \
      --dir1=${dir1} --dir2=${dir2} --interval=$interval \
      --lbl1=${lbl1} --lbl2=${lbl2} \
-     --datadir=/work2/noaa/da/weihuang/cycling > obs_count_${flag}.csv
+     --datadir=${toprundir} > obs_count_${flag}.csv
 
    python plot-jedi-gsi-diag.py --lbl1=${lbl1} --lbl2=${lbl2} \
 	--output=1 >> obs_count_${flag}.csv
@@ -57,23 +58,13 @@
    mv -f *.png ${dirname}/.
  }
 
- tar cvf ~/jg.tar plot-jedi-gsi-diag.py get_diag.sh
+ tar cvf ~/jg.tar plot-jedi-gsi-diag.py diag.py get_diag.sh
 #------------------------------------------------------------------------------
-#firstlist=(new.jedi_C96_lgetkf_sondesonly)
-#secondlist=(sepreint.jedi_C96_lgetkf_sondesonly)
-#firstlbls=(JEDI)
-#secondlbls=(REINT)
-
-#firstlist=(sondes-rerun.gsi-cycling)
-#secondlist=(sondes-rerun.gdas-cycling)
-#firstlbls=(sondes-rerun.GSI)
-#secondlbls=(sondes-rerun.JEDI)
 
  firstlist=(gsi-cycling)
-#secondlist=(gdas-cycling)
- secondlist=(gdas-cycling.PSonly)
- firstlbls=(GSI_PSonly)
- secondlbls=(JEDI_PSonly)
+ secondlist=(jedi-cycling)
+ firstlbls=(GSI_sondes)
+ secondlbls=(JEDI_sondes)
 
  deltlist=(0 6 0)
  hourlist=(6 12 12)

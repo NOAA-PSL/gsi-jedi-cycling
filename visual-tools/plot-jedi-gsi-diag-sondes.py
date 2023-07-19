@@ -323,14 +323,25 @@ class Plot_JEDI_GSI_Diag():
         self.cblevs = np.arange(0.0, 11.0, 1.0)
       else:
         self.cmapname = 'bwr'
+
+        endval = 1.0
+        startval = -endval
+        cintv = 0.05
+        bintv = 0.25 
+        cendval = endval + cint
+        bendval = endval + bint
+
+        self.clevs = np.arange(startval, cendval, cintv)
+        self.cblevs = np.arange(startval, bendval, bintv)
+
        #self.clevs = np.arange(-2.0, 2.1, 0.1)
        #self.cblevs = np.arange(-2.0, 3.0, 1.0)
        #self.clevs = np.arange(-4.0, 4.01, 0.01)
-       #self.clevs = [-4.0, -2.0, -1.5, -1.0, -0.5, -0.25, -0.1, -0.05, -0.02, -0.01, 0.0,
-       #              0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 1.0, 1.5, 2.0, 4.0]
        #self.cblevs = np.arange(-4.0, 5.0, 1.0)
-        self.clevs = np.arange(-0.5, 0.52, 0.02)
-        self.cblevs = np.arange(-0.5, 0.6, 0.1)
+       #self.clevs = np.arange(-0.5, 0.52, 0.02)
+       #self.cblevs = np.arange(-0.5, 0.6, 0.1)
+        self.clevs = np.arange(-1.0, 1.02, 0.02)
+        self.cblevs = np.arange(-1.0, 1.25, 0.25)
        #self.clevs = np.arange(-0.1, 0.11, 0.01)
        #self.cblevs = np.arange(-0.1, 0.15, 0.05)
 
@@ -449,7 +460,7 @@ class Plot_JEDI_GSI_Diag():
     plt.xlim(tmin, tmax)
    #plt.ylim(1.5, 2.25)
    #plt.ylim(1.0, 2.00)
-    plt.ylim(1.75, 2.25)
+    plt.ylim(1.50, 2.25)
     plt.grid(True)
     plt.legend(loc=0)
 
@@ -591,8 +602,10 @@ class Plot_JEDI_GSI_Diag():
    #  #plt.xlim(2.2,3.4)
    #Wind rms min: 3.0864446.2, max:   6.84
    #plt.xlim(3.25,5.5)
-   #plt.xlim(3.25,5.75)
-    plt.xlim(2.00,6.50)
+   #plt.xlim(3.50,9.50)
+   #plt.xlim(3.50,11.25)
+    plt.xlim(3.25,12.50)
+   #plt.xlim(2.00,6.50)
    #for PS
    #plt.xlim(5.00,11.00)
     plt.ylim(self.levbot,self.levtop)
@@ -622,7 +635,9 @@ class Plot_JEDI_GSI_Diag():
    #Temp rms min: 1.2050896.2, max:   4.07
    #plt.xlim(1.0,2.75)       
    #plt.xlim(0.75,2.50)       
-    plt.xlim(0.75,3.00)       
+   #plt.xlim(1.50,3.00)       
+   #plt.xlim(1.75,3.25)       
+    plt.xlim(1.00,3.75)       
    #For PS
    #plt.xlim(2.25,3.50)
    #plt.xlim(1.75,3.25)       
