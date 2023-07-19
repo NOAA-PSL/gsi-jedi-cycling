@@ -17,11 +17,13 @@
 
  if [ ! -L ${cold_start_dir} ]
  then
-   mkdir -p ${cold_start_dir}
+   mkdir -p ${run_dir}
+   cd ${run_dir}
+   ln -sf ../${datestr} .
 
    touch ${cold_start_dir}/cold_start_bias
 
-  #cd ${current_dir}
+   cd ${current_dir}
 
    cp textdata/gdas1.t00z.abias ${cold_start_dir}/.
    cp textdata/abias_pc ${cold_start_dir}/.

@@ -53,10 +53,10 @@ local ensemble DA:
   solver: GETKF
   vertical localization:
     fraction of retained variance: .95
-   #lengthscale: 14
-   #lengthscale units: levels
-    lengthscale: 4
-    lengthscale units: logp
+    lengthscale: 14
+    lengthscale units: levels
+   #lengthscale: 4
+   #lengthscale units: logp
   inflation:
     rtps: 0.85
     rtpp: 0.0
@@ -90,3 +90,4 @@ output increment:
 observations:
   observers:
   - !INC sondes.yaml
+  - !INC amsua_n19.yaml

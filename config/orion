@@ -134,8 +134,8 @@ fi
 export jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
 export jediblddir=/work2/noaa/da/weihuang/GDASApp/build
 
-export NOSAT="YES" # if yes, no radiances assimilated
-#export NOSAT="NO" # if yes, no radiances assimilated
+#export NOSAT="YES" # if yes, no radiances assimilated
+export NOSAT="NO" # if yes, no radiances assimilated
 export NOCONV="NO"
 export NOTLNMC="NO" # no TLNMC in GSI in GSI EnVar
 export NOOUTERLOOP="NO" # no outer loop in GSI EnVar
