@@ -5,14 +5,14 @@
 ##SBATCH -N 20
 #SBATCH -N 40
 #SBATCH --ntasks-per-node=40
-#SBATCH -p orion
-#SBATCH -J jedicycl
-#SBATCH -e logs/jedicycl.%J.err
-#SBATCH -o logs/jedicycl.%J.out
+#SBATCH -p MACHINE
+#SBATCH -J CYCLENAME
+#SBATCH -e logs/CYCLENAME.%J.err
+#SBATCH -o logs/CYCLENAME.%J.out
 
 export NODES=$SLURM_NNODES
 export corespernode=$SLURM_CPUS_ON_NODE
-export machine=orion
+export machine=MACHINE
 
 # for control forecast
 if [ $NODES -eq 10 ]; then

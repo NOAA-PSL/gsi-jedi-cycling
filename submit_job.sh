@@ -2,7 +2,6 @@
 
 machine=orion
 runtype=gsi
-exptname=${runtype}-cycling
 
 function show_usage () {
     printf "Usage: $0 [options [parameters]]\n"
@@ -53,6 +52,11 @@ then
 fi
 
 cold-start.sh $runtype
+
+cyclename=${runtype}cycl
+sed -e "s/CYCLENAME/${cyclename}/g" \
+    -e "s/MACHINE/${machine}/g" \
+       preamble/template > preamble/${machine}
 
 cat preamble/${machine} config/${machine} > job.sh
 
