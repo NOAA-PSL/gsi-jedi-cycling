@@ -145,7 +145,7 @@ if [ $use_correlated_oberrs == ".true." ];  then
 else
   lupdqc=.false.
 fi
-SETUP="verbose=.true.,reduce_diag=.true.,lwrite_peakwt=.true.,lread_obs_save=$lread_obs_save,lread_obs_skip=$lread_obs_skip,l4densvar=.true.,ens_nstarthr=3,iwrtinc=-1,nhr_assimilation=6,nhr_obsbin=$FHOUT,use_prepb_satwnd=$use_prepb_satwnd,lwrite4danl=$lwrite4danl,passive_bc=.true.,newpc4pred=.true.,adp_anglebc=.true.,angord=4,use_edges=.false.,diag_precon=.true.,step_start=1.e-3,emiss_bc=.true.,lobsdiag_forenkf=$lobsdiag_forenkf,lwrite_predterms=.true.,thin4d=.true.,lupdqc=$lupdqc,nhr_anal=$iaufhrs"
+SETUP="verbose=.true.,reduce_diag=.false.,lwrite_peakwt=.true.,lread_obs_save=$lread_obs_save,lread_obs_skip=$lread_obs_skip,l4densvar=.true.,ens_nstarthr=3,iwrtinc=-1,nhr_assimilation=6,nhr_obsbin=$FHOUT,use_prepb_satwnd=$use_prepb_satwnd,lwrite4danl=$lwrite4danl,passive_bc=.true.,newpc4pred=.true.,adp_anglebc=.true.,angord=4,use_edges=.false.,diag_precon=.true.,step_start=1.e-3,emiss_bc=.true.,lobsdiag_forenkf=$lobsdiag_forenkf,lwrite_predterms=.true.,thin4d=.true.,lupdqc=$lupdqc,nhr_anal=$iaufhrs"
 
 if [[ "$HXONLY" = "YES" ]]; then
    #SETUP="$SETUP,lobserver=.true.,l4dvar=.true." # can't use reduce_diag=T
@@ -455,13 +455,13 @@ EOF
 
 berror=${BERROR:-$fixgsi/Big_Endian/global_berror.l${LEVS}y${NLAT}.f77}
 
-satinfo=${SATINFO:-$fixgsi/global_satinfo.txt}
+convinfo=${CONVINFO}
+satinfo=${SATINFO}
+ozinfo=${OZINFO}
 atmsfilter=${ATMSFILTER:-$fixgsi/atms_beamwidth.txt}
 scaninfo=$fixgsi/global_scaninfo.txt
 satangl=$fixgsi/global_satangbias.txt
 pcpinfo=$fixgsi/global_pcpinfo.txt
-ozinfo=${OZINFO:-$fixgsi/global_ozinfo.txt}
-convinfo=${CONVINFO:-$fixgsi/global_convinfo.txt}
 insituinfo=${INSITUINFO:-$fixgsi/global_insituinfo.txt}
 aeroinfo=${AEROINFO:-$fixgsi/global_aeroinfo.txt}
 errtable=$fixgsi/prepobs_errtable.global
@@ -484,12 +484,12 @@ $ncp $anavinfo ./anavinfo
 $ncp $radcloudinfo ./cloudy_radiance_info.txt
 $nln $berror   ./berror_stats
 $nln $satangl  ./satbias_angle
-$nln $satinfo  ./satinfo
+$nln $SATINFO  ./satinfo
 $nln $atmsfilter ./atms_beamwidth.txt
 $nln $scaninfo ./scaninfo
 $nln $pcpinfo  ./pcpinfo
-$nln $ozinfo   ./ozinfo
-$nln $convinfo ./convinfo
+$nln $OZINFO   ./ozinfo
+$nln $CONVINFO ./convinfo
 $nln $insituinfo ./insituinfo
 $nln $aeroinfo ./aeroinfo
 $nln $errtable ./errtable
@@ -735,6 +735,11 @@ $nln $GBIAS_PC           ./satbias_pc
 $nln $GSATANG            ./satbias_angle
 $nln $GBIASAIR           ./aircftbias_in
 
+$nln $ABIAS              ./satbias_out
+$nln $ABIASPC            ./satbias_pc.out
+$nln $ABIASAIR           ./aircftbias_out
+
+
 SFCG03=${SFCG03:-$datges/bfg_${adate}_fhr03_${charnanal}}
 $nln $SFCG03               ./sfcf03
 SFCG06=${SFCG06:-$datges/bfg_${adate}_fhr06_${charnanal}}
@@ -972,18 +977,18 @@ done
 wait
 echo "Time after diagnostic loop is `date` "
 
+#if [ ! -s $savdir/diag_conv_uv_ges.${adate}_${charnanal2}.nc4 ]; then
+#   exit 1
+#fi
+#if [ ! -s $savdir/diag_conv_t_ges.${adate}_${charnanal2}.nc4 ]; then
+#   exit 1
+#fi
+#if [ ! -s $savdir/diag_conv_q_ges.${adate}_${charnanal2}.nc4 ]; then
+#   exit 1
+#fi
 if [ ! -s $savdir/diag_conv_uv_ges.${adate}_${charnanal2}.nc4 ]; then
    exit 1
 fi
-if [ ! -s $savdir/diag_conv_t_ges.${adate}_${charnanal2}.nc4 ]; then
-   exit 1
-fi
-if [ ! -s $savdir/diag_conv_q_ges.${adate}_${charnanal2}.nc4 ]; then
-   exit 1
-fi
-#if [ ! -s $savdir/diag_conv_ps_ges.${adate}_${charnanal2}.nc4 ]; then
-#   exit 1
-#fi
 
 fi # skipcat
 

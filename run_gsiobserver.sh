@@ -35,15 +35,13 @@ if [ $skipcat == 'false' ]; then
    if [ $NOCONV == 'YES' ]; then
      diagfile=${datapath2}/diag_amsua_n15_ges.${analdate}_${charnanal2}.nc4
    else
-     diagfile=${datapath2}/diag_conv_uv_ges.${analdate}_${charnanal2}.nc4
-    #diagfile=${datapath2}/diag_conv_ps_ges.${analdate}_${charnanal2}.nc4
+    diagfile=${datapath2}/diag_conv_uv_ges.${analdate}_${charnanal2}.nc4
    fi
 else
    if [ $NOCONV == 'YES' ]; then
      diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.amsua_n15_01.nc4
    else
-    #diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.conv_uv_01.nc4
-     diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.conv_ps_01.nc4
+     diagfile=${datapath2}/gsitmp_${charnanal2}/pe0000.conv_uv_01.nc4
    fi
 fi
 echo "skipcat $skipcat diagfile $diagfile"
@@ -77,6 +75,27 @@ export nprocs=`expr $cores \/ $OMP_NUM_THREADS`
 export mpitaskspernode=`expr $corespernode \/ $OMP_NUM_THREADS`
 echo "running with $OMP_NUM_THREADS threads ..."
 
+#if [ -z $biascorrdir ]; then # cycled bias correction files
+    export GBIAS=${datapathm1}/${PREINPm1}abias
+    export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
+    export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
+    export ABIAS=${datapath2}/${PREINP}abias
+    export ABIASPC=${datapath2}/${PREINP}abias_pc
+    export ABIASAIR=${datapath2}/${PREINP}abias_air
+    export ABIASe=${datapath2}/${PREINP}abias_int
+#else # externally specified bias correction files.
+#    if [ -s ${biascorrdir}/${analdate}/${PREINP}abias ]; then
+#    export GBIAS=${biascorrdir}/${analdate}/${PREINP}abias
+#    export GBIAS_PC=${biascorrdir}/${analdate}/${PREINP}abias_pc
+#    export GBIASAIR=${biascorrdir}/${analdate}/${PREINP}abias_air
+#    export ABIAS=${biascorrdir}/${analdate}/${PREINP}abias
+#    else
+#    export GBIAS=${biascorrdir}/abias
+#    export GBIAS_PC=${biascorrdir}/abias_pc
+#    export GBIASAIR=${biascorrdir}/abias_air
+#    fi
+#fi
+
 biaslist=(abias abias_pc abias_air)
 env_list=(GBIAS GBIAS_PC GBIASAIR)
 for n in ${!biaslist[@]}
@@ -95,22 +114,6 @@ do
     fi
   fi
 done
-
-#if [ -z $biascorrdir ]; then # cycled bias correction files
-#    export GBIAS=${datapathm1}/${PREINPm1}abias
-#    export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
-#    export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
-#else # externally specified bias correction files.
-#    if [ -s ${biascorrdir}/${analdate}/${PREINP}abias ]; then
-#    export GBIAS=${biascorrdir}/${analdate}/${PREINP}abias
-#    export GBIAS_PC=${biascorrdir}/${analdate}/${PREINP}abias_pc
-#    export GBIASAIR=${biascorrdir}/${analdate}/${PREINP}abias_air
-#    else
-#    export GBIAS=${biascorrdir}/abias
-#    export GBIAS_PC=${biascorrdir}/abias_pc
-#    export GBIASAIR=${biascorrdir}/abias_air
-#    fi
-#fi
 
 export GSATANG=$fixgsi/global_satangbias.txt # not used, but needs to exist
 

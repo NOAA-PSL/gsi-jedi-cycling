@@ -1,32 +1,41 @@
 #!/bin/sh
 set -x
 # need symlinks for satbias_angle, satbias_in, satinfo
-if [ -z $biascorrdir ]; then # cycled bias correction files
+#if [ -z $biascorrdir ]; then # cycled bias correction files
     export GBIAS=${datapathm1}/${PREINPm1}abias
     export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
     export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
+    export ABIAS=${datapath2}/${PREINP}abias
+    export ABIASPC=${datapath2}/${PREINP}abias_pc
+    export ABIASAIR=${datapath2}/${PREINP}abias_air
+    export ABIASe=${datapath2}/${PREINP}abias_int
+
     #if [ "$cold_start_bias" == "true" ]; then
-    if [ -s ${datapath2}/${PREINP}abias ]; then
+#    if [ -s ${datapath2}/${PREINP}abias ]; then
       # if bias correction files have already been created for this analysis time, use them
-      export GBIAS=${datapath2}/${PREINP}abias
-      export GBIAS_PC=${datapath2}/${PREINP}abias_pc
-      export GBIASAIR=${datapath2}/${PREINP}abias_air
-    fi
-else # externally specified bias correction files.
-    if [ -s ${biascorrdir}/${analdate}//${PREINP}abias ]; then
-    export GBIAS=${biascorrdir}/${analdate}//${PREINP}abias
-    export GBIAS_PC=${biascorrdir}/${analdate}//${PREINP}abias_pc
-    export GBIASAIR=${biascorrdir}/${analdate}//${PREINP}abias_air
-    else
-    export GBIAS=${biascorrdir}/abias
-    export GBIAS_PC=${biascorrdir}/abias_pc
-    export GBIASAIR=${biascorrdir}/abias_air
-    fi
-fi
+#      export GBIAS=${datapath2}/${PREINP}abias
+#      export GBIAS_PC=${datapath2}/${PREINP}abias_pc
+#      export GBIASAIR=${datapath2}/${PREINP}abias_air
+#    fi
+#else # externally specified bias correction files.
+#    if [ -s ${biascorrdir}/${analdate}//${PREINP}abias ]; then
+#    export GBIAS=${biascorrdir}/${analdate}//${PREINP}abias
+#    export GBIAS_PC=${biascorrdir}/${analdate}//${PREINP}abias_pc
+#    export GBIASAIR=${biascorrdir}/${analdate}//${PREINP}abias_air
+#    else
+#    export GBIAS=${biascorrdir}/abias
+#    export GBIAS_PC=${biascorrdir}/abias_pc
+#    export GBIASAIR=${biascorrdir}/abias_air
+#    fi
+#fi
 export GSATANG=$fixgsi/global_satangbias.txt # not used, but needs to exist
 
 ln -fs $GBIAS   ${datapath2}/satbias_in
 ln -fs $GBIAS_PC   ${datapath2}/satbias_pc
+ln -fs $GBIASAIR ${datapath2}/aircftbias_in
+ln -fs $ABIAS   ${datapath2}/satbias_out
+ln -fs $ABIASPC ${datapath2}/satbias_pc.out
+ln -fs $ABIASAIR ${datapath2}/aircftbias_out
 ln -fs $GSATANG ${datapath2}/satbias_angle
 #ln -fs ${gsipath}/fix/global_satinfo.txt ${datapath2}/satinfo
 ln -fs ${SATINFO} ${datapath2}/satinfo
@@ -43,10 +52,8 @@ ln -fs ${current_logdir}/convinfo.out ${datapath2}/fort.205
 
 # remove previous analyses
 if [ $cleanup_anal == 'true' ]; then
-  #/bin/rm -f ${datapath2}/sanl_*mem*
-  #/bin/rm -f ${datapath2}/sanl_*ensmean
-   /bin/rm -f ${datapath2}/incr_*mem*
-   /bin/rm -f ${datapath2}/incr_*ensmean
+   /bin/rm -f ${datapath2}/sanl_*mem*
+   /bin/rm -f ${datapath2}/sanl_*ensmean
 fi
 
 niter=1

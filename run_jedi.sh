@@ -27,19 +27,16 @@ source ~/gdasenv
 executable=${jediblddir}/bin/fv3jedi_letkf.x
 ulimit -s unlimited
 
-#module load mkl/2020.2 armforge/22.0.2
-
 echo "run Jedi starting at `date`"
 
 cd ${run_dir}
 rm -rf ioda_v2_data diag
 mkdir -p ioda_v2_data diag
 
-#for type in conv_q conv_t conv_uv amsua_n19 iasi_metop-b
+#cp diag_* diag/.
 #for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
-#for type in conv_ps
-#for type in amsua_n19 conv_q conv_t conv_uv
-for type in conv_q conv_t conv_uv amsua_n19
+#for type in amsua_n19 conv_ps conv_q conv_t conv_uv
+for type in amsua_n19 conv_q conv_t conv_uv
 do
   cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
 done
@@ -59,19 +56,27 @@ echo "proc_gsi_ncdiag.py elapsed Time: $(($time_end-$time_start)) seconds"
 time_start=$(date +%s)
 
 cd ioda_v2_data
-
+#flst=`ls *_ps_obs_${yyyymmddhh}.nc4`
 #python ${iodablddir}/bin/combine_obsspace.py \
-#  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
-#     sfcship_ps_obs_${yyyymmddhh}.nc4 \
-#     sondes_ps_obs_${yyyymmddhh}.nc4 \
-#  -o ps_obs_${yyyymmddhh}.nc4
+#    -i ${flst} -o ps_obs_${yyyymmddhh}.nc4
 
+#cp sfc_ps_obs_${yyyymmddhh}.nc4 ps_obs_${yyyymmddhh}.nc4
+
+flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
 python ${iodablddir}/bin/combine_obsspace.py \
   -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
      sondes_tv_obs_${yyyymmddhh}.nc4 \
      sondes_uv_obs_${yyyymmddhh}.nc4 \
      sondes_q_obs_${yyyymmddhh}.nc4 \
-  -o sondes_obs_${yyyymmddhh}.nc4
+  -o sondes_obs_${yyyymmddhh}.nc4 &
+
+#flst="sfc_ps_obs_${yyyymmddhh}.nc4 sfcship_ps_obs_${yyyymmddhh}.nc4 sondes_ps_obs_${yyyymmddhh}.nc4"
+#python ${iodablddir}/bin/combine_obsspace.py \
+#  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
+#     sfcship_ps_obs_${yyyymmddhh}.nc4 \
+#     sondes_ps_obs_${yyyymmddhh}.nc4 \
+#  -o ps_obs_${yyyymmddhh}.nc4 &
+#wait
 
 time_end=$(date +%s)
 echo "combine_obsspace.py elapsed Time: $(($time_end-$time_start)) seconds"
@@ -134,10 +139,9 @@ cd ${run_dir}
 
 #--------------------------------------------------------------------------------------------
  cp ${enkfscripts}/genyaml/config.template .
+ cp ${enkfscripts}/genyaml/*ps.yaml .
  cp ${enkfscripts}/genyaml/halo.distribution .
- cp ${enkfscripts}/genyaml/halo.distribution.iasi .
  cp ${enkfscripts}/genyaml/rr.distribution .
- cp ${enkfscripts}/genyaml/ps.yaml .
  cp ${enkfscripts}/genyaml/sondes.yaml .
  cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
  cp ${enkfscripts}/genyaml/amsua_n15.yaml .
@@ -153,17 +157,8 @@ cd ${run_dir}
 
  export observer_layout_x=3
  export observer_layout_y=4
-#export solver_layout_x=8
-#export solver_layout_y=5
-#export solver_layout_x=6
-#export solver_layout_y=10
  export solver_layout_x=12
  export solver_layout_y=22
-
-#export observer_layout_x=3
-#export observer_layout_y=4
-#export solver_layout_x=8
-#export solver_layout_y=5
  export NMEM_ENKF=80
 
  python ${enkfscripts}/genyaml/genconfig.py \
@@ -186,12 +181,12 @@ cd ${run_dir}
 #export OOPS_TRACK=-11
 #export OOPS_TRACE=1
 
+ export ALLINEA_NO_TIMEOUT=true
+
  echo "run observer"
 
  rm -rf analysis hofx stdoutNerr solver
  mkdir -p analysis/mean analysis/increment hofx solver
-
- export ALLINEA_NO_TIMEOUT=true
 
 number_members=${NMEM_ENKF}
 n=0
@@ -211,12 +206,8 @@ do
     #srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
     #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
 
-    #time map --profile srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
-    #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
-
-     srun -N 2 -n 72 --ntasks-per-node=36 ${executable} \
+     srun -N 2 -n 72 --ntasks-per-node=40 ${executable} \
           observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
-
      n=$(( $n + 1 ))
    done
    wait
@@ -233,8 +224,7 @@ time_start=$(date +%s)
  number_members=81
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
-#for obstype in sondes amsua_n19 iasi_metop-b
-#for obstype in ps
+#for obstype in ps sondes amsua_n19
  for obstype in sondes amsua_n19
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
@@ -253,20 +243,16 @@ time_start=$(date +%s)
  echo "run solver"
  cd ${run_dir}
 
-export OOPS_DEBUG=-11
+export OOPS_DEBUG=1
 export OOPS_TRACK=-11
 export OMP_NUM_THREADS=1
-export corespernode=36
 
+export corespernode=36
 export mpitaskspernode=40
+
 nprocs=1584
 totnodes=40
 
-#nprocs=792
-#totnodes=20
-
-#totnodes=8
-#nprocs=240
 
 #echo "srun -N $totnodes -n $nprocs -c $count --ntasks-per-node=$mpitaskspernode \\" >> ${run_dir}/logs/run_jedi.out
 #echo "  --exclusive --cpu-bind=cores --verbose $executable getkf.yaml" >> ${run_dir}/logs/run_jedi.out
@@ -359,8 +345,6 @@ fi
 
 run_jedi_time_end=$(date +%s)
 echo "run_jedi.sh elapsed Time: $(($run_jedi_time_end-$run_jedi_time_start)) seconds"
-
-export mpitaskspernode=36
 
 echo "$jedi_done" > ${run_dir}/logs/run_jedi.log
 echo "jedi_done = $jedi_done" >> ${run_dir}/logs/run_jedi.out

@@ -11,7 +11,6 @@ cris-fsr_npp      2       0.0     1.0    sea     Rcov_crisnpp
 met_guess::
 !var     level    crtm_use    desc              orig_name
   ps        1      -1         surface_pressure     ps
-  dpres   127      -1         pressure_thickness   dprse
   z         1      -1         geopotential_height  phis
   u       127       2         zonal_wind           u
   v       127       2         meridional_wind      v
@@ -35,7 +34,6 @@ state_derivatives::
  oz   127    met_guess
  cw   127    met_guess
  prse 128    met_guess
- dprse 127   met_guess
 ::
 
 state_tendencies::
@@ -47,7 +45,6 @@ state_tendencies::
  cw   127     met_guess
  oz   127     met_guess
  prse 128     met_guess
- dprse 127    met_guess
 ::
 
 state_vector::  
@@ -61,7 +58,7 @@ state_vector::
  ql      127      1     met_guess    ql 
  qi      127      1     met_guess    qi 
  prse    128      0     met_guess    prse
- dpres   127      0     met_guess    prse   
+!dpres   127      0     met_guess    prse   
  ps        1      0     met_guess    prse
  sst       1      0     met_guess    sst
 ::
@@ -73,7 +70,6 @@ state_vector_efsoi::
  v       127      0     met_guess    v
  tv      127      0     met_guess    tv
  q       127      1     met_guess    q
- dpres   127      0     met_guess    prse   
  ps        1      0     met_guess    prse
 ::
 
@@ -88,7 +84,7 @@ control_vector_enkf::
  tv      127      0       1.50        -1.0     state    tv
  q       127      1       1.50        -1.0     state    q
  oz      127      1       2.00        -1.0     state    oz
- dpres   127      0       1.00        -1.0     state    prse
+!dpres   127      0       1.00        -1.0     state    prse
 !sst       1      0       1.00        -1.0     state    sst
 !cw      127      1       1.00        -1.0     state    cw
 !stl       1      0       3.00        -1.0     motley   sst
@@ -100,7 +96,6 @@ control_vector::
  sf      127      0       1.00        -1.0     state    u,v
  vp      127      0       1.00        -1.0     state    u,v
  ps        1      0       1.20        -1.0     state    prse
- dpres   127      0       1.00        -1.0     state    prse
  t       127      0       1.50        -1.0     state    tv
  q       127      1       1.50        -1.0     state    q
  oz      127      1       2.00        -1.0     state    oz
