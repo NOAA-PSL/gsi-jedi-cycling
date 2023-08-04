@@ -52,13 +52,13 @@ if [ "$REALTIME" == "NO" ]; then
 #sh create_satinfo.sh $analdate > $SATINFO
 #cd ..
 
-#   Set CONVINFO
+#Set CONVINFO
 export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
 
-#   Set OZINFO
+#Set OZINFO
 export OZINFO=${enkfscripts}/textdata/global_ozinfo.txt
 
-#   Set SATINFO
+#Set SATINFO
 export SATINFO=${enkfscripts}/satinfo/global_satinfo.txt
 
 fi
@@ -241,7 +241,6 @@ else # just run observer (EnKF only)
   #Create diag files.
    gsiobserver_start=$(date +%s)
    echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
-   echo "${enkfscripts}/run_gsiobserver.sh 1.1"
    sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer.out 2>&1
    # once observer has completed, check log files.
    gsi_done=`cat ${current_logdir}/run_gsi_observer.log`
@@ -256,8 +255,8 @@ else # just run observer (EnKF only)
 fi
 
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
-   run_jedi_start=$(date +%s)
    echo "Run JEDI for: $analdate start at: `date`"
+   run_jedi_start=$(date +%s)
 
    if [ -f ${current_logdir}/run_jedi.log ]
    then
@@ -330,7 +329,7 @@ if [ $recenter_anal == "true" ]; then
        fi
    else
       # hybrid covariance
-      export fileprefix="incr"
+      export fileprefix="sanl"
       echo "$analdate recenter enkf analysis ensemble around varanal analysis `date`"
       sh ${enkfscripts}/recenter_ens.sh > ${current_logdir}/recenter_ens_anal.out 2>&1
       recenter_done=`cat ${current_logdir}/recenter.log`
@@ -352,7 +351,6 @@ if [ $replay_controlfcst == 'true' ] && [ $replay_run_observer == "true" ]; then
    export lobsdiag_forenkf='.false.'
    export skipcat="false"
    echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
-   echo "${enkfscripts}/run_gsiobserver.sh 1"
    sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer_control.out 2>&1
    # once observer has completed, check log files.
    gsi_done=`cat ${current_logdir}/run_gsi_observer.log`
@@ -383,7 +381,6 @@ if [ $nanals2 -gt 0 ] && [ $run_gsiobserver -ne 0 ] && [ -s $datapath2/sfg2_${an
    export lobsdiag_forenkf='.false.'
    export skipcat="false"
    echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
-   echo "${enkfscripts}/run_gsiobserver.sh 2"
    sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsiobserver.out 2>&1
    # once observer has completed, check log files.
    gsi_done=`cat ${current_logdir}/run_gsi_observer.log`
@@ -468,7 +465,6 @@ else
 fi
 
 done # next analysis time
-
 
 if [ $analdate -le $analdate_end ]  && [ $resubmit == 'true' ]; then
    echo "current time is $analdate"

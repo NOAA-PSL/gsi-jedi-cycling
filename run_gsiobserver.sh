@@ -19,13 +19,13 @@ export NLAT=$((${LATA}+2))
 export CO2DIR=$fixgsi
 
 # charanal is an env var set in parent script
-export SIGANL03=${datapath2}/incr_${analdate}_fhr03_${charnanal}
-export SIGANL04=${datapath2}/incr_${analdate}_fhr04_${charnanal}
-export SIGANL05=${datapath2}/incr_${analdate}_fhr05_${charnanal}
-export SIGANL06=${datapath2}/incr_${analdate}_fhr06_${charnanal}
-export SIGANL07=${datapath2}/incr_${analdate}_fhr07_${charnanal}
-export SIGANL08=${datapath2}/incr_${analdate}_fhr08_${charnanal}
-export SIGANL09=${datapath2}/incr_${analdate}_fhr09_${charnanal}
+export SIGANL03=${datapath2}/sanl_${analdate}_fhr03_${charnanal}
+export SIGANL04=${datapath2}/sanl_${analdate}_fhr04_${charnanal}
+export SIGANL05=${datapath2}/sanl_${analdate}_fhr05_${charnanal}
+export SIGANL06=${datapath2}/sanl_${analdate}_fhr06_${charnanal}
+export SIGANL07=${datapath2}/sanl_${analdate}_fhr07_${charnanal}
+export SIGANL08=${datapath2}/sanl_${analdate}_fhr08_${charnanal}
+export SIGANL09=${datapath2}/sanl_${analdate}_fhr09_${charnanal}
 export BIASO=${datapath2}/${PREINP}abias 
 export BIASO_PC=${datapath2}/${PREINP}abias_pc 
 export SATANGO=${datapath2}/${PREINP}satang
@@ -95,26 +95,6 @@ echo "running with $OMP_NUM_THREADS threads ..."
 #    export GBIASAIR=${biascorrdir}/abias_air
 #    fi
 #fi
-
-biaslist=(abias abias_pc abias_air)
-env_list=(GBIAS GBIAS_PC GBIASAIR)
-for n in ${!biaslist[@]}
-do
-  biasname=${biaslist[$n]}
-  env_name=${env_list[$n]}
-  if [ -f ${datapathm1}/${PREINPm1}${biasname} ]
-  then
-    export ${env_name}=${datapathm1}/${PREINPm1}${biasname}
-  else
-    if [ -f ${biascorrdir}/${analdate}/${PREINP}${biasname} ]
-    then
-      export ${env_name}=${biascorrdir}/${analdate}/${PREINP}${biasname}
-    else
-      export ${env_name}=${biascorrdir}/${biasname}
-    fi
-  fi
-done
-
 export GSATANG=$fixgsi/global_satangbias.txt # not used, but needs to exist
 
 export lread_obs_save=".false."

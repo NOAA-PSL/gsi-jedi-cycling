@@ -1,0 +1,5 @@
+dump: gdas
+gsi_bc_root: /work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022010312/  
+ufo_bc_root: /work2/noaa/da/weihuang/EMC_cycling/scripts/jedi-cycling/test_out/ 
+work_root: /work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/
+satbias2ioda: /work2/noaa/da/weihuang/GDASApp/build/bin/satbias2ioda.x

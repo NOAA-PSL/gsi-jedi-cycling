@@ -1,7 +1,7 @@
 #!/bin/bash
 
 machine=orion
-runtype=gsi
+runtype=jedi
 
 function show_usage () {
     printf "Usage: $0 [options [parameters]]\n"

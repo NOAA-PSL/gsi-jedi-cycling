@@ -22,9 +22,9 @@ export month=`echo $analdate |cut -c 5-6`
 export day=`echo $analdate |cut -c 7-8`
 export hour=`echo $analdate |cut -c 9-10`
 
-source ~/intelenv
+source ~/gdasenv
 
-interpsrcdir=/work2/noaa/gsienkf/weihuang/production/run/transform/interp_fv3cube2gaussian
+interpsrcdir=/work2/noaa/da/weihuang/EMC_cycling/scripts/jedi-cycling/interp_fv3cube2gaussian
 prefix=${year}${month}${day}.${hour}0000.
 
 workdir=${datapath}/${analdate}

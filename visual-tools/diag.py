@@ -61,6 +61,11 @@ class DiagObFit():
     self.runid = runid
     self.hem = hem
 
+    print('self.sdate = ', self.sdate)
+    print('self.edate = ', self.edate)
+    print('self.runid = ', self.runid)
+    print('self.hem = ', self.hem)
+
    #if sondesonly False, aircraft, pibals and surface data included also
    #self.sondesonly = False # use only 120,132,220,221,232 (sondes,pibals,drops)
     self.sondesonly = sondesonly
@@ -159,9 +164,13 @@ class DiagObFit():
         obsfile_t  = os.path.join(datapath,'%s/diag_conv_t_ges.%s.nc4' % (date,date))
         obsfile_q  = os.path.join(datapath,'%s/diag_conv_q_ges.%s.nc4' % (date,date))
 
-      nc_uv = Dataset(obsfile_uv)
-      nc_t = Dataset(obsfile_t)
-      nc_q = Dataset(obsfile_q)
+      print('uv file:', obsfile_uv)
+      print('t file:', obsfile_t)
+      print('q file:', obsfile_q)
+
+      nc_uv = Dataset(obsfile_uv, 'r')
+      nc_t = Dataset(obsfile_t, 'r')
+      nc_q = Dataset(obsfile_q, 'r')
 
       uv_code = nc_uv['Observation_Type'][:]
       t_code = nc_t['Observation_Type'][:]
@@ -383,9 +392,8 @@ if __name__== '__main__':
   interval = 12
   sdate = '2020010112'
   edate = '2020010218'
-  dir1 = 'gsi_C96_lgetkf_sondesonly'
+  dir1 = 'gsi-cycling'
   dir2 = 'gdas-cycling'
-  datadir = '/work2/noaa/da/weihuang/cycling'
   runid = 'ensmean'
   hem = 'NH'
 
@@ -395,7 +403,7 @@ if __name__== '__main__':
   latbound=30
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'sdate=', 'edate=',
-                                                'datadir=', 'runid=', 'hem=',
+                                                'runid=', 'hem=',
                                                 'dir1=', 'dir2=', 'interval=',
                                                 'lbl1=', 'lbl2='])
   for o, a in opts:
@@ -407,8 +415,6 @@ if __name__== '__main__':
       sdate = a
     elif o in ('--edate'):
       edate = a
-    elif o in ('--datadir'):
-      datadir = a
     elif o in ('--runid'):
       runid = a
     elif o in ('--hem'):
@@ -428,6 +434,12 @@ if __name__== '__main__':
 
 #-----------------------------------------------------------------------------------------
 
+  print('sdate = ', sdate)
+  print('edate = ', edate)
+  print('runid = ', runid)
+  print('dir1 = ', dir1)
+  print('dir2 = ', dir2)
+
   dof = DiagObFit(debug=debug, output=output, sdate=sdate, edate=edate,
                   runid=runid, hem=hem, sondesonly=sondesonly, interval=interval,
                   noair=noair, aironly=aironly, latbound=latbound)
@@ -435,7 +447,7 @@ if __name__== '__main__':
   lbllist = [lbl1, lbl2]
   dirlist = [dir1, dir2]
   for n in range(len(dirlist)):
-    datapath = '%s/%s' %(datadir, dirlist[n])
+    datapath = dirlist[n]
     outfile = 'stats_%s' %(lbllist[n])
     dof.process(datapath, outfile)
 

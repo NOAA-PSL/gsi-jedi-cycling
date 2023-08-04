@@ -1,0 +1,16 @@
+(gdasapp) (gdasapp) bash-4.2$ diff -r pyiodaconv python3.7/pyiodaconv/
+diff -r pyiodaconv/gsi_ncdiag.py python3.7/pyiodaconv/gsi_ncdiag.py
+11c11
+< from orddicts import DefaultOrderedDict
+---
+> from pyiodaconv.orddicts import DefaultOrderedDict
+17c17
+< import ioda_conv_engines as iconv
+---
+> import pyiodaconv.ioda_conv_engines as iconv
+diff -r pyiodaconv/ioda_conv_engines.py python3.7/pyiodaconv/ioda_conv_engines.py
+3c3
+< import ioda_obs_space as ioda_os
+---
+> from pyioda import ioda_obs_space as ioda_os
+

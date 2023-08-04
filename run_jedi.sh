@@ -23,7 +23,8 @@ yyyymmddhh=${year}${month}${day}${hour}
 #input file fir.
 run_dir=${datapath}/${analdate}
 
-source ~/gdasenv
+#source ~/gdasenv
+source ${enkfscripts}/gdasenv
 executable=${jediblddir}/bin/fv3jedi_letkf.x
 ulimit -s unlimited
 
@@ -48,7 +49,7 @@ echo "in run_dir: ${run_dir}"
 
 time_start=$(date +%s)
 
-python ${iodablddir}/bin/proc_gsi_ncdiag.py \
+python ${jediblddir}/bin/proc_gsi_ncdiag.py \
        -o ioda_v2_data diag
 
 time_end=$(date +%s)
@@ -63,7 +64,7 @@ cd ioda_v2_data
 #cp sfc_ps_obs_${yyyymmddhh}.nc4 ps_obs_${yyyymmddhh}.nc4
 
 flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
-python ${iodablddir}/bin/combine_obsspace.py \
+python ${jediblddir}/bin/combine_obsspace.py \
   -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
      sondes_tv_obs_${yyyymmddhh}.nc4 \
      sondes_uv_obs_${yyyymmddhh}.nc4 \
@@ -86,10 +87,29 @@ cd ..
 minute=0
 second=0
 
+cd ${run_dir}
+export GBIAS=${datapathm1}/${PREINPm1}abias
+export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
+export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
+ln -fs $GBIAS   ${datapath2}/abias
+ln -fs $GBIAS_PC   ${datapath2}/abias_pc
+ln -fs $GBIASAIR ${datapath2}/abias_air
+
 ensdatadir=${run_dir}/Data
 mkdir -p ${ensdatadir}
-cd ${ensdatadir}
+mkdir -p ${ensdatadir}/satbias
 
+cat > satbias.yaml << EOF
+dump: gdas
+gsi_bc_root: ${run_dir}
+ufo_bc_root: ${ensdatadir}/satbias
+work_root: ${run_dir}
+satbias2ioda: ${jediblddir}/bin/satbias2ioda.x
+EOF
+
+python ${enkfscripts}/run_satbias_conv.py --config satbias.yaml
+
+cd ${ensdatadir}
 echo "cd ${ensdatadir}" >> ${run_dir}/logs/run_jedi.out
 
  sed -e "s?SYEAR?${year}?g" \
@@ -106,11 +126,13 @@ echo "cd ${ensdatadir}" >> ${run_dir}/logs/run_jedi.out
      -e "s?ESECOND?${second}?g" \
      ${enkfscripts}/genyaml/coupler.res.template > coupler.res
 
+#crtmdir=${fixcrtm}
+#ln -sf crtmdir crtm
+
 for dir in crtm \
    fieldmetadata \
    fieldsets \
    fv3files \
-   satbias \
    TauCoeff
 do
    if [ ! \( -e "${dir}" \) ]

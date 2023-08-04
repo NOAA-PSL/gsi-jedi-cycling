@@ -71,8 +71,6 @@ local ensemble DA:
     fraction of retained variance: .95
     lengthscale: 14
     lengthscale units: levels
-   #lengthscale: 4
-   #lengthscale units: logp
   inflation:
     rtps: 0.85
     rtpp: 0.0

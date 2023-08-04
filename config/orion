@@ -86,8 +86,8 @@ export save_hpss="false"
 
 source $MODULESHOME/init/sh
 if [ "$machine" == 'orion' ]; then
-   export basedir=/work2/noaa/da/weihuang/EMC_cycling/scripts
-   export datadir=/work2/noaa/da/weihuang/EMC_cycling
+   export basedir=/work2/noaa/da/weihuang/EMC_cycling
+   export datadir=$basedir
   #export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work/noaa/rstprod/dump
    ulimit -s unlimited
@@ -103,12 +103,19 @@ if [ "$machine" == 'orion' ]; then
    module load wgrib/1.8.0b
   #export PYTHONPATH=/home/jwhitake/.local/lib/python3.7/site-packages
   #export PYTHONPATH=/work2/noaa/gsienkf/weihuang/anaconda3/lib
+
    export HDF5_DISABLE_VERSION_CHECK=1
    export WGRIB=`which wgrib`
 else
    echo "machine must be 'orion'. Exiting"
    exit 1
 fi
+
+export enkfscripts=${basedir}/scripts/${exptname}
+export homedir=$enkfscripts
+export incdate="${enkfscripts}/incdate.sh"
+
+source ${enkfscripts}/config/runtype
 
 if [[ -z "${runtype}" ]]; then
   echo "runtype is not defined. Stop"
@@ -117,22 +124,18 @@ else
   export exptname="${runtype}-cycling"
 fi
 
-export enkfscripts=${basedir}/${exptname}
-export homedir=$enkfscripts
-export incdate="${enkfscripts}/incdate.sh"
-
-source ${enkfscripts}/config/runtype
-
-export datapath="${datadir}/${exptname}"
-export logdir="${datadir}/logs/${exptname}"
-
 if [ "$runtype" == 'gsi' ]; then
    export jedirun=false
 else
    export jedirun=true
 fi
-export jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
+
+export jedidatadir=/work2/noaa/da/weihuang/cycling/Data
+#jedidatadir=/work2/noaa/gsienkf/weihuang/jedi/case_study/Data
 export jediblddir=/work2/noaa/da/weihuang/GDASApp/build
+
+export datapath="${datadir}/${exptname}"
+export logdir=${enkfscripts}/logs
 
 #export NOSAT="YES" # if yes, no radiances assimilated
 export NOSAT="NO" # if yes, no radiances assimilated
@@ -257,8 +260,7 @@ elif [ $RES -eq 96 ]; then
    export LONB=384   
    export LATB=192  
   #export dt_atmos=600   #Original setup. It blows up at 2020010618.
-  #export dt_atmos=300
-   export dt_atmos=240
+   export dt_atmos=300
    export cdmbgwd="0.14,1.8,1.0,1.0"  # mountain blocking, ogwd, cgwd, cgwd src scaling
 elif [ $RES -eq 48 ]; then
    export JCAP=94
@@ -334,8 +336,7 @@ export INCREMENTS_TO_ZERO="'liq_wat_inc','icmr_inc'"
 # Stratospheric increments to zero
 export INCVARS_ZERO_STRAT="'sphum_inc','liq_wat_inc','icmr_inc'"
 export INCVARS_EFOLD="5"
-#export write_fv3_increment=".false." # don't change this
-export write_fv3_increment=".true." # don't change this
+export write_fv3_increment=".false." # don't change this
 export WRITE_INCR_ZERO="incvars_to_zero= $INCREMENTS_TO_ZERO,"
 export WRITE_ZERO_STRAT="incvars_zero_strat= $INCVARS_ZERO_STRAT,"
 export WRITE_STRAT_EFOLD="incvars_efold= $INCVARS_EFOLD,"
@@ -394,11 +395,10 @@ if [ $LEVS -eq 64 ]; then
 elif [ $LEVS -eq 127 ]; then
   export s_ens_v=7.7 # 20 levels
 fi
-
 # use pre-generated bias files.
 #export biascorrdir=${datadir}/biascor
-#export biascorrdir=${datapath}/2020010100
- export biascorrdir=${enkfscripts}/textdata
+export biascorrdir=${enkfscripts}/textdata
+#export biascorrdir=${datapath}/2022010312/
 
 export nanals=80                                                    
 # if nanals2>0, extend nanals2 members out to FHMAX + ANALINC (one extra assim window)
@@ -406,13 +406,6 @@ export nanals2=-1 # longer extension. Set to -1 to disable
 #export nanals2=$NODES
 #export nanals2=$nanals
 export nitermax=1 # number of retries
-
-# use pre-generated bias files.
-#export biascorrdir=${datadir}/biascor
-#export biascorrdir=${datapath}/2020010100
-export biascorrdir=${enkfscripts}/textdata
-
-echo "enkfscripts=$enkfscripts"
 
 if [ "$machine" == 'orion' ]; then
    export FIXDIR=/work/noaa/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
@@ -422,11 +415,12 @@ if [ "$machine" == 'orion' ]; then
    export fv3gfspath=/work/noaa/global/glopara
    export FIXFV3=$fv3gfspath/fix_nco_gfsv16/fix_fv3_gmted2010
    export FIXGLOBAL=$fv3gfspath/fix_nco_gfsv16/fix_am
-  #export gsipath=/work/noaa/gsienkf/whitaker/GSI
    export gsipath=/work2/noaa/da/weihuang/cycling/scripts/GSI
    export fixgsi=${gsipath}/fix
+   #export fixcrtm=${basedir}/fix/crtm/v2.2.6/fix
    export fixcrtm=$fv3gfspath/crtm/crtm_v2.3.0
-   export execdir=${basedir}/exec_${machine}
+  #export execdir=${enkfscripts}/exec_${machine}
+   export execdir=${basedir}/scripts/exec_${machine}
    export enkfbin=${execdir}/global_enkf
    export gsiexec=${execdir}/global_gsi
    export CHGRESEXEC=${execdir}/enkf_chgres_recenter_nc.x
@@ -443,15 +437,18 @@ else
 fi
 
 
-export ANAVINFO=${enkfscripts}/textdata/global_anavinfo.l${LEVS}.txt
+#export ANAVINFO=${fixgsi}/global_anavinfo_allhydro.l${LEVS}.txt
+#export ANAVINFO=${fixgsi}/global_anavinfo.l${LEVS}.txt
+export ANAVINFO=${fixgsi}/global_anavinfo.l${LEVS}.txt
 export ANAVINFO_ENKF=${ANAVINFO}
 export HYBENSINFO=${enkfscripts}/textdata/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
-#export HYBENSINFO=${enkfscripts}/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
 # comment out next line to disable smoothing of ensemble perturbations
 # in stratosphere/mesosphere
+#export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
 export OZINFO=${enkfscripts}/textdata/global_ozinfo.txt
 export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
 export SATINFO=${enkfscripts}/textdata/global_satinfo.txt
+#export SATINFO=${fixgsi}/global_satinfo.txt
 export NLAT=$((${LATA}+2))
 # default is to use berror file in gsi fix dir.
 #export BERROR=${basedir}/staticB/global_berror_enkf.l${LEVS}y${NLAT}.f77
@@ -472,7 +469,7 @@ if [ $controlanal == "true" ]; then
    export hybgain=".false." # controlanal takes precedence over hybgain
    export HYBENSINFO=${enkfscripts}/textdata/global_hybens_info.l${LEVS}.txt # only used if readin_beta or readin_localization=T
    # uncomment to smooth ensemble perturbations
-   #export HYBENSMOOTHINFO=${enkfscripts}/textdata/global_hybens_smoothinfo.l${LEVS}.txt
+   #export HYBENSMOOTHINFO=${fixgsi}/global_hybens_smoothinfo.l${LEVS}.txt
    sh ./main_controlanal.sh
 else
    # GSI sees ensemble mean background (high-res control forecast is a replay to ens mean analysis)
@@ -496,5 +493,5 @@ else
       export readin_localization=.false.
    fi
    pwd
-   sh ./main.sh
+   sh main.sh
 fi

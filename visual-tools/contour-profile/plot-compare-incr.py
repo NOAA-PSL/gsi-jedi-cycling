@@ -140,9 +140,9 @@ class GeneratePlot():
 #--------------------------------------------------------------------------------
 if __name__== '__main__':
   debug = 1
-  output = 0
-  firstfile = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19/increment/interp2gaussian_grid.nc4'
-  secondfile = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19.separate_reinit_observer/increment/interp2gaussian_grid.nc4'
+  output = 1
+  firstfile = '../letkf2d/xainc.20201215_000000z.nc4'
+  secondfile = '../letkf3d/xainc.20201215_000000z.nc4'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=',
                                                 'secondfile=', 'firstfile='])
@@ -169,23 +169,25 @@ if __name__== '__main__':
   clevs = np.arange(-1.0, 1.01, 0.01)
   cblevs = np.arange(-1.0, 1.1, 0.1)
 
+  clevs = 0.01*clevs
+  cblevs = 0.01*cblevs
+
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
 #-----------------------------------------------------------------------------------------
- #second_varlist = ['T_inc', 'u_inc', 'v_inc', 'sphum_inc', 'o3mr_inc']
- #first_varlist = ['T_inc', 'u_inc', 'v_inc', 'sphum_inc', 'o3mr_inc']
-  second_varlist = ['T_inc', 'u_inc', 'v_inc', 'delz_inc', 'sphum_inc']
-  first_varlist = ['T_inc', 'u_inc', 'v_inc', 'delz_inc', 'sphum_inc']
+  second_varlist = ['T', 'ua', 'va', 'DELP', 'sphum']
+  first_varlist = ['T', 'ua', 'va', 'DELP', 'sphum']
 
- #unitlist = ['Unit (C)', 'Unit (m/s)', 'Unit (m/s)',
- #            'Unit (kg/kg)', 'Unit (Pa', 'Unit (m', 'Unit (ppm)']
-  unitlist = ['Unit (C)', 'Unit (m/s)', 'Unit (m/s)', 'Unit (m)', 'Unit (kg/kg)']
+  unitlist = ['Unit (C)', 'Unit (m/s)', 'Unit (m/s)', 'Unit (pa)', 'Unit (kg/kg)']
 
 #-----------------------------------------------------------------------------------------
   for n in range(len(second_varlist)):
-    secondvar = ncsecond.variables[second_varlist[n]][:, :, :]
-    firstvar = ncfirst.variables[first_varlist[n]][:, :, :]
+    secondvar = ncsecond.variables[second_varlist[n]][0, :, :, :]
+    firstvar = ncfirst.variables[first_varlist[n]][0, :, :, :]
+
+    print('second_varlist[%d]: %s' %(n, second_varlist[n]))
+    print('secondvar.shape = ', secondvar.shape)
 
     nlev, nlat, nlon = secondvar.shape
     print('secondvar.shape = ', secondvar.shape)
@@ -193,7 +195,7 @@ if __name__== '__main__':
 
     gp.set_label(unitlist[n])
 
-    for lev in range(5, nlev, 10):
+    for lev in range(50, nlev, 20):
       v0 = firstvar[lev,:,:]
       v1 = secondvar[lev,:,:]
       v2 = v1 - v0

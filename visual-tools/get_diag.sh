@@ -2,9 +2,16 @@
 
  set -x
 
- sdate=2020010112
-#edate=2020010312
- edate=2020011512
+ incdate () {
+   if [ $# != 2 ]; then
+     echo "usage: incdate YYYYMMDDHH hrs"
+     echo "where YYYYMMDDHH is a 10 character date string (e.g. 2002050312)"
+     echo "and hrs is integer number of hours to increment YYYMMDDHH"
+     exit 1
+   fi
+
+   ndate=`date -u -d "${1:0:4}-${1:4:2}-${1:6:2} ${1:8:2}:00:00 UTC $2 hour" +%Y%m%d%H`
+ }
 
  plot_stats () {
    argnum=$#
@@ -33,13 +40,12 @@
 
    python diag.py --sdate=$sdate --edate=$edate \
      --dir1=${dir1} --dir2=${dir2} --interval=$interval \
-     --lbl1=${lbl1} --lbl2=${lbl2} \
-     --datadir=/work2/noaa/da/weihuang/cycling > obs_count_${flag}.csv
+     --lbl1=${lbl1} --lbl2=${lbl2} > obs_count_${flag}.csv
 
    python plot-jedi-gsi-diag.py --lbl1=${lbl1} --lbl2=${lbl2} \
 	--output=1 >> obs_count_${flag}.csv
 
-   dirname=${lbl2}-${lbl1}.$flag
+   dirname=${lbl2}-${lbl1}.${flag}
    rm -rf ${dirname}
    mkdir -p ${dirname}
    mv -f obs_count_${flag}.csv ${dirname}/.
@@ -59,39 +65,37 @@
 
  tar cvf ~/jg.tar plot-jedi-gsi-diag.py get_diag.sh
 #------------------------------------------------------------------------------
-#firstlist=(new.jedi_C96_lgetkf_sondesonly)
-#secondlist=(sepreint.jedi_C96_lgetkf_sondesonly)
-#firstlbls=(JEDI)
-#secondlbls=(REINT)
+#firstlist=(PSL_GSI_sondes_amusa_n19)
+#secondlist=(PSL_JEDI_sondes_amsua_n19)
+#firstlbls=(Travis_GSI_SondesAmsuaN19)
+#secondlbls=(Travis_JEDI_SondesAmsuaN19)
 
-#firstlist=(sondes-rerun.gsi-cycling)
-#secondlist=(sondes-rerun.gdas-cycling)
-#firstlbls=(sondes-rerun.GSI)
-#secondlbls=(sondes-rerun.JEDI)
+#firstlist=(/work2/noaa/da/weihuang/EMC_cycling/gsi-cycling)
+#secondlist=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
+#firstlbls=(GSI_SondesAmsuaN19)
+#secondlbls=(JEDI_SondesAmsuaN19)
 
- firstlist=(gsi-cycling)
-#secondlist=(gdas-cycling)
- secondlist=(gdas-cycling.PSonly)
- firstlbls=(GSI_PSonly)
- secondlbls=(JEDI_PSonly)
+ firstlist=(/work2/noaa/da/telless/PSL_gsi_jedi/PSL_JEDI_sondes_amsua_n19)
+ secondlist=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
+ firstlbls=(TravisJEDI_SondesAmsuaN19)
+ secondlbls=(JEDI_SondesAmsuaN19)
 
- deltlist=(0 6 0)
- hourlist=(6 12 12)
- caselist=(all at_12h at_6h)
+ sdate=2022010318
+ edate=2022010712
+
+ incdate $sdate 6
+
  for j in ${!firstlist[@]}
  do
    first=${firstlist[$j]}
    second=${secondlist[$j]}
    echo "first: ${first}, second: ${second}"
 
-   for n in ${!hourlist[@]}
-   do
-     hour=${hourlist[$n]}
-     case=${caselist[$n]}
-     stime=$(( $sdate + ${deltlist[$n]} ))
-     plot_stats ${stime} ${edate} ${hour} ${case} ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
-   done
-   tar uvf ~/jg.tar ${secondlbls[$j]}-${firstlbls[$j]}.*
+   plot_stats ${sdate} ${edate} 6  all    ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
+   plot_stats ${ndate} ${edate} 12 at_12h ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
+   plot_stats ${sdate} ${edate} 12 at_6h  ${first} ${second} ${firstlbls[$j]} ${secondlbls[$j]}
+
+   tar uvf ~/jg.tar ${secondlbls[$j]}-${firstlbls[$j]}
  done
 
  exit 0
