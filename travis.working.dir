@@ -1,0 +1,25 @@
+Hi all, catching up on some things coming back from leave:
+@Wei Huang
+I have been using different script/data directories for specific runs.
+If you want to reproduce sondes only, data directories are
+/work2/noaa/da/telless/PSL_gsi_jedi/PSL_JEDI_sondes
+and
+/work2/noaa/da/telless/PSL_gsi_jedi/PSL_GSI_sondes.
+Script directories are in
+/work2/noaa/da/telless/git/PSL_GSI_scripts/.
+For sondes and AMUSA-N19 combined my JEDI data directory is
+/work2/noaa/da/telless/PSL_gsi_jedi/PSL_JEDI_sondes_amsua_n19.
+My GSI data is in stmp space which I don't think you have access to
+so I can move those over to the da space here soon.
+The scripts used for sondes and amsua are GSI:
+/work2/noaa/da/telless/git/new_PSL_gsi_cycling_workflow_write_inc
+and JEDI: /work2/noaa/da/telless/git/new_PSL_jedi_cycling_workflow.
+Note that in the JEDI directory I had to make changes to the AMSUA-N19 yaml
+since the one I passed to you didn't have a proper channel use flag check.
+Please make sure you update the yaml if you are not copying my entire directory completely.
+Also thank you for sharing the location of the plotting script.
+I will look at using it in the near future as well.
+
+@sergey frolov
+ a note on my comparisons. I changed the GSI horizontal localization scales to match the ones used in JEDI, but did not touch anything with the vertical. Looks like there is still discussions on going as to what those should be, but like Wei's initial runs, the vertical localization used in my comparisons is the 14 levels.
+
