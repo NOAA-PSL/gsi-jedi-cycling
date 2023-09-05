@@ -1,43 +1,71 @@
 #!/bin/sh
-##SBATCH -q urgent
 #SBATCH -t 00:15:00
 #SBATCH -A gsienkf
 #SBATCH -N 1
-#SBATCH --ntasks-per-node=20
+#SBATCH --ntasks-per-node=40
 #SBATCH -p bigmem
 ##SBATCH -p orion
 #SBATCH -J mpi4py
 #SBATCH -e mpi4py.%J.err
 #SBATCH -o mpi4py.%J.out
 
- ulimit -n 131072
+#ulimit -n 131072
 
- source ~/visenv
- module load slurm py-netcdf4/1.5.3
+#Wei's default env is "gdasenv".
 
- datapath=/work2/noaa/da/weihuang/cycling/gdas-cycling
- yyyymmddhh=2020010206
+#module purge
+#source ~/intelenv
+#source ~/gdasenv
+
+ source /home/weihuang/parioenv
+
+ module load intel/2020.2 impi/2020.2
+
+ libdir=/work/noaa/gsienkf/weihuang/lib
+ export LD_LIBRARY_PATH=${libdir}/lib:$LD_LIBRARY_PATH
+
+ datapath=/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling
+ yyyymmddhh=2022011900
 
 #input file fir.
  rundir=${datapath}/${yyyymmddhh}
  cd ${rundir}
  rm -f logdir/*
 
- enkfscripts=/work2/noaa/da/weihuang/cycling/scripts/gdas-cycling
+ enkfscripts=/work2/noaa/da/weihuang/EMC_cycling/scripts/jedi-cycling
 
-#echo "concatenate observer"
- time_start=$(date +%s)
- obstype=sondes
-#obstype=iasi_metop-b
+#Jeff Whitaker
+#2:21 PM
+#I was able to finally get it to work by doing
+#conda install -c conda-forge mpich
+#conda install -c conda-forge  hdf5=*=*mpich*
+#conda install -c conda-forge  libnetcdf=*=*mpich*
+#conda install -c conda-forge  netcdf4=*=*mpich*
+#
+#2:22
+#to be safe, run 'conda update -c conda-forge conda' first
 
- number_cores=20
- number_members=81
+#https://mpi4py.readthedocs.io/en/stable/install.html
 
-#time python ${enkfscripts}/python_scripts/concanate-observer.py \
-#       --run_dir=${rundir} \
-#       --datestr=${yyyymmddhh} \
-#       --nmem=${number_members} \
-#       --obstype=${obstype}
+#python -m pip install mpi4py
+
+#env MPICC=/path/to/mpicc python -m pip install mpi4py
+
+#pip keeps previouly built wheel files on its cache for future reuse.
+#If you want to reinstall the mpi4py package using a different or
+#updated MPI implementation, you have to either first remove the cached wheel file with:
+
+# python -m pip cache remove mpi4py
+
+#or ask pip to disable the cache:
+# python -m pip install --no-cache-dir mpi4py
+
+
+#obstype=sondes
+ obstype=amsua_n19
+
+ number_cores=40
+ number_members=80
 
  time srun -N 1 -n ${number_cores} \
       python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
@@ -47,20 +75,4 @@
       --obstype=${obstype}
 
  exit 0
-
-#for obstype in sfc_ps sfcship_ps sondes_ps
-#for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
- for obstype in sondes amsua_n19 iasi_metop-b
- do
-   time python ${enkfscripts}/python_scripts/concanate-observer.py \
-        --rundir=${rundir} \
-        --datestr=${yyyymmddhh} \
-        --nmem=${number_members} \
-        --obstype=${obstype} &
- done
-
- wait
-
-time_end=$(date +%s)
-echo "concanate-observer.py elapsed Time: $(($time_end-$time_start)) seconds"
 

@@ -6,11 +6,12 @@ import netCDF4 as nc4
 import numpy as np
 
 #------------------------------------------------------------------
-def compare_variables_in_group(name, basegroup, casegroup, diminfo):
+def compare_variables_in_group(grpname, basegroup, casegroup, diminfo):
  #print('\t%20s, %10s, %10s' %(' ', 'min', 'max'))
   infostr = []
-  title = '\n%s' %(name)
+  title = '\n%s' %(grpname)
   infostr.append(title)
+  print(title)
 
   epsilon = 1.0e-20
   head = '\t%20s, %10s, %10s' %(' ', 'min', 'max')
@@ -18,6 +19,8 @@ def compare_variables_in_group(name, basegroup, casegroup, diminfo):
 
   print_info = False
   for name, variable in basegroup.variables.items():
+    title = '\t%s' %(name)
+    print(title)
     if('stationIdentification' == name):
       continue
     if(1 == len(variable.dimensions)):
@@ -37,10 +40,10 @@ def compare_variables_in_group(name, basegroup, casegroup, diminfo):
     if(any(x is None for x in diff)):
       print('One of the variables %s has None' %(name))
     else:
-     #print('\t%20s, %10.4f, %10.4f' %(name, np.min(diff), np.max(diff)))
+     #print('\t%s, %10.4f, %10.4f' %(name, np.min(diff), np.max(diff)))
       if(epsilon < np.max(diff)):
         print_info = True
-        prntstr = '\t%20s, %10.4f, %10.4f' %(name, np.min(diff), np.max(diff))
+        prntstr = '\t%s, %10.4f, %10.4f' %(name, np.min(diff), np.max(diff))
         infostr.append(prntstr)
       
     if(print_info):
@@ -52,9 +55,10 @@ def compare_variables_in_group(name, basegroup, casegroup, diminfo):
         ds = diminfo[variable.dimensions[n]]
         dimsize.append(ds)
 
-      print('variable.size:', variable.size)
-      print('variable.dimensions:', variable.dimensions)
       print('dimsize:', dimsize)
+      print('variable.dimensions:', variable.dimensions)
+      print('variable.size:', variable.size)
+      print('variable.name:', variable.name)
       if(1 == len(dimsize)):
         for n in range(dimsize[0]):
           if(epsilon < np.abs(diff[n])):
@@ -62,27 +66,22 @@ def compare_variables_in_group(name, basegroup, casegroup, diminfo):
       elif(2 == len(dimsize)):
         nj = dimsize[0]
         ni = dimsize[1]
-        for j in range(nj):
-          for i in range(ni):
+        for i in range(ni):
+          for j in range(nj):
             if(epsilon < np.abs(diff[j,i])):
               print('No [%d, %d] cv: %f, bv: %f, diff: %f' %(j, i, caseval[j,i], baseval[j,i], diff[j,i]))
 
 #------------------------------------------------------------------
 if __name__== '__main__':
   debug = 1
-  basedir = '/work2/noaa/da/weihuang/cycling/sondes+amsua_n19+iasi_metop-b.gdas-cycling/2020010206/observer/seqobs'
-  casedir = '/work2/noaa/da/weihuang/cycling/sondes+amsua_n19+iasi_metop-b.gdas-cycling/2020010206/observer/mpiobs'
+  basedir = '/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022011900/observer'
+  casedir = '/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022011900/observer'
 
- #obstype = 'iasi_metop-b'
   obstype = 'amsua_n19'
- #obstype = 'sondes'
 
- #baseflnm = '%s/sondes_obs_2020010206.nc4' %(basedir)
- #caseflnm = '%s/sondes_obs_2020010206.nc4' %(casedir)
-
- #obstype = 'iasi_metop-b'
-  baseflnm = '%s/%s_obs_2020010206.nc4' %(basedir, obstype)
-  caseflnm = '%s/%s_obs_2020010206.nc4' %(casedir, obstype)
+ #baseflnm = '%s/%s_obs_2022011900.nc4.saved' %(basedir, obstype)
+  baseflnm = '%s/%s_obs_2022011900.nc4.mpi' %(basedir, obstype)
+  caseflnm = '%s/%s_obs_2022011900.nc4' %(casedir, obstype)
 
   userdefine = False
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'baseflnm=', 'caseflnm=', 'obstype='])
@@ -113,11 +112,9 @@ if __name__== '__main__':
   for name, dimension in basencf.dimensions.items():
     diminfo[name] = dimension.size
 
- #print('\nRoot Group')
   compare_variables_in_group('Root Group', basencf, casencf, diminfo)
 
-  for name, basegroup in basencf.groups.items():
-    casegroup = casencf.groups[name]
-   #print('\n%s' %(name))
-    compare_variables_in_group(name, basegroup, casegroup, diminfo)
+  for grpname, basegroup in basencf.groups.items():
+    casegroup = casencf.groups[grpname]
+    compare_variables_in_group(grpname, basegroup, casegroup, diminfo)
 

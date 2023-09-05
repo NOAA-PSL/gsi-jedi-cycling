@@ -10,9 +10,9 @@ import numpy as np
 def average(vlist):
   buf = np.zeros_like(vlist[0])
   nmem = len(vlist)
-  for n in range(1, nmem):
+  for n in range(nmem):
     buf += vlist[n]
-  buf /= (nmem-1)
+  buf /= nmem
   return buf
 
 #-----------------------------------------------------------------------------------------

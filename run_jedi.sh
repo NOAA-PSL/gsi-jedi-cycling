@@ -247,6 +247,7 @@ time_start=$(date +%s)
 #for obstype in sfc_ps sfcship_ps sondes_ps
 #for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
 #for obstype in ps sondes amsua_n19
+#for obstype in sondes
  for obstype in sondes amsua_n19
  do
    time python ${enkfscripts}/python_scripts/concanate-observer.py \
@@ -254,6 +255,18 @@ time_start=$(date +%s)
         --datestr=${yyyymmddhh} \
         --nmem=${number_members} \
         --obstype=${obstype} &
+ done
+
+ number_cores=40
+ number_members=80
+ for obstype in amsua_n19
+ do
+   time srun -N 1 -n ${number_cores} \
+      python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
+      --rundir=${datapath} \
+      --datestr=${yyyymmddhh} \
+      --nmem=${number_members} \
+      --obstype=${obstype} &
  done
 
  wait

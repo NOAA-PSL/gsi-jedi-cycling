@@ -26,7 +26,8 @@ class GeneratePlot():
 
     self.set_default()
 
-  def plot(self, lons, lats, data=[], obslon=[], obslat=[], omb=[]):
+  def plot(self, lons, lats, data=[], obslon=[], obslat=[], omb=[],
+           grdlon=[], grdlat=[]):
    #ax.coastlines(resolution='110m')
    #ax.gridlines()
 
@@ -66,6 +67,7 @@ class GeneratePlot():
      #colors = colors[-1]
 
       obsplot = axs[i].scatter(obslon, obslat, s=10, zorder=1, c='green', marker='x')
+      grdplot = axs[i].scatter(grdlon[i], grdlat[i], s=10, zorder=1, c='cyan', marker='o')
 
       axs[i].set_extent([-180, 180, -90, 90], crs=proj)
       axs[i].coastlines(resolution='auto', color='k')
@@ -149,6 +151,59 @@ class GeneratePlot():
   def set_cmapname(self, cmapname):
     self.cmapname = cmapname
 
+#=========================================================================
+class ProcessGeometry():
+  def __init__(self, debug=0):
+    self.debug = debug
+
+ #-----------------------------------------------------------------------------------------
+  def set_region(self):
+    self.minlat = np.min(self.lat)
+    self.maxlat = np.max(self.lat)
+
+    self.minlon = np.min(self.lon)
+    self.maxlon = np.max(self.lon)
+
+    self.plotarea = [self.minlon, self.maxlon, self.minlat, self.maxlat]
+
+ #-----------------------------------------------------------------------------------------
+  def get_var(self, filename):
+    fin = open(filename,'r')
+    lines = fin.readlines()
+    fin.close()
+
+    self.dist = []
+    self.lat = []
+    self.lon = []
+
+    notl = len(lines)
+    n = 0
+    while (n < notl):
+      line = lines[n]
+      n += 1
+
+      if(line.find('OOPS_DEBUG') >= 0 and line.find('Longitude') > 0):
+        item = line.split(': ')
+       #print('line: ', line)
+       #print('item: ', item)
+        headlon = item[1].split(', ')
+       #print('headlon: ', headlon)
+        lon = float(headlon[0].strip())
+        if(lon > 180.0):
+          lon -= 360.0
+        headlat = item[2].split(', ')
+       #print('headlat: ', headlat)
+        lat = float(headlat[0].strip())
+        self.lat.append(lat)
+        self.lon.append(lon)
+        self.dist.append(item[3])
+
+       #print('lat: %f, lon: %f, org: %f' %(lat, lon, dist))
+
+   #self.set_region()
+
+    return self.lon, self.lat, self.dist
+
 #--------------------------------------------------------------------------------
 if __name__== '__main__':
   debug = 1
@@ -156,8 +211,12 @@ if __name__== '__main__':
   datadir = '/work2/noaa/gsienkf/weihuang/jedi/per_core_timing/build/fv3-jedi/test'
   anlfile = '%s/Data/analysis/letkf/gfs/mem000/xainc.20201215_000000z.nc4' %(datadir)
  #obsfile  = '%s/Data/obs/testinput_tier_1/sondes_obs_2020121500_m.nc4' %(datadir)
-  obsfile  = '%s/Data/hofx/sondes_letkf-gfs_2020121500_m.nc4'
-  dbgfile  = '%s/stdoutNerr/stdout.00000001'
+ #obsfile  = '%s/Data/hofx/sondes_letkf-gfs_2020121500_m.nc4'  %(datadir)
+ #obsfile  = '%s/Data/hofx/scatwind_letkf-gfs_2020121500_m.nc4'  %(datadir)
+ #obsfile  = '%s/Data/hofx/satwind_letkf-gfs_2020121500_m.nc4'  %(datadir)
+ #obsfile  = '%s/Data/hofx/sfc_letkf-gfs_2020121500_m.nc4'  %(datadir)
+  obsfile  = '%s/Data/hofx/aircraft_letkf-gfs_2020121500_m.nc4'  %(datadir)
+  dbgfile  = '%s/stdoutNerr/stdout.00000004'  %(datadir)
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=',
                                                 'anlfile=', 'obsfile=', 'dbgfile='])
@@ -181,15 +240,20 @@ if __name__== '__main__':
   obslat = group.variables['latitude'][:]
   obslon = group.variables['longitude'][:]
   group = ncobs.groups['ObsValue']
-  obsval = group.variables['airTemperature'][:]
+ #obsval = group.variables['airTemperature'][:]
+  obsval = group.variables['windEastward'][:]
   ncobs.close()
 
 #-----------------------------------------------------------------------------------------
-  ncdbg = netcdf_dataset(dbgfile)
-  group = ncdbg.groups['MetaData']
-  dbglat = group.variables['xaxis_1'][:]
-  dbglon = group.variables['longitude'][:]
-  ncdbg.close()
+  gridlonlist = []
+  gridlatlist = []
+  pg = ProcessGeometry(debug=debug)
+
+  for n in range(6):
+    dbgfile  = '%s/stdoutNerr/stdout.0000000%d' %(datadir, n)
+    grdlon, grdlat, dist = pg.get_var(dbgfile)
+    gridlonlist.append(grdlon)
+    gridlatlist.append(grdlat)
 
 #-----------------------------------------------------------------------------------------
   gp = GeneratePlot(debug=debug, output=output)
@@ -217,6 +281,7 @@ if __name__== '__main__':
   lons = ncf.variables['lon'][:]
 
 #-----------------------------------------------------------------------------------------
+  m = 0
   for n in range(len(varlist)):
     var = ncf.variables[varlist[n]][0, :, :, :]
 
@@ -247,7 +312,11 @@ if __name__== '__main__':
     imagename = '%s_lev_%3.3d_%3.3d.png' %(varlist[n], lev0, lev1)
     gp.set_imagename(imagename)
 
-    gp.plot(lons, lats, data=data, obslon=obslon, obslat=obslat, omb=obsval)
+    if(m >= 6):
+      m -= 6
+    gp.plot(lons, lats, data=data, obslon=obslon, obslat=obslat, omb=obsval,
+            grdlon=gridlonlist[m:m+2], grdlat=gridlatlist[m:m+2])
+    m += 2
 
 #-----------------------------------------------------------------------------------------
   ncf.close()

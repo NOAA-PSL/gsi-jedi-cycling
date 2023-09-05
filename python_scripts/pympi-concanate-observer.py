@@ -4,13 +4,18 @@ from mpi4py import MPI
 import numpy as np
 import netCDF4 as nc4
 
-#=========================================================================
+from decimal import Decimal, getcontext
+
+#============================================================================
 class PyMPIConcatenateObserver():
-  def __init__(self, debug=0, rundir=None, datestr=None, nmem=81):
+  def __init__(self, debug=0, rundir=None, datestr=None, nmem=80, maxeng=20):
     self.debug = debug
     self.datestr = datestr
     self.rundir = rundir
     self.nmem = nmem
+    self.maxeng = maxeng
+
+    self.obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
 
     self.format = 'NETCDF4'
    #self.format = 'NETCDF4_CLASS'
@@ -163,20 +168,24 @@ class PyMPIConcatenateObserver():
       self.grpinfo[grpname] = self.get_varinfo(group)
 
 #-----------------------------------------------------------------------------------------
-  def create_file(self, rootfile=None, outfile=None):
-    self.rootfile = rootfile
-    self.outfile = outfile
+  def create_file(self):
+    rootfile = '%s/mem000/%s' %(self.obsdir, self.filename)
+    outputfile = '%s/%s' %(self.obsdir, self.filename)
+
+    if(self.debug):
+      self.LOGFILE.write('rootfile: %s\n' %(rootfile))
+      self.LOGFILE.write('outputfile: %s\n' %(outputfile))
 
     if(0 == self.rank):
-      if(os.path.exists(self.outfile)):
-        os.remove(self.outfile)
+      if(os.path.exists(outputfile)):
+        os.remove(outputfile)
 
     self.comm.Barrier()
 
-    self.OFILE = nc4.Dataset(self.outfile, 'w', parallel=True, comm=self.comm,
+    self.OFILE = nc4.Dataset(outputfile, 'w', parallel=True, comm=self.comm,
                              info=MPI.Info(), format=self.format)
 
-    self.RFILE = nc4.Dataset(self.rootfile, 'r')
+    self.RFILE = nc4.Dataset(rootfile, 'r')
 
     self.copy_dimensions(self.RFILE, self.OFILE)
     self.rootvardict = self.create_var_in_group(self.RFILE, self.OFILE)
@@ -310,6 +319,19 @@ class PyMPIConcatenateObserver():
       self.LOGFILE.flush()
 
 #-----------------------------------------------------------------------------------------
+  def float_to_binary(self, float):
+    getcontext().prec = 24
+    d = Decimal(input)
+    i = int(d * (1 << 23))
+    return bin(i)
+
+#-----------------------------------------------------------------------------------------
+  def float2double(self, x):
+    getcontext().prec = 16
+    d = Decimal(x)
+    return d(i)
+
+#-----------------------------------------------------------------------------------------
   def mpi_average(self, varlist):
     meanvars = {}
 
@@ -323,6 +345,9 @@ class PyMPIConcatenateObserver():
            buf = val
         else:
            buf += val
+
+        tinfo = 'var %s mem %d' %(varname, mem)
+        self.print_minmax(tinfo, val)
     
       self.comm.Allreduce(buf, val, op=MPI.SUM)
       val /= self.nmem
@@ -333,7 +358,7 @@ class PyMPIConcatenateObserver():
 #-----------------------------------------------------------------------------------------
   def print_minmax(self, name, val):
     if(self.debug):
-      self.LOGFILE.write('\t%s min: %f, max: %f\n' %(name, np.max(val), np.min(val)))
+      self.LOGFILE.write('\t%s max: %f, min: %f\n' %(name, np.max(val), np.min(val)))
 
 #-----------------------------------------------------------------------------------------
   def process_ombg(self):
@@ -358,8 +383,9 @@ class PyMPIConcatenateObserver():
         elif(3 == dim):
            var[:,:,:] = val
 
-        self.print_minmax('hofx_y_mean_xb0', self.hofx_y_mean_xb0[varname])
         self.print_minmax('old-ombg', self.ombg[varname])
+        self.print_minmax('hofx_y_mean_xb0', self.hofx_y_mean_xb0[varname])
+        self.print_minmax('meanvars', meanvars[varname])
         self.print_minmax('new-ombg', val)
 
 #-----------------------------------------------------------------------------------------
@@ -406,7 +432,7 @@ class PyMPIConcatenateObserver():
         self.LOGFILE.write('write group %s from %s\n' %(newname, grpname))
         self.LOGFILE.flush()
 
-      for n in range(20):
+      for n in range(self.maxeng):
         neng = n + 1
         grpname = 'hofxm0_%d_1' %(neng)
         group = igroups[grpname]
@@ -427,6 +453,7 @@ class PyMPIConcatenateObserver():
 #-----------------------------------------------------------------------------------------
   def process(self, obstype):
     self.obstype = obstype
+    self.filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
 
     if(self.LOGFILE is not None):
       self.LOGFILE.close()
@@ -437,17 +464,10 @@ class PyMPIConcatenateObserver():
     self.LOGFILE.write('size: %d\n' %(self.size))
     self.LOGFILE.write('rank: %d\n' %(self.rank))
 
-    self.obsdir = '%s/%s/observer' %(self.rundir, self.datestr)
-    self.filename = '%s_obs_%s.nc4' %(self.obstype, self.datestr)
+    for mem in self.memlist:
+      self.LOGFILE.write('mem: %d is on rank: %d\n' %(mem, self.rank))
 
-    self.rootfile = '%s/mem000/%s' %(self.obsdir, self.filename)
-    self.outputfile = '%s/%s' %(self.obsdir, self.filename)
-
-    if(self.debug):
-      self.LOGFILE.write('rootfile: %s\n' %(self.rootfile))
-      self.LOGFILE.write('outputfile: %s\n' %(self.outputfile))
-
-    self.create_file(rootfile=self.rootfile, outfile=self.outputfile)
+    self.create_file()
 
     self.debug = 1
     self.output_file()
@@ -460,16 +480,15 @@ class PyMPIConcatenateObserver():
 #=========================================================================================
 if __name__== '__main__':
   debug = 0
-  nmem = 81
+  nmem = 80
+  maxeng = 20
   rundir = '/work2/noaa/da/weihuang/cycling/gdas-cycling'
   datestr = '2020010200'
-  obstype = 'sondes'
-  obstypelist = ['sfc_ps', 'sfcship_ps', 'sondes_ps',
-                 'sondes', 'amsua_n15', 'amsua_n18', 'amsua_n19']
+  obstype = 'amsua_n19'
 
  #--------------------------------------------------------------------------------
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'rundir=', 'obstype=',
-                                                'nmem=', 'datestr='])
+                                                'nmem=', 'datestr=', 'maxeng='])
  #print('opts = ', opts)
  #print('args = ', args)
 
@@ -486,6 +505,8 @@ if __name__== '__main__':
       datestr = a
     elif o in ('--nmem'):
       nmem = int(a)
+    elif o in ('--maxeng'):
+      maxeng = int(a)
     else:
       print('o: <%s>' %(o))
       print('a: <%s>' %(a))
@@ -493,6 +514,6 @@ if __name__== '__main__':
 
  #--------------------------------------------------------------------------------
   pmco = PyMPIConcatenateObserver(debug=debug, rundir=rundir,
-                                  nmem=nmem, datestr=datestr)
+                                  nmem=nmem, datestr=datestr, maxeng=maxeng)
   pmco.process(obstype)
 
