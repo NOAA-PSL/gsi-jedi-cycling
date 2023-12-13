@@ -239,7 +239,7 @@ time_end=$(date +%s)
 echo "observer elapsed Time: $(($time_end-$time_start)) seconds"
 time_start=$(date +%s)
 
- echo "concanate observer"
+ echo "concatenate observer"
  cd ${run_dir}
  obstype=ps
 

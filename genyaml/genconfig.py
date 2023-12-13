@@ -42,6 +42,7 @@ class GenerateConfig():
     print('yaml_file = ', yaml_file)
     yaml_file['executable options']['ATM_WINDOW_BEGIN'] = self.advancedate(-intval)
     yaml_file['executable options']['BKG_ISOTIME'] = self.advancedate(0)
+    yaml_file['executable options']['ATM_WINDOW_END'] = self.advancedate(intval)
     yaml_file['executable options']['YYYYMMDDHH'] = self.ymdh
     yaml_file.save(self.yaml_out)
 

@@ -12,20 +12,9 @@ RANLIB	=       echo
 .SUFFIXES: .F90 .f90 .o .f .c .cc
 
 ####################################################
-#NETCDFPATH      =       /work/noaa/da/jedipara/opt/modules/intel-2020.2/impi-2020.2/netcdf/4.7.4
-#HDF5PATH        =       /work/noaa/da/jedipara/opt/modules/intel-2020.2/impi-2020.2/hdf5/1.12.0
-
-#NETCDF_C_PATH    =       /work/noaa/da/role-da/spack-stack/spack-stack-v1/envs/skylab-3.0.0-gnu-10.2.0/install/gcc/10.2.0/netcdf-c-4.8.1-2xeea5h
-#NETCDF_F_PATH    =       /work/noaa/da/role-da/spack-stack/spack-stack-v1/envs/skylab-3.0.0-gnu-10.2.0/install/gcc/10.2.0/netcdf-fortran-4.5.4-ufstnkb
-#HDF5PATH        =       /work/noaa/da/role-da/spack-stack/spack-stack-v1/envs/skylab-3.0.0-gnu-10.2.0/install/gcc/10.2.0/hdf5-1.12.1-az32o4w
-
-#NETCDF_C_PATH    =       /work/noaa/da/role-da/spack-stack/spack-stack-v1/envs/skylab-2.0.0-intel-2022.0.2/install/intel/2022.0.2/netcdf-c-4.8.1-xycuozc
-#NETCDF_F_PATH    =       /work/noaa/da/role-da/spack-stack/spack-stack-v1/envs/skylab-2.0.0-intel-2022.0.2/install/intel/2022.0.2/netcdf-fortran-4.5.4-zutmubx
-#HDF5PATH        =       /work/noaa/da/role-da/spack-stack/spack-stack-v1/envs/skylab-2.0.0-intel-2022.0.2/install/intel/2022.0.2/hdf5-1.12.1-3sndhtn
-
-NETCDF_C_PATH    =	/work/noaa/epic-ps/role-epic-ps/spack-stack/spack-stack-1.3.1/envs/unified-env/install/intel/2022.0.2/netcdf-c-4.9.2-jaqo3i5
-NETCDF_F_PATH    =	/work/noaa/epic-ps/role-epic-ps/spack-stack/spack-stack-1.3.1/envs/unified-env/install/intel/2022.0.2/netcdf-fortran-4.6.0-hxdyorj
-HDF5PATH        =	/work/noaa/epic-ps/role-epic-ps/spack-stack/spack-stack-1.3.1/envs/unified-env/install/intel/2022.0.2/hdf5-1.12.2-eefcl5d
+NETCDF_C_PATH    =	/work/noaa/epic/role-epic/spack-stack/orion/spack-stack-1.5.1/envs/unified-env/install/intel/2022.0.2/netcdf-c-4.9.2-j2wl3gb
+NETCDF_F_PATH    =	/work/noaa/epic/role-epic/spack-stack/orion/spack-stack-1.5.1/envs/unified-env/install/intel/2022.0.2/netcdf-fortran-4.6.0-i2wplrg
+HDF5PATH        =	/work/noaa/epic/role-epic/spack-stack/orion/spack-stack-1.5.1/envs/unified-env/install/intel/2022.0.2/hdf5-1.14.0-xfu3drv
 
 #NETCDF_C_PATH    =      ${netcdf_c_ROOT}
 #NETCDF_F_PATH    =      ${netcdf_fortran_ROOT}

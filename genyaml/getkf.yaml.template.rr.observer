@@ -13,8 +13,12 @@ geometry:
   npz: $(npz_ges)
   field metadata override: Data/fieldmetadata/gfs-restart.yaml
 
-window begin: '$(ATM_WINDOW_BEGIN)'
-window length: $(ATM_WINDOW_LENGTH)
+#window begin: '$(ATM_WINDOW_BEGIN)'
+#window length: $(ATM_WINDOW_LENGTH)
+
+time window:
+  begin: $(ATM_WINDOW_BEGIN)
+  end: $(ATM_WINDOW_END)
 
 increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
 

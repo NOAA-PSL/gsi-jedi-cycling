@@ -260,7 +260,8 @@ elif [ $RES -eq 96 ]; then
    export LONB=384   
    export LATB=192  
   #export dt_atmos=600   #Original setup. It blows up at 2020010618.
-   export dt_atmos=300
+  #export dt_atmos=300
+   export dt_atmos=240
    export cdmbgwd="0.14,1.8,1.0,1.0"  # mountain blocking, ogwd, cgwd, cgwd src scaling
 elif [ $RES -eq 48 ]; then
    export JCAP=94
@@ -313,7 +314,7 @@ export ANALINC=6
 export FHMIN=6
 export FHMAX=7
 export FHOUT=6
-export RESTART_FREQ=6
+export RESTART_FREQ=3
 FHMAXP1=`expr $FHMAX + 1`
 # if FHMAX_LONGER divisible by 6, only the last output time saved.
 # if not divisible by 6, all times in 6-h window at the end of forecast saved

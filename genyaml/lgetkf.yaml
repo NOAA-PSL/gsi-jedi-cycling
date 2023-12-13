@@ -10,8 +10,12 @@ geometry:
   npy: $(npy_ges)
   npz: $(npz_ges)
   field metadata override: Data/fieldmetadata/gfs-restart.yaml
-window begin: '$(ATM_WINDOW_BEGIN)'
-window length: PT6H
+#window begin: '$(ATM_WINDOW_BEGIN)'
+#window length: PT6H
+time window:
+  begin: $(ATM_WINDOW_BEGIN)
+  end: $(ATM_WINDOW_END)
+
 increment variables: [ua,va,DZ,delp,t,ps,sphum,ice_wat,liq_wat,o3mr]
 background:
    datetime: '2022-03-03T09:00:00Z'

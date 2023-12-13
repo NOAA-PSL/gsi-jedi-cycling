@@ -1,9 +1,11 @@
- export gdasapphome=/work2/noaa/da/weihuang/GDASApp
+#
+ gdasapphome=/work2/noaa/da/weihuang/GDASApp
+ BUILD_TARGET=orion
 
-#source $MODULESHOME/init/sh
  module purge
- module use ${gdasapphome}/modulefiles
- module load GDAS/orion
+#source $gdasapphome/ush/module-setup.sh
+ module use $gdasapphome/modulefiles
+ module load GDAS/$BUILD_TARGET
  module load slurm
 
 #module list
@@ -25,8 +27,10 @@
  export jediblddir=${gdasapphome}/build
  export LD_LIBRARY_PATH=${jediblddir}/lib:$LD_LIBRARY_PATH
 
+#export PYTHONPATH=${gdasapphome}/iodaconv/src:$PYTHONPATH
 #export PYTHONPATH=${jediblddir}/iodaconv/src:$PYTHONPATH
+#export PYTHONPATH=${jediblddir}/lib/python3.7/pyioda:$PYTHONPATH
+#export PYTHONPATH=${jediblddir}/lib/python3.7/pyiodaconv:$PYTHONPATH
+ export PYTHONPATH=${jediblddir}/lib/pyioda:$PYTHONPATH
  export PYTHONPATH=${jediblddir}/lib/pyiodaconv:$PYTHONPATH
- export PYTHONPATH=${jediblddir}/lib/python3.7/pyioda:$PYTHONPATH
- export PYTHONPATH=${gdasapphome}/iodaconv/src:$PYTHONPATH
 
