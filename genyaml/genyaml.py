@@ -88,7 +88,7 @@ class GenerateYAML():
      #self.config['IASI_METOP_B_OBSINFILE'] = 'ioda_v2_data/iasi_metop-b_obs_%s.nc4' %(self.config['YYYYMMDDHH'])
      #self.config['IASI_METOP_B_OBSOUTFILE'] = '%s/mem%3.3d/iasi_metop-b_obs_%s.nc4' %(self.obsdir, n, self.config['YYYYMMDDHH'])
 
-      self.config['MEMBERDATAPATH'] = 'mem%3.3d/INPUT' %(n)
+     #self.config['MEMBERDATAPATH'] = 'mem%3.3d' %(n)
       self.config['MEMSTR'] = 'mem%3.3d' %(n)
 
       self.genYAML(self.config, self.observer, yaml_out)

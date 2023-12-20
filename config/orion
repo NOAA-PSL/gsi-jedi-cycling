@@ -314,7 +314,8 @@ export ANALINC=6
 export FHMIN=6
 export FHMAX=7
 export FHOUT=6
-export RESTART_FREQ=3
+#export RESTART_FREQ=3
+export RESTART_FREQ=1
 FHMAXP1=`expr $FHMAX + 1`
 # if FHMAX_LONGER divisible by 6, only the last output time saved.
 # if not divisible by 6, all times in 6-h window at the end of forecast saved
