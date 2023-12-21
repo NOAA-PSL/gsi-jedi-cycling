@@ -13,14 +13,10 @@ geometry:
   npz: $(npz_ges)
   field metadata override: Data/fieldmetadata/gfs-restart.yaml
 
-#window begin: '$(ATM_WINDOW_BEGIN)'
-#window length: $(ATM_WINDOW_LENGTH)
-
 time window:
   begin: $(ATM_WINDOW_BEGIN)
   end: $(ATM_WINDOW_END)
 
-#increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
 increment variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                       slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                       u_srf,v_srf,f10m]
@@ -31,41 +27,40 @@ background:
     nmembers: $(NMEM_ENKF)
     zero padding: 3
     template:
-      datetime: $(BKG_ISOTIME)
       states:
-      - datetime: &date_bgn $(BKG_BGN)
+      - datetime: DATE_BGN '$(ATM_BGN_TIME)'
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: /work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022010418/mem%mem%/RESTART
-        filename_core: 20220104.230000.fv_core.res.nc
-        filename_trcr: 20220104.230000.fv_tracer.res.nc
-        filename_sfcd: 20220104.230000.sfc_data.nc
-        filename_sfcw: 20220104.230000.fv_srf_wnd.res.nc
-        filename_cplr: 20220104.230000.coupler.res
-      - datetime: &date_mid '2022-01-05T00:00:00Z'
+        datapath: $(TOPDIR)/$(ATM_BGN_YYYYMMDDHH)/mem%mem%/RESTART
+        filename_core: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_core.res.nc
+        filename_trcr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_tracer.res.nc
+        filename_sfcd: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.sfc_data.nc
+        filename_sfcw: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_srf_wnd.res.nc
+        filename_cplr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.coupler.res
+      - datetime: DATE_MID '$(ATM_WINDOW_CENTER)'
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: MEMSTR/INPUT
+        datapath: mem%mem%/INPUT
         filename_core: fv_core.res.nc
         filename_trcr: fv_tracer.res.nc
         filename_sfcd: sfc_data.nc
         filename_sfcw: fv_srf_wnd.res.nc
         filename_cplr: coupler.res
-      - datetime: &date_end '2022-01-05T01:00:00Z'
+      - datetime: DATE_END '$(ATM_END_TIME)'
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: /work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022010500/mem%mem%/RESTART
-        filename_core: 20220105.010000.fv_core.res.nc
-        filename_trcr: 20220105.010000.fv_tracer.res.nc
-        filename_sfcd: 20220105.010000.sfc_data.nc
-        filename_sfcw: 20220105.010000.fv_srf_wnd.res.nc
-        filename_cplr: 20220105.010000.coupler.res
+        datapath: $(TOPDIR)/$(ATM_END_YYYYMMDDHH)/mem%mem%/RESTART
+        filename_core: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_core.res.nc
+        filename_trcr: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_tracer.res.nc
+        filename_sfcd: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.sfc_data.nc
+        filename_sfcw: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_srf_wnd.res.nc
+        filename_cplr: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.coupler.res
 
 driver:
   read HX from disk: true
