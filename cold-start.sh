@@ -10,8 +10,7 @@
 
  current_dir=`pwd`
  datestr=2022010312
- dateend=2022010400
-#datestr=2022012000
+ dateend=2022011100
 #dateend=2022012100
 
  run_dir=/work2/noaa/da/weihuang/EMC_cycling/${runtype}-cycling
