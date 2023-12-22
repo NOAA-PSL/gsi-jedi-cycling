@@ -45,13 +45,41 @@ cd ${run_dir}
    --hour=${hour} \
    --intv=3
 
- exit 0
-
 #--------------------------------------------------------------------------------------------
- python ${enkfscripts}/genyaml/genyaml.py \
+ python ${enkfscripts}/genyaml/gen-mts-yaml.py \
    --config=config.yaml \
    --observer=${enkfscripts}/genyaml/getkf.yaml.template.rr.observer.mts \
    --solver=${enkfscripts}/genyaml/getkf.yaml.template.solver.mts \
    --numensmem=${NMEM_ENKF} \
    --obsdir=observer
+
+#--------------------------------------------------------------------------------------------
+ number_members=${NMEM_ENKF}
+ n=0
+ while [ $n -le $number_members ]
+ do
+   zeropadmem=`printf %03d $n`
+   member_str=mem${zeropadmem}
+  #mkdir -p observer/${member_str}
+
+   sed -e "s?MEMSTR?${member_str}?g" \
+       -e "s?AT_DATE_BGN:?datetime: \&date_bgn?g" \
+       -e "s?AT_DATE_MID:?datetime: \&date_mid?g" \
+       -e "s?AT_DATE_END:?datetime: \&date_end?g" \
+       -e "s?STAR_DATE_BGN?\*date_bgn?g" \
+       -e "s?STAR_DATE_MID?\*date_mid?g" \
+       -e "s?STAR_DATE_END?\*date_end?g" \
+       observer/getkf.yaml.observer.${member_str} > tf
+   mv tf observer/getkf.yaml.observer.${member_str}
+
+   sed -e "s?AT_DATE_BGN:?datetime: \&date_bgn?g" \
+       -e "s?AT_DATE_MID:?datetime: \&date_mid?g" \
+       -e "s?AT_DATE_END:?datetime: \&date_end?g" \
+       -e "s?STAR_DATE_BGN?\*date_bgn?g" \
+       -e "s?STAR_DATE_MID?\*date_mid?g" \
+       -e "s?STAR_DATE_END?\*date_end?g" \
+       getkf.solver.yaml > tf
+   mv tf getkf.solver.yaml
+   n=$(( $n + 1 ))
+ done
 

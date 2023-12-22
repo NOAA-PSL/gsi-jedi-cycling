@@ -14,8 +14,8 @@ geometry:
   field metadata override: Data/fieldmetadata/gfs-restart.yaml
 
 time window:
-  begin: $(ATM_WINDOW_BEGIN)
-  end: $(ATM_WINDOW_END)
+  begin: '$(ATM_WINDOW_BEGIN)'
+  end: '$(ATM_WINDOW_END)'
 
 increment variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                       slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
@@ -28,7 +28,7 @@ background:
     zero padding: 3
     template:
       states:
-      - datetime: DATE_BGN '$(ATM_BGN_TIME)'
+      - AT_DATE_BGN: '$(ATM_BGN_TIME)'
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
@@ -39,7 +39,7 @@ background:
         filename_sfcd: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.sfc_data.nc
         filename_sfcw: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_srf_wnd.res.nc
         filename_cplr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.coupler.res
-      - datetime: DATE_MID '$(ATM_WINDOW_CENTER)'
+      - AT_DATE_MID: '$(ATM_WINDOW_CENTER)'
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
@@ -50,7 +50,7 @@ background:
         filename_sfcd: sfc_data.nc
         filename_sfcw: fv_srf_wnd.res.nc
         filename_cplr: coupler.res
-      - datetime: DATE_END '$(ATM_END_TIME)'
+      - AT_DATE_END: '$(ATM_END_TIME)'
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
@@ -101,17 +101,17 @@ output ensemble increments:
 output:
   states:
   - datadir: analysis/mean/mem%{member}%
-    datetime: *date_bgn
+    datetime: STAR_DATE_BGN
     filename: bgn.%{member}%
     filetype: auxgrid
     gridtype: gaussian
   - datadir: analysis/mean/mem%{member}%
-    datetime: *date_mid
+    datetime: STAR_DATE_MID
     filename: mid.%{member}%
     filetype: auxgrid
     gridtype: gaussian
   - datadir: analysis/mean/mem%{member}%
-    datetime: *date_end
+    datetime: STAR_DATE_END
     filename: end.%{member}%
     filetype: auxgrid
     gridtype: gaussian

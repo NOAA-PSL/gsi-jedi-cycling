@@ -15,46 +15,46 @@ geometry:
 
 time window:
   begin: '$(ATM_WINDOW_BEGIN)'
-  end: '$(ATM_WINDOW_LENGTH)'
+  end: $(ATM_WINDOW_END)
 
 #increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
 
 background:
-  date: '$(ATM_WINDOW_CENTER)'
+  date: $(ATM_WINDOW_CENTER)
   members from template:
     pattern: '%mem%'
     nmembers: 1
     zero padding: 3
     template:
       states:
-      - datetime: DATE_BGN '$(ATM_BGN_TIME)'
+      - AT_DATE_BGN: $(ATM_BGN_TIME)
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: $(TOPDIR)/$(ATM_BGN_YYYYMMDDHH)/mem%mem%/RESTART
+        datapath: $(TOPDIR)/$(ATM_BGN_YYYYMMDDHH)/MEMSTR/RESTART
         filename_core: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_core.res.nc
         filename_trcr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_tracer.res.nc
         filename_sfcd: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.sfc_data.nc
         filename_sfcw: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_srf_wnd.res.nc
         filename_cplr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.coupler.res
-      - datetime: DATE_MID '$(ATM_WINDOW_CENTER)'
+      - AT_DATE_MID: $(ATM_WINDOW_CENTER)
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: mem%mem%/INPUT
+        datapath: MEMSTR/INPUT
         filename_core: fv_core.res.nc
         filename_trcr: fv_tracer.res.nc
         filename_sfcd: sfc_data.nc
         filename_sfcw: fv_srf_wnd.res.nc
         filename_cplr: coupler.res
-      - datetime: DATE_END '$(ATM_END_TIME)'
+      - AT_DATE_END: $(ATM_END_TIME)
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: $(TOPDIR)/$(ATM_END_YYYYMMDDHH)/mem%mem%/RESTART
+        datapath: $(TOPDIR)/$(ATM_END_YYYYMMDDHH)/MEMSTR/RESTART
         filename_core: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_core.res.nc
         filename_trcr: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_tracer.res.nc
         filename_sfcd: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.sfc_data.nc
@@ -62,25 +62,25 @@ background:
         filename_cplr: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.coupler.res
 
 control member:
-  date: '$(ATM_WINDOW_CENTER)'
+  date: $(ATM_WINDOW_CENTER)
   members from template:
     pattern: '%mem%'
     nmembers: 1
     zero padding: 3
     template:
       states:
-      - datetime: &date_bgn '$(ATM_BGN_TIME)'
+      - datetime: STAR_DATE_BGN
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: $(TOPDIR)/$(ATM_BGN_YYYYMMDDHH)/mem000/RESTART
+        datapath: mem000/RESTART
         filename_core: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_core.res.nc
         filename_trcr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_tracer.res.nc
         filename_sfcd: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.sfc_data.nc
         filename_sfcw: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_srf_wnd.res.nc
         filename_cplr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.coupler.res
-      - datetime: &date_mid '$(ATM_WINDOW_CENTER)'
+      - datetime: STAR_DATE_MID
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
@@ -91,12 +91,12 @@ control member:
         filename_sfcd: sfc_data.nc
         filename_sfcw: fv_srf_wnd.res.nc
         filename_cplr: coupler.res
-      - datetime: &date_end '$(ATM_END_TIME)'
+      - datetime: STAR_DATE_END
         filetype: fms restart
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: $(TOPDIR)/$(ATM_END_YYYYMMDDHH)/mem000/RESTART
+        datapath: mem000/RESTART
         filename_core: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_core.res.nc
         filename_trcr: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_tracer.res.nc
         filename_sfcd: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.sfc_data.nc
@@ -130,9 +130,22 @@ local ensemble DA:
 
 # Analysis output
 output:
-  filetype: auxgrid
-  gridtype: gaussian
-  filename: analysis/mean/mean.
+  states:
+  - datadir: analysis/mean/mem%{member}%
+    datetime: STAR_DATE_BGN
+    filename: bgn.%{member}%
+    filetype: auxgrid
+    gridtype: gaussian
+  - datadir: analysis/mean/mem%{member}%
+    datetime: STAR_DATE_MID
+    filename: mid.%{member}%
+    filetype: auxgrid
+    gridtype: gaussian
+  - datadir: analysis/mean/mem%{member}%
+    datetime: STAR_DATE_END
+    filename: end.%{member}%
+    filetype: auxgrid
+    gridtype: gaussian
 
 # Observing system
 # ----------------

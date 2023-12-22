@@ -30,8 +30,6 @@ class GenerateConfig():
     self.bgn_datetime = self.get_advancedate(-self.interval)
     self.bgn_year, self.bgn_month, self.bgn_day, self.bgn_hour = self.get_ymdh(self.bgn_datetime)
     self.bgn_ymdh = '%d%2.2d%2.2d%2.2d' %(self.bgn_year, self.bgn_month, self.bgn_day, self.bgn_hour)
-    bgn_intv = -self.interval - 1
-    self.bgn_datetime = self.get_advancedate(bgn_intv)
 
     self.end_datetime = self.get_advancedate(self.interval)
     self.end_year, self.end_month, self.end_day, self.end_hour = self.get_ymdh(self.end_datetime)
@@ -66,22 +64,27 @@ class GenerateConfig():
   def genYAML(self, intval=3):
     yaml_file = YAMLFile(path=self.yaml_in)
     print('yaml_file = ', yaml_file)
-    yaml_file['executable options']['ATM_WINDOW_BEGIN'] = self.advancedate(-intval)
-    yaml_file['executable options']['ATM_WINDOW_END'] = self.advancedate(intval)
+    bgn_intv = self.interval + 1
+    yaml_file['executable options']['ATM_WINDOW_BEGIN'] = self.advancedate(-bgn_intv)
+    yaml_file['executable options']['ATM_WINDOW_END'] = self.advancedate(self.interval)
     yaml_file['executable options']['ATM_WINDOW_CENTER'] = self.advancedate(0)
     yaml_file['executable options']['NMEM_ENKF'] = self.nmem_enkf
     yaml_file['executable options']['YYYYMMDDHH'] = self.ymdh
 
-    yaml_file['executable options']['TOPDIR'] = self.ymdh
-    yaml_file['executable options']['ATM_BGN_TIME'] = self.bgn_datetime
+    yaml_file['executable options']['TOPDIR'] = self.topdir
+    yaml_file['executable options']['ATM_BGN_TIME'] = self.advancedate(-self.interval)
     yaml_file['executable options']['ATM_BGN_YYYYMMDDHH'] = self.bgn_ymdh
     yaml_file['executable options']['ATM_BGN_YYYYMMDD'] = '%d%2.2d%2.2d' %(self.bgn_year, self.bgn_month, self.bgn_day)
     yaml_file['executable options']['ATM_BGN_HH'] = '%2.2d' %(self.bgn_hour)
 
-    yaml_file['executable options']['ATM_END_TIME'] = self.end_datetime
+   #yaml_file['executable options']['ATM_CNT_TIME'] = self.advancedate(0)
+
+    yaml_file['executable options']['ATM_END_TIME'] = self.advancedate(self.interval)
     yaml_file['executable options']['ATM_END_YYYYMMDDHH'] = self.end_ymdh
     yaml_file['executable options']['ATM_END_YYYYMMDD'] = '%d%2.2d%2.2d' %(self.end_year, self.end_month, self.end_day)
     yaml_file['executable options']['ATM_END_HH'] = '%2.2d' %(self.end_hour)
+
+   #yaml_file['executable options']['CTR_CNT_TIME'] = self.advancedate(0)
 
     yaml_file.save(self.yaml_out)
 
