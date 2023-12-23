@@ -1,0 +1,399 @@
+#!/bin/sh
+# model was compiled with these 
+echo "run Jedi starting at `date`"
+run_mts_jedi_time_start=$(date +%s)
+#source $MODULESHOME/init/sh
+
+source ${datapath}/analdate.sh
+
+# yr,mon,day,hr at middle of assim window (analysis time)
+export year=`echo $analdate |cut -c 1-4`
+export month=`echo $analdate |cut -c 5-6`
+export day=`echo $analdate |cut -c 7-8`
+export hour=`echo $analdate |cut -c 9-10`
+yyyymmddhh=${year}${month}${day}${hour}
+
+#input file fir.
+run_dir=${datapath}/${analdate}
+
+#source ~/gdasenv
+source ${enkfscripts}/gdasenv
+executable=${jediblddir}/bin/fv3jedi_letkf.x
+ulimit -s unlimited
+
+echo "run Jedi starting at `date`"
+
+cd ${run_dir}
+rm -rf ioda_v2_data diag
+mkdir -p ioda_v2_data diag
+
+#cp diag_* diag/.
+#for type in diag_amsua_n15 amsua_n18 amsua_n19 conv_ps conv_q conv_t conv_uv
+#for type in amsua_n19 conv_ps conv_q conv_t conv_uv
+for type in amsua_n19 conv_q conv_t conv_uv
+do
+  cp diag_${type}_ges.${yyyymmddhh}_ensmean.nc4 diag/.
+done
+
+echo "in run_dir: ${run_dir}"
+
+#echo "module list"
+#module list
+
+time_start=$(date +%s)
+
+python ${jediblddir}/bin/proc_gsi_ncdiag.py \
+       -o ioda_v2_data diag
+
+time_end=$(date +%s)
+echo "proc_gsi_ncdiag.py elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
+
+cd ioda_v2_data
+#flst=`ls *_ps_obs_${yyyymmddhh}.nc4`
+#python ${iodablddir}/bin/combine_obsspace.py \
+#    -i ${flst} -o ps_obs_${yyyymmddhh}.nc4
+
+#cp sfc_ps_obs_${yyyymmddhh}.nc4 ps_obs_${yyyymmddhh}.nc4
+
+flst="sondes_tsen_obs_${yyyymmddhh}.nc4 sondes_tv_obs_${yyyymmddhh}.nc4 sondes_uv_obs_${yyyymmddhh}.nc4 sondes_q_obs_${yyyymmddhh}.nc4"
+python ${jediblddir}/bin/combine_obsspace.py \
+  -i sondes_tsen_obs_${yyyymmddhh}.nc4 \
+     sondes_tv_obs_${yyyymmddhh}.nc4 \
+     sondes_uv_obs_${yyyymmddhh}.nc4 \
+     sondes_q_obs_${yyyymmddhh}.nc4 \
+  -o sondes_obs_${yyyymmddhh}.nc4 &
+
+#flst="sfc_ps_obs_${yyyymmddhh}.nc4 sfcship_ps_obs_${yyyymmddhh}.nc4 sondes_ps_obs_${yyyymmddhh}.nc4"
+#python ${iodablddir}/bin/combine_obsspace.py \
+#  -i sfc_ps_obs_${yyyymmddhh}.nc4 \
+#     sfcship_ps_obs_${yyyymmddhh}.nc4 \
+#     sondes_ps_obs_${yyyymmddhh}.nc4 \
+#  -o ps_obs_${yyyymmddhh}.nc4 &
+#wait
+
+time_end=$(date +%s)
+echo "combine_obsspace.py elapsed Time: $(($time_end-$time_start)) seconds"
+	
+cd ..
+
+minute=0
+second=0
+
+cd ${run_dir}
+export GBIAS=${datapathm1}/${PREINPm1}abias
+export GBIAS_PC=${datapathm1}/${PREINPm1}abias_pc
+export GBIASAIR=${datapathm1}/${PREINPm1}abias_air
+ln -fs $GBIAS   ${datapath2}/abias
+ln -fs $GBIAS_PC   ${datapath2}/abias_pc
+ln -fs $GBIASAIR ${datapath2}/abias_air
+
+ensdatadir=${run_dir}/Data
+mkdir -p ${ensdatadir}
+mkdir -p ${ensdatadir}/satbias
+
+cat > satbias.yaml << EOF
+dump: gdas
+gsi_bc_root: ${run_dir}
+ufo_bc_root: ${ensdatadir}/satbias
+work_root: ${run_dir}
+satbias2ioda: ${jediblddir}/bin/satbias2ioda.x
+EOF
+
+python ${enkfscripts}/run_satbias_conv.py --config satbias.yaml
+
+cd ${ensdatadir}
+echo "cd ${ensdatadir}" >> ${run_dir}/logs/run_mts_jedi.out
+
+ sed -e "s?SYEAR?${year}?g" \
+     -e "s?SMONTH?${month}?g" \
+     -e "s?SDAY?${day}?g" \
+     -e "s?SHOUR?${hour}?g" \
+     -e "s?SMINUTE?${minute}?g" \
+     -e "s?SSECOND?${second}?g" \
+     -e "s?EYEAR?${year}?g" \
+     -e "s?EMONTH?${month}?g" \
+     -e "s?EDAY?${day}?g" \
+     -e "s?EHOUR?${hour}?g" \
+     -e "s?EMINUTE?${minute}?g" \
+     -e "s?ESECOND?${second}?g" \
+     ${enkfscripts}/genyaml/coupler.res.template > coupler.res
+
+#crtmdir=${fixcrtm}
+#ln -sf crtmdir crtm
+
+for dir in crtm \
+   fieldmetadata \
+   fieldsets \
+   fv3files \
+   TauCoeff
+do
+   if [ ! \( -e "${dir}" \) ]
+   then
+      ln -sf ${jedidatadir}/$dir .
+   fi
+done
+
+cd ${run_dir}
+
+echo "Run gen-mts-ensmean.sh"
+
+#echo "module list"
+#module list
+
+time_start=$(date +%s)
+
+${enkfscripts}/scripts/gen-mts-ensmean.sh ${datapath} ${analdate}
+
+time_end=$(date +%s)
+echo "gen-mts-ensmean.sh elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
+
+echo "cd ${run_dir}" >> ${run_dir}/logs/run_mts_jedi.out
+cd ${run_dir}
+
+#--------------------------------------------------------------------------------------------
+ cp ${enkfscripts}/genyaml/config.template .
+ cp ${enkfscripts}/genyaml/*ps.yaml .
+ cp ${enkfscripts}/genyaml/halo.distribution .
+ cp ${enkfscripts}/genyaml/rr.distribution .
+ cp ${enkfscripts}/genyaml/sondes.yaml .
+ cp ${enkfscripts}/genyaml/iasi_metop-b.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n15.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n18.yaml .
+ cp ${enkfscripts}/genyaml/amsua_n19.yaml .
+
+ export corespernode=40
+ export mpitaskspernode=40
+ count=1
+ export OMP_NUM_THREADS=1
+
+ NODES=$SLURM_NNODES
+
+ export observer_layout_x=3
+ export observer_layout_y=4
+ export solver_layout_x=12
+ export solver_layout_y=22
+ export NMEM_ENKF=80
+
+ python ${enkfscripts}/genyaml/gen-mts-config.py \
+   --template=config.template \
+   --year=${year} \
+   --month=${month} \
+   --day=${day} \
+   --hour=${hour} \
+   --intv=3
+
+ python ${enkfscripts}/genyaml/gen-mts-yaml.py \
+   --config=config.yaml \
+   --observer=${enkfscripts}/genyaml/getkf.yaml.template.rr.observer.mts \
+   --solver=${enkfscripts}/genyaml/getkf.yaml.template.solver.mts \
+   --numensmem=${NMEM_ENKF} \
+   --obsdir=observer
+
+#--------------------------------------------------------------------------------------------
+#export OOPS_DEBUG=-11
+#export OOPS_TRACK=-11
+#export OOPS_TRACE=1
+
+ export ALLINEA_NO_TIMEOUT=true
+
+ echo "run observer"
+
+ rm -rf analysis hofx stdoutNerr solver
+ mkdir -p analysis/mean analysis/increment hofx solver
+
+number_members=${NMEM_ENKF}
+n=0
+while [ $n -le $number_members ]
+do
+   used_nodes=0
+   while [ $used_nodes -lt $NODES ] && [ $n -le $number_members ]
+   do
+     used_nodes=$(( $used_nodes + 2 ))
+
+     zeropadmem=`printf %03d $n`
+     member_str=mem${zeropadmem}
+     cp ${ensdatadir}/coupler.res ${member_str}/INPUT/.
+     mkdir -p analysis/increment/${member_str}
+    #mkdir -p observer/${member_str}
+
+     sed -e "s?MEMSTR?${member_str}?g" \
+         -e "s?AT_DATE_BGN:?datetime: \&date_bgn?g" \
+         -e "s?AT_DATE_MID:?datetime: \&date_mid?g" \
+         -e "s?AT_DATE_END:?datetime: \&date_end?g" \
+         -e "s?STAR_DATE_BGN?\*date_bgn?g" \
+         -e "s?STAR_DATE_MID?\*date_mid?g" \
+         -e "s?STAR_DATE_END?\*date_end?g" \
+         observer/getkf.yaml.observer.${member_str} > tf
+     mv tf observer/getkf.yaml.observer.${member_str}
+
+     sed -e "s?AT_DATE_BGN:?datetime: \&date_bgn?g" \
+         -e "s?AT_DATE_MID:?datetime: \&date_mid?g" \
+         -e "s?AT_DATE_END:?datetime: \&date_end?g" \
+         -e "s?STAR_DATE_BGN?\*date_bgn?g" \
+         -e "s?STAR_DATE_MID?\*date_mid?g" \
+         -e "s?STAR_DATE_END?\*date_end?g" \
+         getkf.solver.yaml > tf
+     mv tf getkf.solver.yaml
+
+    #srun -N 1 -n 36 --ntasks-per-node=40 ${executable} \
+    #     observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+
+     srun -N 2 -n 72 --ntasks-per-node=40 ${executable} \
+          observer/getkf.yaml.observer.${member_str} >& observer/log.${member_str} &
+     n=$(( $n + 1 ))
+   done
+   wait
+ done
+
+time_end=$(date +%s)
+echo "observer elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
+
+ echo "concatenate observer"
+ cd ${run_dir}
+ obstype=ps
+
+ number_members=81
+#for obstype in sfc_ps sfcship_ps sondes_ps
+#for obstype in sfc_ps sfcship_ps sondes_ps sondes amsua_n19
+#for obstype in ps sondes amsua_n19
+#for obstype in sondes
+ for obstype in sondes amsua_n19
+ do
+   time python ${enkfscripts}/python_scripts/concanate-observer.py \
+        --run_dir=${run_dir} \
+        --datestr=${yyyymmddhh} \
+        --nmem=${number_members} \
+        --obstype=${obstype} &
+ done
+
+ number_cores=40
+ number_members=80
+ for obstype in amsua_n19
+ do
+   time srun -N 1 -n ${number_cores} \
+      python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
+      --rundir=${datapath} \
+      --datestr=${yyyymmddhh} \
+      --nmem=${number_members} \
+      --obstype=${obstype} &
+ done
+
+ wait
+
+time_end=$(date +%s)
+echo "concanate-observer.py elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
+
+ echo "run solver"
+ cd ${run_dir}
+
+export OOPS_DEBUG=1
+export OOPS_TRACK=-11
+export OMP_NUM_THREADS=1
+
+export corespernode=36
+export mpitaskspernode=40
+
+nprocs=1584
+totnodes=40
+
+
+#echo "srun -N $totnodes -n $nprocs -c $count --ntasks-per-node=$mpitaskspernode \\" >> ${run_dir}/logs/run_mts_jedi.out
+#echo "  --exclusive --cpu-bind=cores --verbose $executable getkf.yaml" >> ${run_dir}/logs/run_mts_jedi.out
+echo "srun: `which srun`" >> ${run_dir}/logs/run_mts_jedi.out
+
+#srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode $executable getkf.solver.yaml
+#srun -N $totnodes -n $nprocs --ntasks-per-node=$mpitaskspernode \
+#        ${executable} getkf.solver.yaml
+#time map --profile srun -n $nprocs ${executable} getkf.solver.yaml
+ srun -n $nprocs ${executable} getkf.solver.yaml
+
+time_end=$(date +%s)
+echo "solver elapsed Time: $(($time_end-$time_start)) seconds"
+time_start=$(date +%s)
+
+cd ${run_dir}
+echo "generate increments"
+
+interpsrcdir=${enkfscripts}/interp_fv3cube2gaussian
+prefix=${year}${month}${day}.${hour}0000.
+
+workdir=${datapath}/${analdate}
+
+echo "workdir: $workdir" >> ${run_dir}/logs/run_mts_jedi.out
+
+cat > input.nml << EOF
+&control_param
+ generate_weights = .false.
+ output_flnm = "fv3_increment6.nc"
+ wgt_flnm = "${interpsrcdir}/gaussian_weights_C96.nc4"
+ indirname = "${workdir}/analysis/increment"
+ outdirname = "${workdir}"
+ has_prefix = .true.
+ prefix = "${prefix}"
+ use_gaussian_grid = .true.
+ gaussian_grid_file = "${interpsrcdir}/gaussian_grid_C96.nc4"
+ nlon = 384
+ nlat = 192
+ nlev = 127
+ nilev = 128
+ npnt = 4
+ total_members = 80
+ num_types = 2
+ data_types = 'fv_core.res.tile', 'fv_tracer.res.tile',
+/
+EOF
+
+export mpitaskspernode=8
+nprocs=80
+totnodes=10
+
+echo "srun -N $totnodes -n $nprocs -c $count --ntasks-per-node=$mpitaskspernode \\" >> ${run_dir}/logs/run_mts_jedi.out
+echo "  --exclusive --cpu-bind=cores --verbose ${interpsrcdir}/fv3interp.exe" >> ${run_dir}/logs/run_mts_jedi.out
+
+srun -N $totnodes -n $nprocs -c $count --ntasks-per-node=$mpitaskspernode \
+  --exclusive --cpu-bind=cores --verbose ${interpsrcdir}/fv3interp.exe
+
+time_end=$(date +%s)
+echo "interpolate to gaussian grid elapsed Time: $(($time_end-$time_start)) seconds"
+
+jedi_done=no
+
+number_members=80
+incrnumb=0
+n=1
+while [ $n -le $number_members ]
+do
+   if [ $n -lt 10 ]
+   then
+      member_str=mem00${n}
+   elif [ $n -lt 100 ]
+   then
+      member_str=mem0${n}
+   else
+      member_str=mem${n}
+   fi
+
+   if [ -f ${run_dir}/${member_str}/INPUT/fv3_increment6.nc ]
+   then
+     incrnumb=$(( $incrnumb + 1 ))
+   fi
+
+   n=$(( $n + 1 ))
+done
+
+if [ $incrnumb -eq $number_members ]
+then
+  jedi_done=yes
+fi
+
+run_mts_jedi_time_end=$(date +%s)
+echo "run_mts_jedi.sh elapsed Time: $(($run_mts_jedi_time_end-$run_mts_jedi_time_start)) seconds"
+
+echo "$jedi_done" > ${run_dir}/logs/run_mts_jedi.log
+echo "jedi_done = $jedi_done" >> ${run_dir}/logs/run_mts_jedi.out
+echo "run Jedi Ending at `date`" >> ${run_dir}/logs/run_mts_jedi.out
+

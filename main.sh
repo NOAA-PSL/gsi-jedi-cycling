@@ -256,24 +256,24 @@ fi
 
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
    echo "Run JEDI for: $analdate start at: `date`"
-   run_jedi_start=$(date +%s)
+   run_mts_jedi_start=$(date +%s)
 
-   if [ -f ${current_logdir}/run_jedi.log ]
+   if [ -f ${current_logdir}/run_mts_jedi.log ]
    then
-     jedi_done=`cat ${current_logdir}/run_jedi.log`
+     jedi_done=`cat ${current_logdir}/run_mts_jedi.log`
      if [ $jedi_done == 'yes' ]; then
        echo "$analdate jedi already completed successfully `date`"
      else
-       ${enkfscripts}/run_jedi.sh
+       ${enkfscripts}/run_mts_jedi.sh
      fi
    else
-     ${enkfscripts}/run_jedi.sh
+     ${enkfscripts}/run_mts_jedi.sh
    fi
 
-   run_jedi_end=$(date +%s)
-   echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
+   run_mts_jedi_end=$(date +%s)
+   echo "run_mts_jedi.sh elapsed Time: $(($run_mts_jedi_end-$run_mts_jedi_start)) seconds"
 
-   jedi_done=`cat ${current_logdir}/run_jedi.log`
+   jedi_done=`cat ${current_logdir}/run_mts_jedi.log`
    if [ $jedi_done == 'yes' ]; then
      echo "$analdate jedi completed successfully `date`"
    else
