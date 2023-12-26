@@ -136,17 +136,17 @@ done
 
 cd ${run_dir}
 
-echo "Run gen-mts-ensmean.sh"
+echo "Run gen_mts_ensmean.sh"
 
 #echo "module list"
 #module list
 
 time_start=$(date +%s)
 
-${enkfscripts}/scripts/gen-mts-ensmean.sh ${datapath} ${analdate}
+${enkfscripts}/scripts/gen_mts_ensmean.sh ${datapath} ${analdate}
 
 time_end=$(date +%s)
-echo "gen-mts-ensmean.sh elapsed Time: $(($time_end-$time_start)) seconds"
+echo "gen_mts_ensmean.sh elapsed Time: $(($time_end-$time_start)) seconds"
 time_start=$(date +%s)
 
 echo "cd ${run_dir}" >> ${run_dir}/logs/run_mts_jedi.out
@@ -176,6 +176,9 @@ cd ${run_dir}
  export solver_layout_y=22
  export NMEM_ENKF=80
 
+ rm -rf analysis hofx stdoutNerr solver observer
+ mkdir -p analysis/mean analysis/increment hofx solver observer
+
  python ${enkfscripts}/genyaml/gen-mts-config.py \
    --template=config.template \
    --year=${year} \
@@ -200,9 +203,6 @@ cd ${run_dir}
 
  echo "run observer"
 
- rm -rf analysis hofx stdoutNerr solver
- mkdir -p analysis/mean analysis/increment hofx solver
-
 number_members=${NMEM_ENKF}
 n=0
 while [ $n -le $number_members ]
@@ -216,7 +216,7 @@ do
      member_str=mem${zeropadmem}
      cp ${ensdatadir}/coupler.res ${member_str}/INPUT/.
      mkdir -p analysis/increment/${member_str}
-    #mkdir -p observer/${member_str}
+     mkdir -p observer/${member_str}
 
      sed -e "s?MEMSTR?${member_str}?g" \
          -e "s?AT_DATE_BGN:?datetime: \&date_bgn?g" \
