@@ -2,18 +2,18 @@
 
 #set -x
 
- sdate=2022010318
- edate=2022011712
+ sdate=2022010500
+ edate=2022010618
 #------------------------------------------------------------------------------
 #firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/gsi-cycling)
 #seconddirs=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
 #firstlbls=(GSI_SondesAmsuaN19)
 #secondlbls=(JEDI_SondesAmsuaN19)
 
- firstdirs=(/work2/noaa/da/telless/PSL_gsi_jedi/PSL_JEDI_sondes_amsua_n19)
+ firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/sts.jedi-cycling)
  seconddirs=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
- firstlbls=(TravisJEDI_SondesAmsuaN19)
- secondlbls=(JEDI_SondesAmsuaN19)
+ firstlbls=(STS)
+ secondlbls=(MTS)
 
  tar cvf ~/jg.tar plot-jedi-gsi-diag.py get_diag.sh
 

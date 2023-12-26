@@ -269,17 +269,17 @@ time_start=$(date +%s)
         --obstype=${obstype} &
  done
 
- number_cores=40
- number_members=80
- for obstype in amsua_n19
- do
-   time srun -N 1 -n ${number_cores} \
-      python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
-      --rundir=${datapath} \
-      --datestr=${yyyymmddhh} \
-      --nmem=${number_members} \
-      --obstype=${obstype} &
- done
+#number_cores=40
+#number_members=80
+#for obstype in amsua_n19
+#do
+#  time srun -N 1 -n ${number_cores} \
+#     python ${enkfscripts}/python_scripts/pympi-concanate-observer.py \
+#     --rundir=${datapath} \
+#     --datestr=${yyyymmddhh} \
+#     --nmem=${number_members} \
+#     --obstype=${obstype} &
+#done
 
  wait
 

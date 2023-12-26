@@ -311,9 +311,9 @@ export LATA=$LATB
 
 export ANALINC=6
 
-export FHMIN=9
+export FHMIN=6
 export FHMAX=10
-export FHOUT=9
+export FHOUT=6
 #export RESTART_FREQ=3
 export RESTART_FREQ=3
 FHMAXP1=`expr $FHMAX + 1`

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#set -x
+ set -x
 
  module load cdo/1.9.10
 
@@ -70,8 +70,8 @@
      ifiles=`ls ${indir}/mem*/INPUT/${type}.tile${tile}.nc`
      cdo ensmean $ifiles $ofile &
    done
-   wait
  done
+ wait
 
 #----------------------------------------------------------------------------------
  ymdhm6=`advance_ymdh $ymdh -6`
@@ -132,7 +132,7 @@
        ifiles=`ls ${indir}/mem*/RESTART/${dtstr}.${type}.tile${tile}.nc`
        cdo ensmean $ifiles $ofile &
      done
-     wait
    done
  done
+ wait
 

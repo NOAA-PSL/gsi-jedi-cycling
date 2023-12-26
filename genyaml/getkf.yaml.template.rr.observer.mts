@@ -74,7 +74,7 @@ control member:
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: mem000/RESTART
+        datapath: $(BKGDIR)/mem000/RESTART
         filename_core: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_core.res.nc
         filename_trcr: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.fv_tracer.res.nc
         filename_sfcd: $(ATM_BGN_YYYYMMDD).$(ATM_BGN_HH)0000.sfc_data.nc
@@ -96,7 +96,7 @@ control member:
         state variables: [ua,va,t,delp,DZ,sphum,ice_wat,liq_wat,o3mr,phis,
                           slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                           u_srf,v_srf,f10m]
-        datapath: mem000/RESTART
+        datapath: $(BKGDIR)/mem000/RESTART
         filename_core: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_core.res.nc
         filename_trcr: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.fv_tracer.res.nc
         filename_sfcd: $(ATM_END_YYYYMMDD).$(ATM_END_HH)0000.sfc_data.nc
