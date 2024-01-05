@@ -683,7 +683,7 @@ ls -l ${datapathp1}/${charnanal}/INPUT
 cd INPUT
 find -type l -delete
 cd ..
-/bin/rm -rf RESTART # don't need RESTART dir anymore.
+#/bin/rm -rf RESTART # don't need RESTART dir anymore.
 
 echo "all done at `date`"
 
