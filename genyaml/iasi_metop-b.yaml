@@ -1,7 +1,7 @@
 obs space:
   name: iasi_metop-b
   distribution:
-   !INC iasi-distribution.yaml
+   !INC distribution.yaml
   obsdatain:
       engine:
         type: H5File

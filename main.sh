@@ -53,13 +53,94 @@ if [ "$REALTIME" == "NO" ]; then
 #cd ..
 
 #   Set CONVINFO
-export CONVINFO=${enkfscripts}/textdata/global_convinfo.txt
+if [[  "$analdate" -ge 2021052012 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2021052012
+elif [[  "$analdate" -ge 2021032212 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2021032212
+elif [[  "$analdate" -ge 2020091612 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2020091612
+elif [[  "$analdate" -ge 2020052612 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2020052612
+elif [[  "$analdate" -ge 2020040718 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2020040718
+elif [[  "$analdate" -ge 2019110706 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2019110706
+elif [[  "$analdate" -ge 2019021900 ]]; then
+    export CONVINFO=$fixgsi/gfsv16_historical/global_convinfo.txt.2019021900
+elif [[ "$analdate" -ge "2018022818" ]]; then
+    export CONVINFO=$fixgsi/fv3_historical/global_convinfo.txt.2018022818
+elif [[ "$analdate" -ge "2018010512" ]]; then
+    export CONVINFO=$fixgsi/fv3_historical/global_convinfo.txt.2018010512
+elif [[ "$analdate" -ge "2017071912" ]]; then
+    export CONVINFO=$fixgsi/fv3_historical/global_convinfo.txt.2017071912
+elif [[ "$analdate" -ge "2016031512" ]]; then
+    export CONVINFO=$fixgsi/fv3_historical/global_convinfo.txt.2016031512
+elif [[ "$analdate" -ge "2014041400" ]]; then
+    export CONVINFO=$fixgsi/fv3_historical/global_convinfo.txt.2014041400
+else
+    echo "no convinfo found"
+    exit 1
+fi
 
 #   Set OZINFO
-export OZINFO=${enkfscripts}/textdata/global_ozinfo.txt
+if [[  "$analdate" -ge 2020011806 ]]; then
+    export OZINFO=$fixgsi/gfsv16_historical/global_ozinfo.txt.2020011806
+elif [[  "$analdate" -ge 2020011600 ]]; then
+    export OZINFO=$fixgsi/gfsv16_historical/global_ozinfo.txt.2020011600
+elif [[  "$analdate" -ge 2020011600 ]]; then
+    export OZINFO=$fixgsi/gfsv16_historical/global_ozinfo.txt.2020021900
+elif [[  "$analdate" -ge 2020011806 ]]; then
+    export OZINFO=$fixgsi/gfsv16_historical/global_ozinfo.txt.2020011806
+elif [[ "$analdate" -ge "2020011600" ]]; then
+    export OZINFO=$fixgsi/fv3_historical/global_ozinfo.txt.2020011600
+elif [[ "$analdate" -ge "2018110700" ]]; then
+    export OZINFO=$fixgsi/fv3_historical/global_ozinfo.txt.2018110700
+elif [[ "$analdate" -ge "2015110500" ]]; then
+    export OZINFO=$fixgsi/fv3_historical/global_ozinfo.txt.2015110500
+else
+    echo "no ozinfo found"
+    exit 1
+fi
 
 #   Set SATINFO
-export SATINFO=${enkfscripts}/satinfo/global_satinfo.txt
+if [[ "$analdate" -ge "2021052118" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2021052118
+elif [[ "$analdate" -ge "2020022012" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2020022012
+elif [[ "$analdate" -ge "2019110706" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2019110706
+elif [[ "$analdate" -ge "2019021900" ]]; then
+    export SATINFO=$fixgsi/gfsv16_historical/global_satinfo.txt.2019021900
+elif [[ "$analdate" -ge "2018053012" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2018053012
+elif [[ "$analdate" -ge "2018021212" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2018021212
+elif [[ "$analdate" -ge "2017103118" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017103118
+elif [[ "$analdate" -ge "2017031612" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017031612
+elif [[ "$analdate" -ge "2017030812" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2017030812
+elif [[ "$analdate" -ge "2016110812" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016110812
+elif [[ "$analdate" -ge "2016090912" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016090912
+elif [[ "$analdate" -ge "2016020312" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016020312
+elif [[ "$analdate" -ge "2016011912" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2016011912
+elif [[ "$analdate" -ge "2015111012" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015111012
+elif [[ "$analdate" -ge "2015100118" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015100118
+elif [[ "$analdate" -ge "2015070218" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015070218
+elif [[ "$analdate" -ge "2015011412" ]]; then
+    export SATINFO=$fixgsi/fv3_historical/global_satinfo.txt.2015011412
+else
+    echo "no satinfo found"
+    exit 1
+fi
 
 fi
 
@@ -255,24 +336,10 @@ else # just run observer (EnKF only)
    echo "run_gsiobserver.sh elapsed Time: $(($gsiobserver_end-$gsiobserver_start)) seconds"
 fi
 
+run_jedi_start=$(date +%s)
 if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
-   run_jedi_start=$(date +%s)
    echo "Run JEDI for: $analdate start at: `date`"
-
-   if [ -f ${current_logdir}/run_jedi.log ]
-   then
-     jedi_done=`cat ${current_logdir}/run_jedi.log`
-     if [ $jedi_done == 'yes' ]; then
-       echo "$analdate jedi already completed successfully `date`"
-     else
-       ${enkfscripts}/run_jedi.sh
-     fi
-   else
-     ${enkfscripts}/run_jedi.sh
-   fi
-
-   run_jedi_end=$(date +%s)
-   echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
+   ${enkfscripts}/run_jedi.sh
 
    jedi_done=`cat ${current_logdir}/run_jedi.log`
    if [ $jedi_done == 'yes' ]; then
@@ -284,6 +351,64 @@ if [ $jedirun == "true" ] && [ $cold_start == 'false' ]; then
 else
    echo "Did not run JEDI for: $analdate "
 fi
+
+run_jedi_end=$(date +%s)
+echo "run_jedi.sh elapsed Time: $(($run_jedi_end-$run_jedi_start)) seconds"
+
+  #module purge
+  #module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
+  #module load hpc/1.1.0
+  #module load hpc-intel/2018.4
+  #module unload mkl/2020.2
+  #module load mkl/2018.4
+  #module load hpc-impi/2018.4
+  #module load hdf5/1.10.6-parallel
+  #module load wgrib/1.8.0b
+  #module load slurm
+
+# loop over members run observer sequentially (for testing)
+#export skipcat="false"
+#nanal=0
+#ncount=0
+#while [ $nanal -le $nanals ]; do
+#   if [ $nanal -eq 0 ]; then
+#     export charnanal="ensmean"
+#     export charnanal2="ensmean"
+#   else
+#     export charnanal="mem"`printf %03i $nanal`
+#     export charnanal2=$charnanal 
+#   fi
+#   export lobsdiag_forenkf='.false.'
+#   echo "$analdate run gsi observer with `printenv | grep charnanal` `date`"
+#   sh ${enkfscripts}/run_gsiobserver.sh > ${current_logdir}/run_gsi_observer_${charnanal}.out 2>&1 &
+#   ncount=$((ncount+1))
+#   if [ $ncount -eq $NODES ]; then
+#      echo "waiting at nanal = $nanal ..."
+#      wait
+#      ncount=0
+#   fi
+#   nanal=$((nanal+1))
+#done
+#wait
+#nanal=0
+#while [ $nanal -le $nanals ]; do
+#   if [ $nanal -eq 0 ]; then
+#     export charnanal="ensmean"
+#     export charnanal2="ensmean"
+#   else
+#     export charnanal="mem"`printf %03i $nanal`
+#     export charnanal2=$charnanal 
+#   fi
+#   # once observer has completed, check log files.
+#   gsi_done=`cat ${current_logdir}/run_gsi_observer_${charnanal}.log`
+#   if [ $gsi_done == 'yes' ]; then
+#     echo "$analdate gsi observer $charnanal completed successfully `date`"
+#   else
+#     echo "$analdate gsi observer $charnanal did not complete successfully, exiting `date`"
+#     exit 1
+#   fi
+#   nanal=$((nanal+1))
+#done
 
 time_start=$(date +%s)
 # run enkf analysis.
@@ -475,13 +600,7 @@ if [ $analdate -le $analdate_end ]  && [ $resubmit == 'true' ]; then
    if [ $resubmit == 'true' ]; then
       echo "resubmit script"
       echo "machine = $machine"
-      echo "runtype = $runtype"
-      if [[ -z "${runtype}" ]]; then
-        echo "runtype is not defined. Stop"
-        exit 1
-      else
-        submit_job.sh -m $machine -r $runtype
-      fi
+      sh submit_job.sh 
    fi
 fi
 

@@ -16,7 +16,7 @@ geometry:
 window begin: '$(ATM_WINDOW_BEGIN)'
 window length: $(ATM_WINDOW_LENGTH)
 
-increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
+#increment variables: [ua, va, t, DZ, delp, ice_wat, liq_wat, sphum, o3mr]
 
 background:
   date: '$(BKG_ISOTIME)'
@@ -33,7 +33,7 @@ background:
       filename_sfcw: fv_srf_wnd.res.nc
       filename_cplr: coupler.res
       filetype: fms restart
-      state variables: [ua,va,t,DZ,delp,sphum,ice_wat,liq_wat,o3mr,phis,
+      state variables: [ua,va,t,delp,sphum,ice_wat,liq_wat,o3mr,phis,
                         slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                         u_srf,v_srf,f10m]
 
@@ -47,7 +47,7 @@ control member:
   filename_sfcw: fv_srf_wnd.res.nc
   filename_cplr: coupler.res
   filetype: fms restart
-  state variables: [ua,va,t,DZ,delp,sphum,ice_wat,liq_wat,o3mr,phis,
+  state variables: [ua,va,t,delp,sphum,ice_wat,liq_wat,o3mr,phis,
                     slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
                     u_srf,v_srf,f10m]
 
@@ -71,8 +71,6 @@ local ensemble DA:
     fraction of retained variance: .95
     lengthscale: 14
     lengthscale units: levels
-   #lengthscale: 4
-   #lengthscale units: logp
   inflation:
     rtps: 0.85
     rtpp: 0.0

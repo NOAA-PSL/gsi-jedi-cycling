@@ -44,13 +44,6 @@ class GeneratePlot():
     for i in range(len(axs)):
       axs[i].set_global()
 
-      if(i == (len(axs) - 1)):
-        clevs=self.incr_clevs
-        cblevs=self.incr_cblevs
-      else:
-        clevs=self.clevs
-        cblevs=self.cblevs
-
       pvar = data[i]
 
      #print('Plot No. ', i)
@@ -59,7 +52,7 @@ class GeneratePlot():
       cyclic_data, cyclic_lons = add_cyclic_point(pvar, coord=lons)
 
       cs=axs[i].contourf(cyclic_lons, lats, cyclic_data, transform=proj,
-                         levels=clevs, extend=self.extend,
+                         levels=self.clevs, extend=self.extend,
                          alpha=self.alpha, cmap=self.cmapname)
      #               cmap=self.cmapname, extend='both')
 
@@ -67,26 +60,20 @@ class GeneratePlot():
       axs[i].coastlines(resolution='auto', color='k')
       axs[i].gridlines(color='lightgrey', linestyle='-', draw_labels=True)
 
-      title = '%s min: %f, max: %f' %(self.runname[i], np.min(pvar), np.max(pvar))
-      axs[i].set_title(title)
-     #axs[i].set_title(self.runname[i])
+      axs[i].set_title(self.runname[i])
 
-      plt.colorbar(cs, ax=axs[i], pad=self.pad, ticks=cblevs,
-                   orientation='vertical')
+   #Adjust the location of the subplots on the page to make room for the colorbar
+    fig.subplots_adjust(bottom=0.1, top=0.9, left=0.05, right=0.8,
+                        wspace=0.02, hspace=0.02)
 
-#For shared color-bar
-#  #Adjust the location of the subplots on the page to make room for the colorbar
-#   fig.subplots_adjust(bottom=0.1, top=0.9, left=0.05, right=0.8,
-#                       wspace=0.02, hspace=0.02)
+   #Add a colorbar axis at the bottom of the graph
+    cbar_ax = fig.add_axes([0.85, 0.1, 0.05, 0.85])
 
-#  #Add a colorbar axis at the bottom of the graph
-#   cbar_ax = fig.add_axes([0.85, 0.1, 0.05, 0.85])
+   #Draw the colorbar
+    cbar=fig.colorbar(cs, cax=cbar_ax, pad=self.pad, ticks=self.cblevs,
+                      orientation='vertical')
 
-#  #Draw the colorbar
-#   cbar=fig.colorbar(cs, cax=cbar_ax, pad=self.pad, ticks=self.cblevs,
-#                     orientation='vertical')
-
-#   cbar.set_label(self.label, rotation=90)
+    cbar.set_label(self.label, rotation=90)
 
    #Add a big title at the top
     plt.suptitle(self.title)
@@ -104,13 +91,10 @@ class GeneratePlot():
     else:
       plt.show()
 
-  def set_runname(self, runname=['JEDI', 'ReInit', 'ReInit - JEDI']):
-    self.runname = runname
-
   def set_default(self):
     self.imagename = 'sample.png'
 
-    self.runname = ['JEDI', 'ReInit', 'ReInit - JEDI']
+    self.runname = ['REINIT', 'IASI', 'REINIT - IASI']
 
    #cmapname = coolwarm, bwr, rainbow, jet, seismic
     self.cmapname = 'bwr'
@@ -132,6 +116,9 @@ class GeneratePlot():
     self.label = 'Unit (C)'
     self.title = 'Temperature Increment'
 
+  def set_runname(self, runname = ['REINIT', 'IASI', 'REINIT - IASI']):
+    self.runname = runname
+
   def set_label(self, label='Unit (C)'):
     self.label = label
 
@@ -144,12 +131,6 @@ class GeneratePlot():
   def set_cblevs(self, cblevs=[]):
     self.cblevs = cblevs
 
-  def set_incr_clevs(self, clevs=[]):
-    self.incr_clevs = clevs
-
-  def set_incr_cblevs(self, cblevs=[]):
-    self.incr_cblevs = cblevs
-
   def set_imagename(self, imagename):
     self.imagename = imagename
 
@@ -160,96 +141,83 @@ class GeneratePlot():
 if __name__== '__main__':
   debug = 1
   output = 0
-  frtdir = '/work2/noaa/da/weihuang/cycling/sondes.gdas-cycling/2020010300'
-  snddir = '/work2/noaa/da/weihuang/cycling/sepreint.jedi_C96_lgetkf_sondesonly/2020010300'
-
-  frtfile = '%s/analysis/increment/xainc.20200103_000000z.nc4' %(frtdir)
-  sndfile = '%s/analysis/increment/xainc.20200103_000000z.nc4' %(snddir)
+  firstfile = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19/increment/interp2gaussian_grid.nc4'
+  secondfile = '/work2/noaa/da/weihuang/cycling/scripts/iasi-amsua/Data/analysis.iasi_metop+n15+n18+n19.separate_reinit_observer/increment/interp2gaussian_grid.nc4'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=',
-                                                'sndfile=', 'frtfile='])
+                                                'secondfile=', 'firstfile='])
   for o, a in opts:
     if o in ('--debug'):
       debug = int(a)
     elif o in ('--output'):
       output = int(a)
-    elif o in ('--sndfile'):
-      sndfile = a
-    elif o in ('--frtfile'):
-      frtfile = a
+    elif o in ('--secondfile'):
+      secondfile = a
+    elif o in ('--firstfile'):
+      firstfile = a
     else:
       assert False, 'unhandled option'
 
   gp = GeneratePlot(debug=debug, output=output)
 
-  ncfrt = netcdf_dataset(frtfile)
-  ncsnd = netcdf_dataset(sndfile)
-
-  lats = ncfrt.variables['lat'][:]
-  lons = ncfrt.variables['lon'][:]
+  ncsecond = netcdf_dataset(secondfile)
+  ncfirst = netcdf_dataset(firstfile)
+  lats = ncsecond.variables['lat'][:]
+  lons = ncsecond.variables['lon'][:]
 
 #-----------------------------------------------------------------------------------------
-  clevs = np.arange(-1.0, 1.02, 0.02)
-  cblevs = np.arange(-1.0, 1.2, 0.2)
+  clevs = np.arange(-1.0, 1.01, 0.01)
+  cblevs = np.arange(-1.0, 1.1, 0.1)
 
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
 #-----------------------------------------------------------------------------------------
-  incr_clevs = np.arange(-0.1, 0.102, 0.002)
-  incr_cblevs = np.arange(-0.1, 0.12, 0.02)
+ #second_varlist = ['T_inc', 'u_inc', 'v_inc', 'sphum_inc', 'o3mr_inc']
+ #first_varlist = ['T_inc', 'u_inc', 'v_inc', 'sphum_inc', 'o3mr_inc']
+  second_varlist = ['T_inc', 'u_inc', 'v_inc', 'delz_inc', 'sphum_inc']
+  first_varlist = ['T_inc', 'u_inc', 'v_inc', 'delz_inc', 'sphum_inc']
 
-  gp.set_incr_clevs(clevs=incr_clevs)
-  gp.set_incr_cblevs(cblevs=incr_cblevs)
-
-#-----------------------------------------------------------------------------------------
-  snd_varlist = ['T', 'ua', 'va', 'sphum', 'delp', 'DZ', 'o3mr']
-  frt_varlist = ['T', 'ua', 'va', 'sphum', 'delp', 'DZ', 'o3mr']
- #snd_varlist = ['T', 'delp', 'sphum']
- #frt_varlist = ['T', 'delp', 'sphum']
-
-  unitlist = ['Unit (C)', 'Unit (m/s)', 'Unit (m/s)',
-              'Unit (kg/kg)', 'Unit (Pa', 'Unit (m', 'Unit (ppm)']
-
-  runname = ['JEDI', 'ReInit', 'ReInit - JEDI']
-  gp.set_runname(runname=runname)
+ #unitlist = ['Unit (C)', 'Unit (m/s)', 'Unit (m/s)',
+ #            'Unit (kg/kg)', 'Unit (Pa', 'Unit (m', 'Unit (ppm)']
+  unitlist = ['Unit (C)', 'Unit (m/s)', 'Unit (m/s)', 'Unit (m)', 'Unit (kg/kg)']
 
 #-----------------------------------------------------------------------------------------
-  for n in range(len(snd_varlist)):
-    sndvar = ncsnd.variables[snd_varlist[n]][0, :, :, :]
-    frtvar = ncfrt.variables[frt_varlist[n]][0,:, :, :]
+  for n in range(len(second_varlist)):
+    secondvar = ncsecond.variables[second_varlist[n]][:, :, :]
+    firstvar = ncfirst.variables[first_varlist[n]][:, :, :]
 
-    nlev, nlat, nlon = sndvar.shape
-    print('sndvar.shape = ', sndvar.shape)
-    print('frtvar.shape = ', frtvar.shape)
+    nlev, nlat, nlon = secondvar.shape
+    print('secondvar.shape = ', secondvar.shape)
+    print('firstvar.shape = ', firstvar.shape)
 
     gp.set_label(unitlist[n])
 
     for lev in range(5, nlev, 10):
-      v0 = frtvar[lev,:,:]
-      v1 = sndvar[lev,:,:]
+      v0 = firstvar[lev,:,:]
+      v1 = secondvar[lev,:,:]
       v2 = v1 - v0
 
       data = [v0, v1, v2]
 
-      title = '%s at Level %d' %(snd_varlist[n], lev)
+      title = '%s at Level %d' %(second_varlist[n], lev)
       gp.set_title(title)
 
       print('Plotting ', title)
-     #print('\tv0.shape = ', v0.shape)
-     #print('\tv1.shape = ', v1.shape)
-     #print('\tv2.shape = ', v2.shape)
+      print('\tv0.shape = ', v0.shape)
+      print('\tv1.shape = ', v1.shape)
+      print('\tv2.shape = ', v2.shape)
  
-      print('\t%s max: %f, min: %f' %(runname[0], np.max(v0), np.min(v0)))
-      print('\t%s max: %f, min: %f' %(runname[1], np.max(v1), np.min(v1)))
-      print('\t%s max: %f, min: %f' %(runname[2], np.max(v2), np.min(v2)))
+      print('\tv0.max: %f, v0.min: %f' %(np.max(v0), np.min(v0)))
+      print('\tv1.max: %f, v1.min: %f' %(np.max(v1), np.min(v1)))
+      print('\tv2.max: %f, v2.min: %f' %(np.max(v2), np.min(v2)))
 
-      imagename = '%s_lev_%3.3d.png' %(snd_varlist[n], lev)
+      imagename = '%s_lev_%3.3d.png' %(second_varlist[n], lev)
       gp.set_imagename(imagename)
 
       gp.plot(lons, lats, data=data)
 
 #-----------------------------------------------------------------------------------------
-  ncsnd.close()
-  ncfrt.close()
+  ncsecond.close()
+  ncfirst.close()
 

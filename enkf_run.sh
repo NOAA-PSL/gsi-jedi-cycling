@@ -6,10 +6,7 @@ export OMP_NUM_THREADS=$enkf_threads
 export OMP_STACKSIZE=512M
 export MKL_NUM_THREADS=1
 source $MODULESHOME/init/sh
-#module list
-
-export DONT_USE_DPRES=true
-export DONT_USE_DELZ=true
+module list
 
 iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
 
@@ -20,7 +17,6 @@ for nfhr in $iaufhrs2; do
   filemissing='no'
   while [ $nanal -le $nanals ]; do
      charnanal="mem"`printf %03i $nanal`
-    #analfile="${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}"
      analfile="${datapath2}/incr_${analdate}_${charfhr}_${charnanal}"
      if [ ! -s $analfile ]; then
         filemissing='yes'
@@ -199,7 +195,6 @@ nanal=1
 filemissing='no'
 while [ $nanal -le $nanals ]; do
    charnanal="mem"`printf %03i $nanal`
-  #analfile=${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}
    analfile=${datapath2}/incr_${analdate}_${charfhr}_${charnanal}
    if [ ! -s $analfile ]; then
      echo "$analfile missing"

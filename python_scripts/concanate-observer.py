@@ -37,17 +37,10 @@ def copy_attributes(ncin, ncout):
 def copy_rootvar(ncin, ncout):
  #copy all var in root group.
   for name, variable in ncin.variables.items():
-    newvar = ncout.createVariable(name, variable.datatype, variable.dimensions)
+    ncout.createVariable(name, variable.datatype, variable.dimensions)
    #copy variable attributes all at once via dictionary
-    newvar.setncatts(variable.__dict__)
-
-    dim = len(variable.dimensions)
-    if(1 == dim):
-      newvar[:] = variable[:]
-    elif(2 == dim):
-      newvar[:,:] = variable[:,:]
-    elif(3 == dim):
-      newvar[:,:,:] = variable[:,:,:]
+    ncout[name].setncatts(ncin[name].__dict__)
+    ncout[name][:] = ncin[name][:]
 
 #-----------------------------------------------------------------------------------------
 def copy_var_in_group(ncingroup, ncoutgroup):
@@ -60,14 +53,7 @@ def copy_var_in_group(ncingroup, ncoutgroup):
     else:
       newvar = ncoutgroup.createVariable(varname, variable.datatype, variable.dimensions)
     copy_attributes(variable, newvar)
-
-    dim = len(variable.dimensions)
-    if(1 == dim):
-      newvar[:] = variable[:]
-    elif(2 == dim):
-      newvar[:,:] = variable[:,:]
-    elif(3 == dim):
-      newvar[:,:,:] = variable[:,:,:]
+    newvar[:] = ncingroup[varname][:]
 
 #-----------------------------------------------------------------------------------------
 def copy_grp2newname(name, n, group, ncout):
@@ -102,13 +88,7 @@ def process(ncinlist, ncout, grplist):
           copy_var_in_group(group, ncoutgroup)
 
         for varname, variable in group.variables.items():
-          dim = len(variable.dimensions)
-          if(1 == dim):
-            val = variable[:]
-          elif(2 == dim):
-            val = variable[:,:]
-          elif(3 == dim):
-            val = variable[:,:,:]
+          val = group[varname][:]
           ensvarinfo[grpname][varname] = val
     else:
       if(grpname.find('hofx') < 0):
@@ -131,13 +111,7 @@ def process(ncinlist, ncout, grplist):
     copy_grp2newname(grpname, n, group, ncout)
 
     for varname, variable in group.variables.items():
-      dim = len(variable.dimensions)
-      if(1 == dim):
-        val = variable[:]
-      elif(2 == dim):
-        val = variable[:,:]
-      elif(3 == dim):
-        val = variable[:,:,:]
+      val = group[varname][:]
       ensvarinfo[grpname][varname].append(val)
 
   varlist = ensvarinfo['hofx0_1'].keys()
@@ -168,13 +142,8 @@ def process(ncinlist, ncout, grplist):
     print('\thofx_y_mean_zb0.max: %f, hofx_y_mean_zb0.min: %f' %(np.max(ensvarinfo['hofx_y_mean_xb0'][varname]), np.min(ensvarinfo['hofx_y_mean_xb0'][varname])))
     print('\tmeanvars.max: %f, meanvars.min: %f' %(np.max(meanvars[varname]), np.min(meanvars[varname])))
     print('\tnew-ombg.max: %f, new-ombg.min: %f' %(np.max(val), np.min(val)))
-    dim = len(variable.dimensions)
-    if(1 == dim):
-      newvar[:] = val[:]
-    elif(2 == dim):
-      newvar[:,:] = val[:,:]
-    elif(3 == dim):
-      newvar[:,:,:] = val[:,:,:]
+   #val = ensvarinfo[grpname][varname]
+    newvar[:] = val[:]
 
 #-----------------------------------------------------------------------------------------
 def replace_var(filelist, outfile, grplist):
