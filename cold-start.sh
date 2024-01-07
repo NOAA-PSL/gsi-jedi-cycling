@@ -3,7 +3,8 @@
 
  if [ "$#" -eq  "0" ]
  then
-   runtype=jedi
+  #runtype=jedi
+   runtype=gsi
  else
    runtype=$1
  fi
