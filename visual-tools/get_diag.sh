@@ -2,18 +2,25 @@
 
 #set -x
 
+ source ~/pythonenv
+
  sdate=2022010500
- edate=2022010618
+ edate=2022011100
 #------------------------------------------------------------------------------
 #firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/gsi-cycling)
 #seconddirs=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
 #firstlbls=(GSI_SondesAmsuaN19)
 #secondlbls=(JEDI_SondesAmsuaN19)
 
- firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/sts.jedi-cycling)
+#firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/sts.jedi-cycling)
+#seconddirs=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
+
+#firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/sts.gsi-cycling)
+ firstdirs=(/work2/noaa/da/weihuang/EMC_cycling/gsi-cycling)
  seconddirs=(/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling)
- firstlbls=(STS)
- secondlbls=(MTS)
+
+ firstlbls=(MTS-GSI)
+ secondlbls=(MTS-JEDI)
 
  tar cvf ~/jg.tar plot-jedi-gsi-diag.py get_diag.sh
 

@@ -176,7 +176,8 @@ cd ${run_dir}
  export solver_layout_y=22
  export NMEM_ENKF=80
 
- rm -rf analysis hofx stdoutNerr solver observer
+#rm -rf analysis hofx stdoutNerr solver observer
+ rm -rf analysis hofx stdoutNerr solver
  mkdir -p analysis/mean analysis/increment hofx solver observer
 
  python ${enkfscripts}/genyaml/gen-mts-config.py \
