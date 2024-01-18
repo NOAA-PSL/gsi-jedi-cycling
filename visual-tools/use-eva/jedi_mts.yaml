@@ -1,0 +1,379 @@
+# template YAML file to create EVA YAML files
+# based on obs spaces listed in JEDI YAML files
+datasets:
+  - name: experiment
+    type: IodaObsSpace
+    filenames:
+     #- "/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022010712/observer/amsua_n19_obs_2022010712.nc4"
+      - "/work2/noaa/da/weihuang/EMC_cycling/jedi-cycling/2022010712/observer/sondes_obs_2022010500.nc4"
+    groups:
+      - name: ObsValue
+       #variables: &variables ['brightnessTemperature']
+        variables: &variables ['airTemperature']
+       #variables: &variables ['virtualTemperature']
+       #variables: &variables ['windEastward']
+       #variables: &variables ['windNorthward']
+       #variables: &variables ['specificHumidity']
+      - name: GsiHofXBc
+      - name: hofx_y_mean_xb0
+      - name: EffectiveQC0
+      - name: MetaData
+      - name: GsiEffectiveQC
+      - name: GsiFinalObsError
+      - name: EffectiveError0
+transforms:
+
+  # difference of hofx
+  - transform: arithmetic
+    new name: experiment::HofXDiff::${variable}
+    equals: experiment::hofx_y_mean_xb0::${variable}-experiment::GsiHofXBc::${variable}
+    for:
+      variable: *variables
+
+  # difference of effective error
+  - transform: arithmetic
+    new name: experiment::ErrDiff::${variable}
+    equals: experiment::EffectiveError0::${variable}-experiment::GsiFinalObsError::${variable}
+    for:
+      variable: *variables
+
+  # difference of QC
+  - transform: arithmetic
+    new name: experiment::QCDiff::${variable}
+    equals: experiment::EffectiveQC0::${variable}-experiment::GsiEffectiveQC::${variable}
+    for:
+      variable: *variables
+
+  # Generate omb for GSI
+  - transform: arithmetic
+    new name: experiment::ObsValueMinusGsiHofXBc::${variable}
+    equals: experiment::ObsValue::${variable}-experiment::GsiHofXBc::${variable}
+    for:
+      variable: *variables
+
+  # Generate omb for JEDI
+  - transform: arithmetic
+    new name: experiment::ObsValueMinusHofx::${variable}
+    equals: experiment::ObsValue::${variable}-experiment::hofx_y_mean_xb0::${variable}
+    for:
+      variable: *variables
+
+  # Generate hofx that passed QC for JEDI
+  - transform: accept where
+    new name: experiment::hofxPassedQc::${variable}
+    starting field: experiment::hofx_y_mean_xb0::${variable}
+    where:
+      - experiment::EffectiveQC0::${variable} == 0
+    for:
+      variable: *variables
+
+  # Generate GSI hofx that passed JEDI QC
+  - transform: accept where
+    new name: experiment::GsiHofXBcPassedQc::${variable}
+    starting field: experiment::GsiHofXBc::${variable}
+    where:
+      - experiment::EffectiveQC0::${variable} == 0
+    for:
+      variable: *variables
+
+  # Generate omb that passed QC for JEDI
+  - transform: accept where
+    new name: experiment::ObsValueMinushofxPassedQc::${variable}
+    starting field: experiment::ObsValueMinusHofx::${variable}
+    where:
+      - experiment::EffectiveQC0::${variable} == 0
+    for:
+      variable: *variables
+
+  # Generate omb that passed QC for GSI
+  - transform: accept where
+    new name: experiment::ObsValueMinusGsiHofXBcPassedQc::${variable}
+    starting field: experiment::ObsValueMinusGsiHofXBc::${variable}
+    where:
+      - experiment::GsiEffectiveQC::${variable} == 0
+    for:
+      variable: *variables
+
+  # hofxdiff that passed QC for JEDI
+  - transform: accept where
+    new name: experiment::HofXDiffPassedJediQc::${variable}
+    starting field: experiment::HofXDiff::${variable}
+    where:
+      - experiment::EffectiveQC0::${variable} == 0
+    for:
+      variable: *variables
+
+  # hofxdiff that passed QC for GSI
+  - transform: accept where
+    new name: experiment::HofXDiffPassedGsiQc::${variable}
+    starting field: experiment::HofXDiff::${variable}
+    where:
+      - experiment::GsiEffectiveQC::${variable} == 0
+    for:
+      variable: *variables
+
+graphics:
+  # ---------- Scatter Plots ----------
+  # JEDI h(x) vs Observations
+  # -------------------------
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'Observations vs. JEDI h(x) |  | ${variable_title}'
+      output name: observation_scatter_plots/2022010500_jedi_hofx_vs_obs_${variable}.png
+    plots:
+      - add_xlabel: 'Observation Value'
+        add_ylabel: 'JEDI h(x)'
+        add_grid:
+        add_legend:
+          loc: 'upper left'
+        layers:
+        - type: Scatter
+          x:
+            variable: experiment::ObsValue::${variable}
+          y:
+            variable: experiment::hofx_y_mean_xb0::${variable}
+          markersize: 5
+          color: 'black'
+          label: 'JEDI h(x) versus obs (all obs)'
+        - type: Scatter
+          x:
+            variable: experiment::ObsValue::${variable}
+          y:
+            variable: experiment::hofxPassedQc::${variable}
+          markersize: 5
+          color: 'red'
+          label: 'JEDI h(x) versus obs (passed QC in JEDI)'
+
+  # GSI h(x) vs Observations
+  # -------------------------
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'Observations vs. GSI h(x) | | ${variable_title}'
+      output name: observation_scatter_plots/2022010500_gsi_hofx_vs_obs_${variable}.png
+    plots:
+      - add_xlabel: 'Observation Value'
+        add_ylabel: 'GSI h(x)'
+        add_grid:
+        add_legend:
+          loc: 'upper left'
+        layers:
+        - type: Scatter
+          x:
+            variable: experiment::ObsValue::${variable}
+          y:
+            variable: experiment::GsiHofXBc::${variable}
+          markersize: 5
+          color: 'black'
+          label: 'GSI h(x) versus obs (all obs)'
+        - type: Scatter
+          x:
+            variable: experiment::ObsValue::${variable}
+          y:
+            variable: experiment::GsiHofXBcPassedQc::${variable}
+          markersize: 5
+          color: 'red'
+          label: 'GSI h(x) versus obs (passed QC in JEDI)'
+
+  # JEDI h(x) vs GSI h(x)
+  # ---------------------
+
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'JEDI h(x) vs. GSI h(x) | | ${variable_title}'
+      output name: observation_scatter_plots/2022010500_gsi_hofx_vs_jedi_hofx_${variable}.png
+    plots:
+      - add_xlabel: 'GSI h(x)'
+        add_ylabel: 'JEDI h(x)'
+        add_grid:
+        add_legend:
+          loc: 'lower left'
+        layers:
+        - type: Scatter
+          x:
+            variable: experiment::GsiHofXBc::${variable}
+          y:
+            variable: experiment::hofx_y_mean_xb0::${variable}
+          markersize: 5
+          color: 'black'
+          label: 'JEDI h(x) versus GSI h(x)'
+        - type: Scatter
+          x:
+            variable: experiment::GsiHofXBcPassedQc::${variable}
+          y:
+            variable: experiment::hofxPassedQc::${variable}
+          markersize: 5
+          color: 'red'
+          label: 'JEDI h(x) versus GSI h(x) (passed QC in JEDI)'
+
+  # JEDI omb vs GSI omb
+  # ---------------------
+
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'JEDI omb vs. GSI omb | | ${variable_title}'
+      output name: observation_scatter_plots/2022010500_gsi_omb_vs_jedi_omb_${variable}.png
+    plots:
+      - add_xlabel: 'GSI observation minus h(x)'
+        add_ylabel: 'JEDI observation minus h(x)'
+        add_grid:
+        add_legend:
+          loc: 'upper left'
+        layers:
+        - type: Scatter
+          x:
+            variable: experiment::ObsValueMinusGsiHofXBc::${variable}
+          y:
+            variable: experiment::ObsValueMinusHofx::${variable}
+          markersize: 5
+          color: 'black'
+          label: 'GSI omb vs JEDI omb (all obs)'
+        - type: Scatter
+          x:
+            variable: experiment::ObsValueMinusGsiHofXBcPassedQc::${variable}
+          y:
+            variable: experiment::ObsValueMinushofxPassedQc::${variable}
+          markersize: 5
+          color: 'red'
+          label: 'GSI omb vs JEDI omb (passed QC in JEDI)'
+
+  # QC difference as a function of H(x) difference
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'H(x) JEDI-GSI vs QC JEDI-GSI. | | ${variable_title}'
+      output name: observation_scatter_plots/2022010500_hofxdiff_vs_qcdiff_${variable}.png
+    plots:
+      - add_xlabel: 'h(x) JEDI - h(x) GSI'
+        add_ylabel: 'h(x) JEDI - h(x) GSI'
+        add_grid:
+        add_legend:
+          loc: 'lower left'
+        layers:
+        - type: Scatter
+          x:
+            variable: experiment::QCDiff::${variable}
+          y:
+            variable: experiment::HofXDiff::${variable}
+          markersize: 5
+          color: 'red'
+          label: 'hofxdiff vs qcdiff'
+        statistics:
+          fields:
+            - field_name: experiment::QCDiff::${variable}
+              xloc: 0.5
+              yloc: -0.10
+              kwargs:
+                fontsize: 6
+          statistics_variables:
+          - n
+          - min
+          - mean
+          - max
+          - std
+
+  # ---------- Histograms ----------
+  # Histogram of h(x) difference
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'Difference of h(x) JEDI-GSI | | ${variable_title}'
+      output name: histograms/2022010500_hofxdiff_histogram_${variable}.png
+    plots:
+      - add_xlabel: 'h(x) JEDI - h(x) GSI'
+        add_ylabel: 'Count'
+        statistics:
+          fields:
+            - field_name: experiment::HofXDiff::${variable}
+              xloc: 0.5
+              yloc: -0.10
+              kwargs:
+                fontsize: 6
+          statistics_variables:
+          - n
+          - min
+          - mean
+          - max
+          - std
+        layers:
+        - type: Histogram
+          data:
+            variable: experiment::HofXDiff::${variable}
+          color: 'blue'
+          label: 'h(x) JEDI - h(x) GSI'
+          bins: 100
+
+  # Histogram of obs error difference
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      title: 'Difference of final obs error JEDI-GSI | | ${variable_title}'
+      output name: histograms/2022010500_errordiff_histogram_${variable}.png
+    plots:
+      - add_xlabel: 'error JEDI - error GSI'
+        add_ylabel: 'Count'
+        statistics:
+          fields:
+            - field_name: experiment::ErrDiff::${variable}
+              xloc: 0.5
+              yloc: -0.10
+              kwargs:
+                fontsize: 6
+          statistics_variables:
+          - n
+          - min
+          - mean
+          - max
+          - std
+        layers:
+        - type: Histogram
+          data:
+            variable: experiment::ErrDiff::${variable}
+          color: 'blue'
+          label: 'error JEDI - error GSI'
+          bins: 100
+
+  # ---------- Map Plots ----------
+  # Map plot of h(x) difference
+  # --------
+
+  - batch figure:
+      variables: *variables
+    figure:
+      layout: [1,1]
+      figure size: [11,5]
+      title: 'Difference of h(x) JEDI-GSI | | ${variable_title}'
+      output name: map_plots/2022010500_hofxdiff_map_${variable}.png
+      tight_layout: true
+    plots:
+      - mapping:
+          projection: plcarr
+          domain: global
+        add_map_features: ['coastline']
+        add_grid:
+        add_colorbar:
+        layers:
+        - type: MapScatter
+          longitude:
+            variable: experiment::MetaData::longitude
+          latitude:
+            variable: experiment::MetaData::latitude
+          data:
+            variable: experiment::HofXDiff::${variable}
+          markersize: 2
+          label: '$(variable)'
+          colorbar: true
+          # below may need to be edited/removed
+          cmap: 'bwr'
+          vmin: -0.1
+          vmax: 0.1

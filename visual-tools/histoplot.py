@@ -59,11 +59,9 @@ class PlotTimeHistogram():
 
     isnd -= tcnt
 
-    fsnd = isnd/3600.0
+    self.fsnd = isnd/3600.0
 
-    print('fsnd = ', fsnd)
-
-    self.plot_histo(fsnd)
+    print('fsnd = ', self.fsnd)
 
 #group: MetaData {
 #  variables:
@@ -108,6 +106,15 @@ class PlotTimeHistogram():
 
     self.title = 'Obs Time Histo'
 
+  def set_imagename(self, imgname):
+    self.image_name = imgname
+
+  def set_title(self, casename, varname, tstr):
+    self.title = 'Histo of %s:%s at %s' %(casename.upper(), varname, tstr)
+
+    imgname = 'histo_%s_%s_%s.png' %(casename.upper(), varname, tstr)
+    self.image_name = imgname
+
   def create_image(self, plt_obj, savename):
     msg = ('Saving image as %s.' % savename)
     print(msg)
@@ -124,7 +131,7 @@ class PlotTimeHistogram():
     if(self.debug):
       self.plt.show()
 
-  def plot_histo(self, var):
+  def plot_histo(self):
     self.plt = matplotlib.pyplot
     try:
       self.plt.close('all')
@@ -132,19 +139,19 @@ class PlotTimeHistogram():
     except Exception:
       pass
 
-    hist, bins = np.histogram(var, self.pbins)
-    print('hist: ', hist)
-    print('bins: ', bins)
+   #hist, bins = np.histogram(self.fsnd, self.pbins)
+   #print('hist: ', hist)
+   #print('bins: ', bins)
 
     self.fig, self.axs = self.plt.subplots(1, 1, tight_layout=True)
 
    #Set the number of bins with the *bins* keyword argument.
-    self.axs.hist(var)
+    self.axs.hist(self.fsnd)
 
-   #self.plt.title(self.title)
+    self.plt.title(self.title)
 
-   #self.plt.xlabel(self.xlabel, fontsize=14)
-   #self.plt.ylabel(self.ylabel, fontsize=14)
+    self.plt.xlabel(self.xlabel, fontsize=14)
+    self.plt.ylabel(self.ylabel, fontsize=14)
 
     self.display(image_name=self.image_name)
 
@@ -155,8 +162,9 @@ if __name__== '__main__':
 
   cntdatetime = '2022010512'
 
+  casename = 'sts.gsi'
   varname = 'amsua_n19'
-  datadir = '/work2/noaa/da/weihuang/EMC_cycling/sts.gsi-cycling/%s' %(cntdatetime)
+  datadir = '/work2/noaa/da/weihuang/EMC_cycling/%s-cycling/%s' %(casename, cntdatetime)
   obsfile = '%s/ioda_v2_data/%s_obs_%s.nc4' %(datadir, varname, cntdatetime)
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'cntdatetime=',
@@ -175,10 +183,17 @@ if __name__== '__main__':
 
 #-----------------------------------------------------------------------------------------
 
-  print('cntdatetime = ', cntdatetime)
-  print('obsfile = ', obsfile)
+  debug = 0
+  for casename in ['sts.gsi', 'mts.gsi', 'sts.jedi', 'mts.jedi']:
+    for varname in ['amsua_n19', 'sondes']:
+      print('cntdatetime = ', cntdatetime)
+      print('obsfile = ', obsfile)
+      datadir = '/work2/noaa/da/weihuang/EMC_cycling/%s-cycling/%s' %(casename, cntdatetime)
+      obsfile = '%s/ioda_v2_data/%s_obs_%s.nc4' %(datadir, varname, cntdatetime)
 
-  pth = PlotTimeHistogram(debug=debug, output=output,
-                          cntdatetime=cntdatetime,
-                          obsfile=obsfile)
+      pth = PlotTimeHistogram(debug=debug, output=output,
+                              cntdatetime=cntdatetime,
+                              obsfile=obsfile)
+      pth.set_title(casename, varname, cntdatetime)
+      pth.plot_histo()
 
