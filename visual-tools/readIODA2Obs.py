@@ -121,7 +121,7 @@ class ReadIODA2Obs():
     return nc_attrs, nc_dims, nc_vars
 
   def get_var(self, ncvarname):
-    print('Processing FV3 file %s for variable %s.' % (self.filename, ncvarname))
+   #print('Processing FV3 file %s for variable %s.' % (self.filename, ncvarname))
 
     gname, vname = self.get_groupNvar_name(ncvarname)
 
@@ -140,13 +140,33 @@ class ReadIODA2Obs():
     ncfile.close()
     return var
 
+  def get_var_2d(self, ncvarname):
+   #print('Processing FV3 file %s for variable %s.' % (self.filename, ncvarname))
+
+    gname, vname = self.get_groupNvar_name(ncvarname)
+
+   #print('gname = ', gname)
+   #print('vname = ', vname)
+
+    ncfile = netCDF4.Dataset(self.filename, 'r')
+    if (gname is None):
+      var = ncfile.variables[ncvarname][:,:]
+    else:
+     #print('gname = ', gname)
+     #print('vname = ', vname)
+
+      ncgroup = ncfile[gname]
+      var = ncgroup.variables[vname][:,:]
+    ncfile.close()
+    return var
+
   def set_vardims(self):
     ncfile = netCDF4.Dataset(self.filename, 'r')
     if(self.debug > 1):
       print('ncpath = ', ncpath)
       print('self.filename = ', self.filename)
-    nc_attrs, nc_dims, nc_vars = self.ncdump(ncfile, verb=True)
-   #nc_attrs, nc_dims, nc_vars = self.ncdump(ncfile, verb=False)
+   #nc_attrs, nc_dims, nc_vars = self.ncdump(ncfile, verb=True)
+    nc_attrs, nc_dims, nc_vars = self.ncdump(ncfile, verb=False)
 
    #print('nc_dims: ', nc_dims)
    #print('nc_vars: ', nc_vars)
@@ -203,8 +223,8 @@ class ReadIODA2Obs():
     short_lon = np.delete(lon, mask)
     short_var = np.delete(var, mask)
 
-    print('len(short_lat) = ', len(short_lat))
-    print('len(short_lon) = ', len(short_lon))
+   #print('len(short_lat) = ', len(short_lat))
+   #print('len(short_lon) = ', len(short_lon))
 
     return short_lat, short_lon, short_var
 
@@ -230,6 +250,6 @@ if __name__ == '__main__':
  #lat, lon = rio.get_latlon()
   lat, lon = rio.get_latlon4var(varname='/ObsValue/surface_pressure')
  
-  print('lat = ', lat)
-  print('lon = ', lon)
+ #print('lat = ', lat)
+ #print('lon = ', lon)
 

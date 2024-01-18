@@ -56,10 +56,17 @@ class MakePanelPlot():
 if __name__ == '__main__':
   debug = 1
   output = 0
-  imglist = ['trim_MTS-GSI-omb_MTS-JEDI-omb_airTemperature.png',
-             'trim_STS-JEDI-omb_MTS-JEDI-omb_airTemperature.png',
-             'trim_STS-GSI-omb_MTS-GSI-omb_airTemperature.png',
-             'trim_STS-GSI-omb_STS-JEDI-omb_airTemperature.png']
+  datestr = '2022010512'
+ #obstype = 'sondes'
+ #varname = 'airTemperature'
+  obstype = 'amsua_n19'
+  varname = 'brightnessTemperature'
+  imglist = []
+
+  imglist.append('trim_MTS-GSI_MTS-JEDI_%s_%s_%s.png' %(varname, datestr, obstype))
+  imglist.append('trim_STS-JEDI_MTS-JEDI_%s_%s_%s.png' %(varname, datestr, obstype))
+  imglist.append('trim_STS-GSI_MTS-GSI_%s_%s_%s.png' %(varname, datestr, obstype))
+  imglist.append('trim_STS-GSI_STS-JEDI_%s_%s_%s.png' %(varname, datestr, obstype))
 
   opts, args = getopt.getopt(sys.argv[1:], '',
                ['debug=', 'output=', 'imglist='])

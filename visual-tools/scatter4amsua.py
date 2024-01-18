@@ -110,7 +110,8 @@ class ScatterPlotsFor2Runs():
     if(varname == 'surface_pressure'):
       self.plt.xlim((-7, 7))
       self.plt.ylim((-7, 7))
-    elif(varname == 'airTemperature' or varname == 'virtualTemperature'):
+    elif(varname == 'airTemperature' or varname == 'virtualTemperature'
+      or varname == 'brightnessTemperature'):
       self.plt.xlim((-10, 10))
       self.plt.ylim((-10, 10))
     elif(varname == 'eastward_wind' or varname == 'northward_wind'):
@@ -133,7 +134,7 @@ class ScatterPlotsFor2Runs():
 
     self.display(image_name=self.image_name)
 
-def reorder(latx, lonx, prsx, laty, lony, prsy, varyin):
+def reorder(latx, lonx, hgtx, laty, lony, hgty, varyin):
   varyout = varyin[:]
   nv = len(latx)
   idx = [i for i in range(nv)]
@@ -144,7 +145,7 @@ def reorder(latx, lonx, prsx, laty, lony, prsy, varyin):
     while (i < len(idx)):
       if(abs(latx[n]-laty[i]) < dlt):
         if(abs(lonx[n]-lony[i]) < dlt):
-          if(abs(prsx[n]-prsy[i]) < dlt):
+          if(abs(hgtx[n]-hgty[i]) < dlt):
             varyout[n] = varyin[i]
             k = i
             i = len(idx)
@@ -157,8 +158,8 @@ def reorder(latx, lonx, prsx, laty, lony, prsy, varyin):
 if __name__ == '__main__':
   debug = 0
   topdir = '/work2/noaa/da/weihuang/EMC_cycling'
-  obstype = 'sondes'
- #obstype = 'amsua_n19'
+ #obstype = 'sondes'
+  obstype = 'amsua_n19'
   datestr = '2022010512'
 
   xflist = ['mts.gsi', 'sts.gsi', 'sts.gsi', 'sts.jedi']
@@ -203,8 +204,8 @@ if __name__ == '__main__':
  #print('xslist = ', xslist)
  #print('yslist = ', yslist)
 
-  varname = 'airTemperature'
- #varname = 'brightnessTemperature'
+ #varname = 'airTemperature'
+  varname = 'brightnessTemperature'
 
   for n in range(len(xflist)):
     xf = xflist[n]
@@ -214,30 +215,30 @@ if __name__ == '__main__':
 
     ncxf = ReadIODA2Obs(debug=debug, filename=xf)
     latx, lonx = ncxf.get_latlon()
-   #hgtx = ncxf.get_var('/MetaData/heightOfSurface')
-    prsx = ncxf.get_var('/MetaData/pressure')
-    gsix = ncxf.get_var('/GsiHofX/airTemperature')
-    obsx = ncxf.get_var('/ObsValue/airTemperature')
+    hgtx = ncxf.get_var('/MetaData/heightOfSurface')
+    gsix = ncxf.get_var_2d('/GsiHofXBc/brightnessTemperature')
+    obsx = ncxf.get_var_2d('/ObsValue/brightnessTemperature')
     varx = obsx - gsix
     lenx = len(latx)
 
     ncyf = ReadIODA2Obs(debug=debug, filename=yf)
     laty, lony = ncyf.get_latlon()
-    prsy = ncyf.get_var('/MetaData/pressure')
-   #hgty = ncyf.get_var('/MetaData/heightOfSurface')
-    gsiy = ncyf.get_var('/GsiHofX/airTemperature')
-    obsy = ncyf.get_var('/ObsValue/airTemperature')
+    hgty = ncyf.get_var('/MetaData/heightOfSurface')
+    gsiy = ncyf.get_var_2d('/GsiHofXBc/brightnessTemperature')
+    obsy = ncyf.get_var_2d('/ObsValue/brightnessTemperature')
     vary = obsy - gsiy
     leny = len(laty)
 
     print('lenx = %d, leny = %d' %(lenx, leny))
 
    #for n in range(lenx):
-   #  print('No %d: lat: %f, %f, lon: %f, %f, prs: %f, %f' %(n, latx[n], laty[n], lonx[n], lony[n], prsx[n], prsy[n]))
+   #  print('No %d: lat: %f, %f, lon: %f, %f, hgt: %f, %f' %(n, latx[n], laty[n], lonx[n], lony[n], hgtx[n], hgty[n]))
 
-    newvary = reorder(latx[::10], lonx[::10], prsx[::10], laty[::10], lony[::10], prsy[::10], vary[::10])
+    channel = 1
+
+    newvary = reorder(latx[::10], lonx[::10], hgtx[::10], laty[::10], lony[::10], hgty[::10], vary[::10, channel])
     sp42r = ScatterPlotsFor2Runs(debug=debug)
 
     sp42r.set_label(xlabel, ylabel, varname, datestr=datestr, obstype=obstype)
-    sp42r.scatter_plot(varx[::10], newvary, varname)
+    sp42r.scatter_plot(varx[::10, channel], newvary, varname)
 
