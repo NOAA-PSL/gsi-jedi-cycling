@@ -51,7 +51,7 @@ then
   mkdir -p logs
 fi
 
-cold-start.sh $runtype
+#cold-start.sh $runtype
 
 cyclename=${runtype}cycl
 sed -e "s/CYCLENAME/${cyclename}/g" \

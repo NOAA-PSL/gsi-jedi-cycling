@@ -1,7 +1,7 @@
 #!/bin/bash
 
  python gen-convinfo.py \
-	--convdir=/work2/noaa/da/weihuang/cycling/scripts/gsi-cycling/convinfo \
+	--convdir=/work2/noaa/da/weihuang/cycling/scripts/jedi-cycling/convinfo \
 	--datestr=2020010106 \
         --otype=uv \
         --otype=t \
